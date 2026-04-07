@@ -7,7 +7,7 @@ markdown
 [![Build Tool](https://img.shields.io/badge/Build-Maven-critical.svg)](https://maven.apache.org/)
 
 ## 📝 Giới thiệu dự án
-Đây là dự án **Bài tập lớn môn Lập trình nâng cao (CS2043_11)** tại **Trường Đại học Công nghệ (VNU-UET)**. Hệ thống cho phép người dùng tham gia đấu giá trực tuyến các mặt hàng trong thời gian thực, hỗ trợ các tính năng tự động nâng cao và xử lý đồng thời.
+Dự án **Bài tập lớn môn Lập trình nâng cao (UET.CS2043_11)** tại **Trường Đại học Công nghệ (VNU-UET)**. Hệ thống cho phép người dùng tham gia đấu giá trực tuyến các mặt hàng trong thời gian thực, hỗ trợ các tính năng tự động nâng cao và xử lý đồng thời.
 
 ---
 
