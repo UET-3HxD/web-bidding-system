@@ -86,4 +86,4 @@ src/main/resources/
 - [ ] **Tuần 9-10:** Hoàn thiện Unit Test, tối ưu hiệu năng và viết báo cáo cuối kỳ.
 
 ---
-*Dự án này tuân thủ các quy định về học thuật và cam kết đóng góp mã nguồn minh bạch trên GitHub. *
+*Dự án này tuân thủ các quy định về học thuật và cam kết đóng góp mã nguồn minh bạch trên GitHub.*
