@@ -4,6 +4,6 @@ package com.auction.team3HxD;
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     static void main() {
-        System.out.println("hieu");
+        System.out.println("huy hieu");
     }
 }
