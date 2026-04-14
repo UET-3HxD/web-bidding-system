@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import com.auction.team3HxD.util.SceneSwitcher;
 
 public class LoginController {
 
@@ -22,6 +23,7 @@ public class LoginController {
         String password = passwordField.getText();
         System.out.println("Đăng nhập: " + username + " - " + password);
         // Sau này sẽ gửi request đến server
+        SceneSwitcher.getInstance().switchTo("/fxml/auction_list.fxml", loginButton, "Danh sách phiên đấu giá");
     }
 
     @FXML

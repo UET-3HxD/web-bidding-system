@@ -12,6 +12,8 @@ public class Main extends Application {
         Scene scene = new Scene(loader.load());
         primaryStage.setTitle("Hệ thống đấu giá trực tuyến");
         primaryStage.setScene(scene);
+        primaryStage.setMinWidth(600);
+        primaryStage.setMinHeight(400);
         primaryStage.show();
     }
     public static void main(String[] args) { launch(args); }
