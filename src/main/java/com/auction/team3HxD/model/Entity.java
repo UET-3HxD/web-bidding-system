@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public abstract class Entity {
-    private UUID id;
-    private LocalDateTime createdAt;
+    protected UUID id;
+    protected LocalDateTime createdAt;
 
     // Constructor
     public Entity() {

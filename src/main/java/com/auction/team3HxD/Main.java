@@ -1,9 +1,21 @@
 package com.auction.team3HxD;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class Main {
-    static void main() {
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.stage.Stage;
 
+public class Main extends Application {
+    @Override
+    public void start(Stage stage) {
+        Label label = new Label("Ngon luon!");
+        Scene scene = new Scene(label, 400, 200);
+        stage.setScene(scene);
+        stage.setTitle("Team 3HxD - Auction System");
+        stage.show();
+    }
+
+    public static void main(String[] args) {
+        launch();
     }
 }

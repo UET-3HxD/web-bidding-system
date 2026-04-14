@@ -1,4 +1,7 @@
 package com.auction.team3HxD.model.enums;
 
-public class Role {
+public enum Role {
+    BIDDER ,
+    SELLER ,
+    ADMIN
 }
