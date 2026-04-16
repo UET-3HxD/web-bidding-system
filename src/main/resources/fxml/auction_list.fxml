@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.team3HxD.controller.AuctionListController" style="-fx-background-color: #f0f2f5;">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <children>
+        <!-- Tiêu đề -->
+        <Label text="DANH SÁCH PHIÊN ĐẤU GIÁ" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-padding: 0 0 10 0;"/>
+
+        <!-- TableView hiển thị danh sách -->
+        <TableView fx:id="auctionTableView" VBox.vgrow="ALWAYS" style="-fx-background-radius: 8; -fx-border-radius: 8;">
+            <columns>
+                <TableColumn fx:id="productNameColumn" text="Tên sản phẩm" prefWidth="200"/>
+                <TableColumn fx:id="currentPriceColumn" text="Giá hiện tại (VNĐ)" prefWidth="150"/>
+                <TableColumn fx:id="endTimeColumn" text="Thời gian kết thúc" prefWidth="200"/>
+                <TableColumn fx:id="sellerColumn" text="Người bán" prefWidth="150"/>
+            </columns>
+            <placeholder>
+                <Label text="Không có phiên đấu giá nào" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+            </placeholder>
+        </TableView>
+
+        <!-- Hàng nút bấm -->
+        <HBox alignment="CENTER_RIGHT" spacing="15.0">
+            <children>
+                <Button fx:id="refreshButton" text="Làm mới" onAction="#handleRefresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 8 20; -fx-background-radius: 5; -fx-cursor: hand;"/>
+                <Button fx:id="detailButton" text="Xem chi tiết" onAction="#handleViewDetail" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 8 20; -fx-background-radius: 5; -fx-cursor: hand;"/>
+            </children>
+        </HBox>
+    </children>
+</VBox>
