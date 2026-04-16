@@ -1,4 +1,9 @@
 package com.auction.team3HxD.model.enums;
 
-public class AuctionStatus {
+public enum AuctionStatus {
+    OPEN ,
+    RUNNING ,
+    FINISHED ,
+    PAID  ,
+    CANCELED
 }
