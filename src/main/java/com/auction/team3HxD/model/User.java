@@ -22,6 +22,7 @@ public abstract class User extends Entity{
     public UUID getId() {
         return super.getId();
     }
+    public String getPasswordHash() {return passwordHash;}
 
     public String getEmail() {
         return email;
