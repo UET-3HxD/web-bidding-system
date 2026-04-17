@@ -13,8 +13,8 @@ import java.util.UUID;
 public class UserDAO {
 
     // CREATE -> thêm một user mới vaò database
-    public void insert(User user) {
-        String sql = "INSERT INTO users(id, user_name, password_hash, email, role, created_at) VALUES (?, ?, ?, ?, ?, ?)";
+    public boolean insertUser(User user) {
+        String sql = "INSERT INTO users(id, username, password, email, role, created_at) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -27,10 +27,13 @@ public class UserDAO {
             ps.setTimestamp(6, Timestamp.valueOf(user.getCreatedAt()));
 
             ps.executeUpdate();
-            System.out.println("Insert thành công!");
+            return true;
 
-        } catch (Exception e) {
+        } catch (SQLException e){
             e.printStackTrace();
+            return false;
+        } catch (Exception e) {
+            return false;
         }
     }
 
@@ -79,7 +82,7 @@ public class UserDAO {
 
     // UPDATE
     public void update(User user) {
-        String sql = "UPDATE users SET user_name=?, password_hash=?, email=?, role=?, created_at=? WHERE id=?";
+        String sql = "UPDATE users SET username=?, password=?, email=?, role=?, created_at=? WHERE id=?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -117,7 +120,28 @@ public class UserDAO {
 
     // LOGIN / REGISTER SUPPORT
     public User getUserByUsername(String username) {
-        String sql = "SELECT * FROM users WHERE user_name = ?";
+        String sql = "SELECT * FROM users WHERE username = ?";
+        User user = null;
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    user = mapResultSetToUser(rs);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return user;
+    }
+
+    public User getUserByEmail(String username) {
+        String sql = "SELECT * FROM users WHERE email = ?";
         User user = null;
 
         try (Connection conn = DBConnection.getConnection();
@@ -140,8 +164,8 @@ public class UserDAO {
     // ================= HELPER =================
     private User mapResultSetToUser(ResultSet rs) throws SQLException {
         NormalUser user = new NormalUser(
-                rs.getString("user_name"),
-                rs.getString("password_hash"),
+                rs.getString("username"),
+                rs.getString("password"),
                 rs.getString("email"),
                 Role.valueOf(rs.getString("role").toUpperCase())
         );
