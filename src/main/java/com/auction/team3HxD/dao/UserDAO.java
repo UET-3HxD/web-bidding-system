@@ -14,7 +14,7 @@ public class UserDAO {
 
     // CREATE -> thêm một user mới vaò database
     public void insert(User user) {
-        String sql = "INSERT INTO users(id, user_name, password_hash, email, role) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users(id, user_name, password_hash, email, role, created_at) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -24,6 +24,7 @@ public class UserDAO {
             ps.setString(3, user.getPasswordHash());
             ps.setString(4, user.getEmail());
             ps.setString(5, user.getRole().name());
+            ps.setTimestamp(6, Timestamp.valueOf(user.getCreatedAt()));
 
             ps.executeUpdate();
             System.out.println("Insert thành công!");
@@ -63,10 +64,10 @@ public class UserDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, id.toString());
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                user = mapResultSetToUser(rs);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    user = mapResultSetToUser(rs);
+                }
             }
 
         } catch (Exception e) {
@@ -78,7 +79,7 @@ public class UserDAO {
 
     // UPDATE
     public void update(User user) {
-        String sql = "UPDATE users SET user_name = ?, password_hash = ?, email = ?, role = ? WHERE id = ?";
+        String sql = "UPDATE users SET user_name=?, password_hash=?, email=?, role=?, created_at=? WHERE id=?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -87,7 +88,8 @@ public class UserDAO {
             ps.setString(2, user.getPasswordHash());
             ps.setString(3, user.getEmail());
             ps.setString(4, user.getRole().name());
-            ps.setString(5, user.getId().toString());
+            ps.setTimestamp(5, Timestamp.valueOf(user.getCreatedAt()));
+            ps.setString(6, user.getId().toString());
 
             ps.executeUpdate();
             System.out.println("Update thành công!");
@@ -122,10 +124,10 @@ public class UserDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, username);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                user = mapResultSetToUser(rs);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    user = mapResultSetToUser(rs);
+                }
             }
 
         } catch (Exception e) {
@@ -137,12 +139,22 @@ public class UserDAO {
 
     // ================= HELPER =================
     private User mapResultSetToUser(ResultSet rs) throws SQLException {
-        return new NormalUser(
-                UUID.fromString(rs.getString("id")),
+        NormalUser user = new NormalUser(
                 rs.getString("user_name"),
                 rs.getString("password_hash"),
                 rs.getString("email"),
-                Role.valueOf(rs.getString("role"))
+                Role.valueOf(rs.getString("role").toUpperCase())
         );
+
+        // set id
+        user.setId(UUID.fromString(rs.getString("id")));
+
+        // set createdAt
+        Timestamp ts = rs.getTimestamp("created_at");
+        if (ts != null) {
+            user.setCreatedAt(ts.toLocalDateTime());
+        }
+
+        return user;
     }
 }
