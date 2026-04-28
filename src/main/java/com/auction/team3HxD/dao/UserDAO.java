@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public class UserDAO {
 
-    // CREATE -> thêm một user mới vaò database
+    // CREATE -> thêm một user mới vào database
     public void insert(User user) {
         String sql = "INSERT INTO users(id, user_name, password_hash, email, role, created_at) VALUES (?, ?, ?, ?, ?, ?)";
 

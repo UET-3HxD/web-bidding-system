@@ -26,4 +26,11 @@ public abstract class Item extends Entity{
         this.description = description;
         this.startingPrice = startingPrice;
     }
+
+    // Getter + Setter
+    public String getImageURL() { return imageURL; }
+    public void setImageURL(String imageURL) { this.imageURL = imageURL; }
+
+    public Seller getOwner() { return owner; }
+    public void setOwner(Seller owner) { this.owner = owner; }
 }
