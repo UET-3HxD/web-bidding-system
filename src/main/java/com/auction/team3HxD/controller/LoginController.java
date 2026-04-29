@@ -5,6 +5,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import com.auction.team3HxD.util.SceneSwitcher;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 
 public class LoginController {
 
@@ -16,6 +18,9 @@ public class LoginController {
     private Button loginButton;
     @FXML
     private Button registerButton;
+
+    @FXML private Label messageLabel;
+    @FXML private ProgressIndicator loadingIndicator;
 
     @FXML
     private void handleLogin() {
