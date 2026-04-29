@@ -13,7 +13,7 @@ import java.util.UUID;
 public class UserDAO {
 
     // CREATE -> thêm một user mới vào database
-    public void insert(User user) {
+    public boolean insert(User user) {
         String sql = "INSERT INTO users(id, user_name, password_hash, email, role, created_at) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
@@ -26,12 +26,13 @@ public class UserDAO {
             ps.setString(5, user.getRole().name());
             ps.setTimestamp(6, Timestamp.valueOf(user.getCreatedAt()));
 
-            ps.executeUpdate();
-            System.out.println("Insert thành công!");
+            return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return false;
     }
 
     // READ ALL -> show all -> trả về toàn bộ user trong DB
