@@ -1,24 +1,21 @@
 /* Nền gradient cho toàn bộ cửa sổ */
-.root {
-    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #1a2a6c, #b21f1f, #fdbb4d);
+.login-root {
+    -fx-background-color: linear-gradient(to bottom right, #1a2a6c, #b21f1f, #fdbb4d);
     -fx-font-family: 'Segoe UI', 'Arial', sans-serif;
 }
 
-/* Khung đăng nhập trong suốt, bo góc, đổ bóng */
+/* Khung đăng nhập trong suốt, có hiệu ứng mờ, bo góc, đổ bóng */
 .login-container {
-    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-background-color: rgba(255, 255, 255, 0.85);
     -fx-background-radius: 20;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 20, 0.1, 0, 5);
-    -fx-padding: 40 30 40 30;
-    -fx-spacing: 20;
-    -fx-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 20, 0.1, 0, 5);
     -fx-max-width: 400;
     -fx-max-height: 400;
 }
 
 /* Tiêu đề */
-.title-label {
-    -fx-font-size: 28px;
+.title {
+    -fx-font-size: 26px;
     -fx-font-weight: bold;
     -fx-text-fill: #2c3e50;
     -fx-padding: 0 0 10 0;
@@ -34,6 +31,7 @@
     -fx-padding: 5 15;
     -fx-font-size: 14px;
     -fx-prompt-text-fill: #7f8c8d;
+    -fx-background-color: white;
 }
 
 .input-field:focused {
@@ -57,7 +55,6 @@
     -fx-background-color: #2980b9;
     -fx-scale-x: 1.02;
     -fx-scale-y: 1.02;
-    -fx-transition: all 0.2s;
 }
 
 /* Nút đăng ký */
@@ -76,8 +73,17 @@
     -fx-text-fill: white;
 }
 
-/* Hiệu ứng khi bấm nút */
-.button:pressed {
-    -fx-scale-y: 0.98;
-    -fx-scale-x: 0.98;
+/* Thông báo */
+.message-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #e74c3c;
+    -fx-padding: 5 0 0 0;
+    -fx-wrap-text: true;
+    -fx-alignment: center;
+}
+
+/* Loading indicator */
+.loading-indicator {
+    -fx-pref-width: 30;
+    -fx-pref-height: 30;
 }
