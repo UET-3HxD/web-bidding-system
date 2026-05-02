@@ -9,6 +9,7 @@ public class UserSession {
     private String username;
     private String role;      // "BIDDER", "SELLER", "ADMIN"
     private boolean loggedIn;
+    private int selectedAuctionId = -1;
 
     private UserSession() {}
 
@@ -38,6 +39,9 @@ public class UserSession {
         this.role = null;
         this.loggedIn = false;
     }
+
+    public void setSelectedAuctionId(int id) { this.selectedAuctionId = id; }
+    public int getSelectedAuctionId() { return selectedAuctionId; }
 
     public boolean isLoggedIn() {
         return loggedIn;
