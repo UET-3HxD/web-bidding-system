@@ -12,9 +12,9 @@ import java.util.UUID;
 
 public class UserDAO {
 
-    // CREATE -> thêm một user mới vaò database
+    // CREATE -> thêm một user mới vào database
     public boolean insertUser(User user) {
-        String sql = "INSERT INTO users(id, username, password, email, role, created_at) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users(id, user_name, password_hash, email, role, created_at) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -26,15 +26,13 @@ public class UserDAO {
             ps.setString(5, user.getRole().name());
             ps.setTimestamp(6, Timestamp.valueOf(user.getCreatedAt()));
 
-            ps.executeUpdate();
-            return true;
+            return ps.executeUpdate() > 0;
 
-        } catch (SQLException e){
-            e.printStackTrace();
-            return false;
         } catch (Exception e) {
-            return false;
+            e.printStackTrace();
         }
+
+        return false;
     }
 
     // READ ALL -> show all -> trả về toàn bộ user trong DB
@@ -82,7 +80,7 @@ public class UserDAO {
 
     // UPDATE
     public void update(User user) {
-        String sql = "UPDATE users SET username=?, password=?, email=?, role=?, created_at=? WHERE id=?";
+        String sql = "UPDATE users SET user_name=?, password_hash=?, email=?, role=?, created_at=? WHERE id=?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -120,7 +118,7 @@ public class UserDAO {
 
     // LOGIN / REGISTER SUPPORT
     public User getUserByUsername(String username) {
-        String sql = "SELECT * FROM users WHERE username = ?";
+        String sql = "SELECT * FROM users WHERE user_name = ?";
         User user = null;
 
         try (Connection conn = DBConnection.getConnection();
@@ -140,14 +138,15 @@ public class UserDAO {
         return user;
     }
 
-    public User getUserByEmail(String username) {
+    public User getUserByEmail(String email) {
         String sql = "SELECT * FROM users WHERE email = ?";
         User user = null;
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, username);
+            ps.setString(1, email);
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     user = mapResultSetToUser(rs);
@@ -164,8 +163,8 @@ public class UserDAO {
     // ================= HELPER =================
     private User mapResultSetToUser(ResultSet rs) throws SQLException {
         NormalUser user = new NormalUser(
-                rs.getString("username"),
-                rs.getString("password"),
+                rs.getString("user_name"),
+                rs.getString("password_hash"),
                 rs.getString("email"),
                 Role.valueOf(rs.getString("role").toUpperCase())
         );
