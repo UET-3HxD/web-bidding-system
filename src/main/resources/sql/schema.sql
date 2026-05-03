@@ -20,14 +20,16 @@
 --
 
 DROP TABLE IF EXISTS `users`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) DEFAULT NULL,
-  `email` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+                         `id` int NOT NULL AUTO_INCREMENT,
+                         `username` varchar(100) NOT NULL UNIQUE,
+                         `password` varchar(255) NOT NULL,
+                         `email` varchar(100) DEFAULT NULL,
+                         `role` varchar(50) NOT NULL,
+    -- Cột mới đây Captain: Tự động lấy thời gian hiện tại khi thêm user
+                         `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+                         PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
