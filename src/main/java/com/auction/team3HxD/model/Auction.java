@@ -50,7 +50,7 @@ public class Auction extends Entity{
     }
 
     // Constructor 2
-    public Auction(UUID id, Seller seller, Item item,
+    public Auction(int id, Seller seller, Item item,
                    double startPrice, double currentPrice, double bidIncrement,
                    AuctionStatus status,
                    LocalDateTime startTime, LocalDateTime endTime) {

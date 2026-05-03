@@ -4,21 +4,21 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public abstract class Entity {
-    protected UUID id;
+    protected int id;
     protected LocalDateTime createdAt;
 
     // Constructor
     public Entity() {
-        this.id = UUID.randomUUID();
+        this.id = 0;
         this.createdAt = LocalDateTime.now();
     }
 
     // Getters and setters
-    public UUID getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(int id) {
         this.id = id;
     }
 

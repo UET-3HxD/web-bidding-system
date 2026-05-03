@@ -14,17 +14,15 @@ public class UserDAO {
 
     // CREATE -> thêm một user mới vào database
     public boolean insertUser(User user) {
-        String sql = "INSERT INTO users(id, user_name, password_hash, email, role, created_at) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users(username, password, email, role) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, user.getId().toString());
             ps.setString(2, user.getUserName());
             ps.setString(3, user.getPasswordHash());
             ps.setString(4, user.getEmail());
             ps.setString(5, user.getRole().name());
-            ps.setTimestamp(6, Timestamp.valueOf(user.getCreatedAt()));
 
             return ps.executeUpdate() > 0;
 
@@ -57,14 +55,14 @@ public class UserDAO {
     }
 
     // READ BY ID -> tìm kiếm bằng Id
-    public User findById(UUID id) {
+    public User findById(int id) {
         String sql = "SELECT * FROM users WHERE id = ?";
         User user = null;
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, id.toString());
+            ps.setString(1, String.valueOf(id));
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     user = mapResultSetToUser(rs);
@@ -80,7 +78,7 @@ public class UserDAO {
 
     // UPDATE
     public void update(User user) {
-        String sql = "UPDATE users SET user_name=?, password_hash=?, email=?, role=?, created_at=? WHERE id=?";
+        String sql = "UPDATE users SET username=?, password=?, email=?, role=? WHERE id=?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -89,8 +87,6 @@ public class UserDAO {
             ps.setString(2, user.getPasswordHash());
             ps.setString(3, user.getEmail());
             ps.setString(4, user.getRole().name());
-            ps.setTimestamp(5, Timestamp.valueOf(user.getCreatedAt()));
-            ps.setString(6, user.getId().toString());
 
             ps.executeUpdate();
             System.out.println("Update thành công!");
@@ -118,11 +114,26 @@ public class UserDAO {
 
     // LOGIN / REGISTER SUPPORT
     public User getUserByUsername(String username) {
-        String sql = "SELECT * FROM users WHERE user_name = ?";
+        String sql = "SELECT * FROM users WHERE username = ?";
         User user = null;
 
         try (Connection conn = DBConnection.getConnection();
+
              PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            // THỬ NGHIỆM: Quét toàn bộ bảng để xem Java thấy bao nhiêu người
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rsAll = stmt.executeQuery("SELECT username, LENGTH(username) FROM users")) {
+
+                System.out.println("--- DANH SÁCH USER JAVA THẤY ---");
+                int count = 0;
+                while (rsAll.next()) {
+                    count++;
+                    System.out.println("User: [" + rsAll.getString(1) + "] - Độ dài: " + rsAll.getInt(2));
+                }
+                System.out.println("Tổng cộng Java thấy: " + count + " users.");
+                System.out.println("--------------------------------");
+            }
 
             ps.setString(1, username);
             try (ResultSet rs = ps.executeQuery()) {
@@ -163,14 +174,14 @@ public class UserDAO {
     // ================= HELPER =================
     private User mapResultSetToUser(ResultSet rs) throws SQLException {
         NormalUser user = new NormalUser(
-                rs.getString("user_name"),
-                rs.getString("password_hash"),
+                rs.getString("username"),
+                rs.getString("password"),
                 rs.getString("email"),
                 Role.valueOf(rs.getString("role").toUpperCase())
         );
 
         // set id
-        user.setId(UUID.fromString(rs.getString("id")));
+        user.setId(rs.getInt("id"));
 
         // set createdAt
         Timestamp ts = rs.getTimestamp("created_at");
