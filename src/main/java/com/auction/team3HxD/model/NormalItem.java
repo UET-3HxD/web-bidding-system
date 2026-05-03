@@ -9,7 +9,7 @@ public class NormalItem extends Item {
     }
 
     // Constructor dùng cho DB
-    public NormalItem(UUID id, String name, String description,
+    public NormalItem(int id, String name, String description,
                       double startingPrice, String imageURL, Seller owner) {
 
         super(name, description, startingPrice);

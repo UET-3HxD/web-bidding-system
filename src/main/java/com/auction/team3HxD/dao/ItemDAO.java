@@ -35,13 +35,13 @@ public class ItemDAO {
     // ===== MAPPING =====
     private Item mapResultSetToItem(ResultSet rs) throws SQLException {
 
-        UUID id = UUID.fromString(rs.getString("id"));
+        int id = rs.getInt("id");
         String name = rs.getString("name");
         String description = rs.getString("description");
         double startingPrice = rs.getDouble("starting_price");
         String imageURL = rs.getString("image_url");
 
-        UUID ownerId = UUID.fromString(rs.getString("owner_id"));
+        int ownerId = rs.getInt("owner_id");
         Seller owner = (Seller) userDAO.findById(ownerId);
 
         return new NormalItem(id, name, description, startingPrice, imageURL, owner);

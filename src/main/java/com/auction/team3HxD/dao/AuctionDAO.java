@@ -25,9 +25,9 @@ public class AuctionDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, auction.getId().toString());
-            ps.setString(2, auction.getSeller().getId().toString());
-            ps.setString(3, auction.getItem().getId().toString());
+            ps.setString(1, String.valueOf(auction.getId()));
+            ps.setString(2, String.valueOf(auction.getSeller().getId()));
+            ps.setString(3, String.valueOf(auction.getItem().getId()));
 
             ps.setDouble(4, auction.getStartPrice());
             ps.setDouble(5, auction.getCurrentPrice());
@@ -101,8 +101,8 @@ public class AuctionDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, auction.getSeller().getId().toString());
-            ps.setString(2, auction.getItem().getId().toString());
+            ps.setString(1, String.valueOf(auction.getSeller().getId()));
+            ps.setString(2, String.valueOf(auction.getItem().getId()));
 
             ps.setDouble(3, auction.getStartPrice());
             ps.setDouble(4, auction.getCurrentPrice());
@@ -112,7 +112,7 @@ public class AuctionDAO {
             ps.setTimestamp(7, Timestamp.valueOf(auction.getStartTime()));
             ps.setTimestamp(8, Timestamp.valueOf(auction.getEndTime()));
 
-            ps.setString(9, auction.getId().toString());
+            ps.setString(9, String.valueOf(auction.getId()));
 
             ps.executeUpdate();
             System.out.println("Update Auction thành công!");
@@ -168,10 +168,10 @@ public class AuctionDAO {
     // Convert ResultSet -> Auction object
     private Auction mapResultSetToAuction(ResultSet rs) throws SQLException {
 
-        UUID id = UUID.fromString(rs.getString("id"));
+        int id = rs.getInt("id");
 
         // ===== Seller =====
-        UUID sellerId = UUID.fromString(rs.getString("seller_id"));
+        int sellerId = rs.getInt("seller_id");
         Seller seller = (Seller) userDAO.findById(sellerId);
 
         // ===== Item =====

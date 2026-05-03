@@ -161,7 +161,9 @@ public class LoginController {
                     loginButton,
                     "Danh sách phiên đấu giá"
             );
-        } else if (response.startsWith("LOGIN_ERR_WRONG_CREDENTIALS")) {
+        } else if(response.startsWith("LOGIN_ERR_USER_NOT_FOUND")) {
+            showMessage("Tài khoản không tồn tại.", false);
+        } else if (response.startsWith("LOGIN_ERR_INVALID")) {
             showMessage("Sai tên đăng nhập hoặc mật khẩu.", false);
         } else if (response.startsWith("LOGIN_ERR_ALREADY_ONLINE")) {
             showMessage("Tài khoản đang được đăng nhập ở nơi khác.", false);
