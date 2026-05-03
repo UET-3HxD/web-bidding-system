@@ -45,11 +45,13 @@ public class Auction extends Entity{
         this.bidHistory = new ArrayList<>();
         this.observers = new ArrayList<>();
         status = AuctionStatus.OPEN;
+        this.item.setStatus(AuctionStatus.OPEN);
     }
 
     //Start : status -> RUNNING / Cho phép bid
     public void start() {
         status = AuctionStatus.RUNNING;
+        item.setStatus(AuctionStatus.RUNNING);
     }
 
     // Đặt bid , kiểm tra hợp lệ
@@ -82,6 +84,7 @@ public class Auction extends Entity{
     // Kết thúc đấu giá
     public void endAuction() {
         status = AuctionStatus.FINISHED;
+        item.setStatus(AuctionStatus.FINISHED);
     }
 
     // Kéo dài thời gian (Anti Sniping)
