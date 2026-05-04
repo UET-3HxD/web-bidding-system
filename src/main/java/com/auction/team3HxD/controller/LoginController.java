@@ -172,9 +172,7 @@ public class LoginController {
 
     @FXML
     private void handleRegister() {
-        // Tạm thời thông báo
-        showMessage("Tính năng đăng ký đang được phát triển.", false);
-        System.out.println("Chuyển sang màn hình đăng ký (chưa có)");
+        SceneSwitcher.getInstance().switchTo("/fxml/register.fxml", registerButton, "Đăng ký tài khoản");
     }
 
     // ---------- Các phương thức hỗ trợ giao diện ----------
