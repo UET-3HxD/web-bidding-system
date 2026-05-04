@@ -96,7 +96,7 @@ public class Auction extends Entity{
             currentWinner = bidder;
 
             // Thêm vào lịch sử giao dịch
-            bidHistory.add(new BidTransaction(bidder , amount));
+            bidHistory.add(new BidTransaction(this, bidder , amount));
         }
         finally {
             lock.unlock();
