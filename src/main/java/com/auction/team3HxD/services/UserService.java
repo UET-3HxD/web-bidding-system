@@ -38,8 +38,10 @@ public class UserService {
         if (user == null) {
             return "LOGIN_ERR_USER_NOT_FOUND";
         }
-        if (!user.getPasswordHash().equals(password)) {
-            return "LOGIN_ERR_INVALID";
+
+        if (!user.getPassword().equals(password)) {
+            return "LOGIN_ERR_INVALID"; // Sai user hoặc pass
+
         }
         if (onlineUsers.contains(username)) {
             return "LOGIN_ERR_ALREADY_ONLINE";       // đúng như client mong đợi
