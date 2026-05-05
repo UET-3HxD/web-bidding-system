@@ -2,8 +2,6 @@ package com.auction.team3HxD.model;
 
 import com.auction.team3HxD.model.enums.Role;
 
-import java.util.UUID;
-
 public abstract class User extends Entity{
     protected String username;
     protected String password;
@@ -11,8 +9,8 @@ public abstract class User extends Entity{
     protected Role role;
 
     //Constructor
-    public User(String username, String password, String email , Role role) {
-        this.username = username;
+    public User(String userName , String password, String email , Role role) {
+        this.username = userName;
         this.password = password;
         this.email = email;
         this.role = role;
@@ -43,4 +41,5 @@ public abstract class User extends Entity{
     public Role getRole() {
         return role;
     }
+
 }

@@ -18,8 +18,8 @@ public class UserDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            ps.setString(1, user.getUserName());
-            ps.setString(2, user.getPasswordHash());
+            ps.setString(1, user.getUsername());
+            ps.setString(2, user.getPassword());
             ps.setString(3, user.getEmail());
             ps.setString(4, user.getRole().name());
 
@@ -67,7 +67,7 @@ public class UserDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, id); // ✅ sửa đúng kiểu
+            ps.setInt(1, id);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -89,11 +89,11 @@ public class UserDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, user.getUserName());
-            ps.setString(2, user.getPasswordHash());
+            ps.setString(1, user.getUsername());
+            ps.setString(2, user.getPassword());
             ps.setString(3, user.getEmail());
             ps.setString(4, user.getRole().name());
-            ps.setInt(5, user.getId()); // ✅ FIX QUAN TRỌNG
+            ps.setInt(5, user.getId());
 
             ps.executeUpdate();
 
@@ -103,13 +103,13 @@ public class UserDAO {
     }
 
     // ================= DELETE =================
-    public void delete(int id) { // ✅ UUID -> int
+    public void delete(int id) {
         String sql = "DELETE FROM users WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, id); // ✅ sửa
+            ps.setInt(1, id);
             ps.executeUpdate();
 
         } catch (SQLException e) {
