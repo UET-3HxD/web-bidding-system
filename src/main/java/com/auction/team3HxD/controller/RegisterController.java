@@ -19,7 +19,6 @@ public class RegisterController {
     @FXML private Button backButton;
     @FXML private Label messageLabel;
     @FXML private ProgressIndicator loadingIndicator;
-
     @FXML private ProgressBar passwordStrengthBar;
     @FXML private Label passwordStrengthLabel;
     @FXML private Label confirmPasswordError;
@@ -30,15 +29,29 @@ public class RegisterController {
 
     @FXML
     public void initialize() {
+        // Ẩn tất cả các thành phần phụ trợ ban đầu, kèm setManaged(false) để không chiếm layout
         messageLabel.setVisible(false);
+        messageLabel.setManaged(false);
         loadingIndicator.setVisible(false);
+        loadingIndicator.setManaged(false);
         passwordStrengthBar.setVisible(false);
+        passwordStrengthBar.setManaged(false);
+        passwordStrengthLabel.setVisible(false);
+        passwordStrengthLabel.setManaged(false);
         confirmPasswordError.setVisible(false);
+        confirmPasswordError.setManaged(false);
         emailError.setVisible(false);
+        emailError.setManaged(false);
 
-        passwordField.textProperty().addListener((obs, oldVal, newVal) -> checkPasswordStrength(newVal));
-        confirmPasswordField.textProperty().addListener((obs, oldVal, newVal) -> checkConfirmPassword());
-        emailField.textProperty().addListener((obs, oldVal, newVal) -> validateEmail(newVal));
+        // Listener real-time cho mật khẩu: cập nhật độ mạnh và kiểm tra xác nhận mật khẩu
+        passwordField.textProperty().addListener((observable, oldValue, newValue) -> {
+            checkPasswordStrength(newValue);
+            checkConfirmPassword();  // Mỗi khi mật khẩu thay đổi, kiểm tra lại xác nhận
+        });
+        // Listener cho xác nhận mật khẩu
+        confirmPasswordField.textProperty().addListener((observable, oldValue, newValue) -> checkConfirmPassword());
+        // Listener cho email
+        emailField.textProperty().addListener((observable, oldValue, newValue) -> validateEmail(newValue));
 
         if (!AppConfig.isMockEnabled()) {
             startListening();
@@ -48,10 +61,11 @@ public class RegisterController {
     private void checkPasswordStrength(String password) {
         if (password == null || password.isEmpty()) {
             passwordStrengthBar.setVisible(false);
-            passwordStrengthLabel.setText("");
+            passwordStrengthBar.setManaged(false);
+            passwordStrengthLabel.setVisible(false);
+            passwordStrengthLabel.setManaged(false);
             return;
         }
-        passwordStrengthBar.setVisible(true);
         int score = 0;
         if (password.length() >= 6) score++;
         if (password.length() >= 8) score++;
@@ -62,6 +76,8 @@ public class RegisterController {
 
         double progress = Math.min(1.0, score / 6.0);
         passwordStrengthBar.setProgress(progress);
+        passwordStrengthBar.setVisible(true);
+        passwordStrengthBar.setManaged(true);
 
         String strengthText;
         String colorStyle;
@@ -77,6 +93,8 @@ public class RegisterController {
         }
         passwordStrengthLabel.setText("Độ mạnh: " + strengthText);
         passwordStrengthLabel.setStyle("-fx-text-fill: " + colorStyle + ";");
+        passwordStrengthLabel.setVisible(true);
+        passwordStrengthLabel.setManaged(true);
     }
 
     private void checkConfirmPassword() {
@@ -84,27 +102,33 @@ public class RegisterController {
         String confirm = confirmPasswordField.getText();
         if (confirm.isEmpty()) {
             confirmPasswordError.setVisible(false);
+            confirmPasswordError.setManaged(false);
             return;
         }
         if (!pwd.equals(confirm)) {
             confirmPasswordError.setText("Mật khẩu xác nhận không khớp");
             confirmPasswordError.setVisible(true);
+            confirmPasswordError.setManaged(true);
         } else {
             confirmPasswordError.setVisible(false);
+            confirmPasswordError.setManaged(false);
         }
     }
 
     private void validateEmail(String email) {
         if (email.isEmpty()) {
             emailError.setVisible(false);
+            emailError.setManaged(false);
             return;
         }
         boolean isValid = Pattern.matches("^[A-Za-z0-9+_.-]+@(.+)$", email);
         if (!isValid) {
             emailError.setText("Email không hợp lệ (ví dụ: name@domain.com)");
             emailError.setVisible(true);
+            emailError.setManaged(true);
         } else {
             emailError.setVisible(false);
+            emailError.setManaged(false);
         }
     }
 
@@ -136,10 +160,15 @@ public class RegisterController {
         String confirm = confirmPasswordField.getText().trim();
         String email = emailField.getText().trim();
 
+        // Ẩn các thông báo lỗi cũ
         messageLabel.setVisible(false);
+        messageLabel.setManaged(false);
         confirmPasswordError.setVisible(false);
+        confirmPasswordError.setManaged(false);
         emailError.setVisible(false);
+        emailError.setManaged(false);
 
+        // Kiểm tra dữ liệu đầu vào
         if (username.isEmpty() || password.isEmpty() || confirm.isEmpty() || email.isEmpty()) {
             showMessage("Vui lòng điền đầy đủ thông tin.", false);
             return;
@@ -147,6 +176,7 @@ public class RegisterController {
         if (!password.equals(confirm)) {
             confirmPasswordError.setText("Mật khẩu xác nhận không khớp");
             confirmPasswordError.setVisible(true);
+            confirmPasswordError.setManaged(true);
             return;
         }
         if (password.length() < 6) {
@@ -156,6 +186,7 @@ public class RegisterController {
         if (!Pattern.matches("^[A-Za-z0-9+_.-]+@(.+)$", email)) {
             emailError.setText("Email không hợp lệ.");
             emailError.setVisible(true);
+            emailError.setManaged(true);
             return;
         }
 
@@ -173,7 +204,9 @@ public class RegisterController {
                         showMessage("Đăng ký thành công! Chuyển về đăng nhập...", true);
                         new Thread(() -> {
                             try { Thread.sleep(2000); } catch (InterruptedException e) {}
-                            Platform.runLater(() -> SceneSwitcher.getInstance().switchTo("/fxml/login.fxml", registerButton, "Đăng nhập"));
+                            Platform.runLater(() -> {
+                                SceneSwitcher.getInstance().switchTo("/fxml/login.fxml", registerButton, "Đăng nhập");
+                            });
                         }).start();
                     } else if (usernameExists) {
                         showMessage("Tên đăng nhập đã tồn tại.", false);
@@ -196,7 +229,9 @@ public class RegisterController {
             showMessage("Đăng ký thành công! Chuyển về đăng nhập...", true);
             new Thread(() -> {
                 try { Thread.sleep(2000); } catch (InterruptedException e) {}
-                Platform.runLater(() -> SceneSwitcher.getInstance().switchTo("/fxml/login.fxml", registerButton, "Đăng nhập"));
+                Platform.runLater(() -> {
+                    SceneSwitcher.getInstance().switchTo("/fxml/login.fxml", registerButton, "Đăng nhập");
+                });
             }).start();
         } else if (response.startsWith("REGISTER_ERR_USERNAME_EXISTS")) {
             showMessage("Tên đăng nhập đã tồn tại.", false);
@@ -215,22 +250,29 @@ public class RegisterController {
     private void startLoading() {
         registerButton.setDisable(true);
         loadingIndicator.setVisible(true);
+        loadingIndicator.setManaged(true);
         messageLabel.setVisible(false);
+        messageLabel.setManaged(false);
     }
 
     private void stopLoading() {
         registerButton.setDisable(false);
         loadingIndicator.setVisible(false);
+        loadingIndicator.setManaged(false);
     }
 
     private void showMessage(String text, boolean isSuccess) {
         messageLabel.setText(text);
         messageLabel.setStyle(isSuccess ? "-fx-text-fill: #2ecc71;" : "-fx-text-fill: #e74c3c;");
         messageLabel.setVisible(true);
+        messageLabel.setManaged(true);
         if (!isSuccess) {
             new Thread(() -> {
                 try { Thread.sleep(3000); } catch (InterruptedException e) {}
-                Platform.runLater(() -> messageLabel.setVisible(false));
+                Platform.runLater(() -> {
+                    messageLabel.setVisible(false);
+                    messageLabel.setManaged(false);
+                });
             }).start();
         }
     }
