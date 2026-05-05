@@ -4,20 +4,19 @@ import com.auction.team3HxD.model.*;
 import com.auction.team3HxD.util.DBConnection;
 
 import java.sql.*;
-import java.util.UUID;
 
 public class ItemDAO {
 
     private final UserDAO userDAO = new UserDAO();
 
-    public Item findById(UUID id) {
+    public Item findById(int id) {
         String sql = "SELECT * FROM items WHERE id = ?";
         Item item = null;
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, id.toString());
+            ps.setInt(1, id);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -25,8 +24,8 @@ public class ItemDAO {
                 }
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error finding item by id", e);
         }
 
         return item;
@@ -36,6 +35,7 @@ public class ItemDAO {
     private Item mapResultSetToItem(ResultSet rs) throws SQLException {
 
         int id = rs.getInt("id");
+
         String name = rs.getString("name");
         String description = rs.getString("description");
         double startingPrice = rs.getDouble("starting_price");

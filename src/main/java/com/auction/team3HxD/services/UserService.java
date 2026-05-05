@@ -38,7 +38,7 @@ public class UserService {
         // 5. Nếu mọi thứ ổn, tạo NormalUser với Role cố định
         User newUser = new NormalUser(username, password, email, Role.USER);
 
-        if (userDAO.insertUser(newUser)) {
+        if (userDAO.insertUser(newUser) > 0) {
             return "REG_SUCCESS";
         }
 
