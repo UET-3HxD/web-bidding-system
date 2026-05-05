@@ -19,7 +19,7 @@ public abstract class User extends Entity{
     }
 
     //Getter and setter
-    public UUID getId() {
+    public int getId() {
         return super.getId();
     }
     public String getPassword() {return password;}

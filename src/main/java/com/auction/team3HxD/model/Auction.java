@@ -5,6 +5,7 @@ import com.auction.team3HxD.model.enums.AuctionStatus;
 import com.auction.team3HxD.model.observer.AuctionObserver;
 import com.auction.team3HxD.exception.AuctionClosedException;
 
+import java.util.UUID;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,17 +36,40 @@ public class Auction extends Entity{
 
 
 
-    //Constructor
+    //Constructor 1
     public Auction(Seller seller , Item item , double startPrice , double bidIncrement , String startTime , String endTime) {
         this.seller = seller;
         this.item = item;
         this.startPrice = startPrice;
+        this.currentPrice = startPrice;
         this.startTime = LocalDateTime.parse(startTime);
         this.endTime = LocalDateTime.parse(endTime);
         this.bidHistory = new ArrayList<>();
         this.observers = new ArrayList<>();
         status = AuctionStatus.OPEN;
         this.item.setStatus(AuctionStatus.OPEN);
+    }
+
+    // Constructor 2
+    public Auction(int id, Seller seller, Item item,
+                   double startPrice, double currentPrice, double bidIncrement,
+                   AuctionStatus status,
+                   LocalDateTime startTime, LocalDateTime endTime) {
+
+        this.setId(id);
+        this.seller = seller;
+        this.item = item;
+
+        this.startPrice = startPrice;
+        this.currentPrice = currentPrice;
+        this.bidIncrement = bidIncrement;
+
+        this.status = status;
+        this.startTime = startTime;
+        this.endTime = endTime;
+
+        this.bidHistory = new ArrayList<>();
+        this.observers = new ArrayList<>();
     }
 
     //Start : status -> RUNNING / Cho phép bid
@@ -74,7 +98,7 @@ public class Auction extends Entity{
             currentWinner = bidder;
 
             // Thêm vào lịch sử giao dịch
-            bidHistory.add(new BidTransaction(bidder , amount));
+            bidHistory.add(new BidTransaction(this, bidder , amount));
         }
         finally {
             lock.unlock();
@@ -102,4 +126,12 @@ public class Auction extends Entity{
         this.observers.add(auctionObserver);
     }
 
+//    GETTER
+    public Seller getSeller() { return seller; }
+    public Item getItem() { return item; }
+    public double getStartPrice() { return startPrice; }
+    public double getBidIncrement() { return bidIncrement; }
+    public AuctionStatus getStatus() { return status; }
+    public LocalDateTime getStartTime() { return startTime; }
+    public LocalDateTime getEndTime() { return endTime; }
 }
