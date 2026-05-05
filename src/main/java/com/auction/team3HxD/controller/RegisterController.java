@@ -15,13 +15,11 @@ public class RegisterController {
     @FXML private PasswordField passwordField;
     @FXML private PasswordField confirmPasswordField;
     @FXML private TextField emailField;
-    @FXML private ComboBox<String> roleComboBox;
     @FXML private Button registerButton;
     @FXML private Button backButton;
     @FXML private Label messageLabel;
     @FXML private ProgressIndicator loadingIndicator;
 
-    // Các thành phần mới
     @FXML private ProgressBar passwordStrengthBar;
     @FXML private Label passwordStrengthLabel;
     @FXML private Label confirmPasswordError;
@@ -38,14 +36,8 @@ public class RegisterController {
         confirmPasswordError.setVisible(false);
         emailError.setVisible(false);
 
-        roleComboBox.getItems().addAll("BIDDER", "SELLER");
-        roleComboBox.getSelectionModel().selectFirst();
-
-        // Listener cho độ mạnh mật khẩu
         passwordField.textProperty().addListener((obs, oldVal, newVal) -> checkPasswordStrength(newVal));
-        // Listener cho xác nhận mật khẩu
         confirmPasswordField.textProperty().addListener((obs, oldVal, newVal) -> checkConfirmPassword());
-        // Listener cho email
         emailField.textProperty().addListener((obs, oldVal, newVal) -> validateEmail(newVal));
 
         if (!AppConfig.isMockEnabled()) {
@@ -143,14 +135,12 @@ public class RegisterController {
         String password = passwordField.getText().trim();
         String confirm = confirmPasswordField.getText().trim();
         String email = emailField.getText().trim();
-        String role = roleComboBox.getValue();
 
-        // Reset thông báo lỗi
         messageLabel.setVisible(false);
         confirmPasswordError.setVisible(false);
         emailError.setVisible(false);
 
-        if (username.isEmpty() || password.isEmpty() || confirm.isEmpty() || email.isEmpty() || role == null) {
+        if (username.isEmpty() || password.isEmpty() || confirm.isEmpty() || email.isEmpty()) {
             showMessage("Vui lòng điền đầy đủ thông tin.", false);
             return;
         }
@@ -195,7 +185,7 @@ public class RegisterController {
                 });
             }).start();
         } else {
-            String msg = "REGISTER|" + username + "|" + password + "|" + email + "|" + role;
+            String msg = "REGISTER|" + username + "|" + password + "|" + email;
             SocketManager.getInstance().send(msg);
         }
     }
