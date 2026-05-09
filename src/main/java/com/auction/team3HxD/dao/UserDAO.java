@@ -19,8 +19,8 @@ public class UserDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(2, user.getUserName());
-            ps.setString(3, user.getPasswordHash());
+            ps.setString(2, user.getUsername());
+            ps.setString(3, user.getPassword());
             ps.setString(4, user.getEmail());
             ps.setString(5, user.getRole().name());
 
@@ -83,8 +83,8 @@ public class UserDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, user.getUserName());
-            ps.setString(2, user.getPasswordHash());
+            ps.setString(1, user.getUsername());
+            ps.setString(2, user.getPassword());
             ps.setString(3, user.getEmail());
             ps.setString(4, user.getRole().name());
 

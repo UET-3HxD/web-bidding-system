@@ -52,7 +52,7 @@ public class UserService {
         if(user == null) {
             return "LOGIN_ERR_USER_NOT_FOUND";
         }
-        if (!user.getPasswordHash().equals(password)) {
+        if (!user.getPassword().equals(password)) {
             return "LOGIN_ERR_INVALID"; // Sai user hoặc pass
         }
 
@@ -64,7 +64,38 @@ public class UserService {
         onlineUsers.add(username);
         return "LOGIN_SUCCESS";
     }
+    public String changePassword(String username, String oldPass, String newPass) {
+        User user = userDAO.getUserByUsername(username);
+        if (user == null) return "CHANGE_ERR_USER_NOT_FOUND";
 
+        if (!user.getPassword().equals(oldPass)) {
+            return "CHANGE_ERR_WRONG_PASSWORD";
+        }
+
+        user.setPassword(newPass);
+
+        try {
+            userDAO.update(user);
+            return "CHANGE_SUCCESS";
+        } catch (Exception e) {
+            return "ERR_DATABASE";
+        }
+    }
+    public String changeEmail(String username, String newEmail, String currentPass) {
+        User user = userDAO.getUserByUsername(username);
+        if (user == null) return "CHANGE_ERR_USER_NOT_FOUND";
+
+        if (!user.getPassword().equals(currentPass)) return "CHANGE_ERR_WRONG_PASSWORD";
+
+        user.setEmail(newEmail);
+
+        try {
+            userDAO.update(user);
+            return "CHANGE_SUCCESS";
+        } catch (Exception e) {
+            return "ERR_DATABASE";
+        }
+    }
     public void logout(String username) {
         if (username != null) onlineUsers.remove(username);
     }
