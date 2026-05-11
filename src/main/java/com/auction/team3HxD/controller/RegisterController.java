@@ -2,11 +2,10 @@ package com.auction.team3HxD.controller;
 
 import com.auction.team3HxD.util.AppConfig;
 import com.auction.team3HxD.util.SceneSwitcher;
-import com.auction.team3HxD.util.SocketManager;
+import com.auction.team3HxD.util.SocketService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import java.io.IOException;
 import java.util.regex.Pattern;
 
 public class RegisterController {
@@ -24,12 +23,9 @@ public class RegisterController {
     @FXML private Label confirmPasswordError;
     @FXML private Label emailError;
 
-    private Thread listenerThread;
-    private volatile boolean running = true;
-
     @FXML
     public void initialize() {
-        // Ẩn tất cả các thành phần phụ trợ ban đầu, kèm setManaged(false) để không chiếm layout
+        // Ẩn tất cả các thành phần phụ trợ ban đầu
         messageLabel.setVisible(false);
         messageLabel.setManaged(false);
         loadingIndicator.setVisible(false);
@@ -43,18 +39,17 @@ public class RegisterController {
         emailError.setVisible(false);
         emailError.setManaged(false);
 
-        // Listener real-time cho mật khẩu: cập nhật độ mạnh và kiểm tra xác nhận mật khẩu
-        passwordField.textProperty().addListener((observable, oldValue, newValue) -> {
-            checkPasswordStrength(newValue);
-            checkConfirmPassword();  // Mỗi khi mật khẩu thay đổi, kiểm tra lại xác nhận
+        // Listener real-time cho mật khẩu và email
+        passwordField.textProperty().addListener((obs, old, newVal) -> {
+            checkPasswordStrength(newVal);
+            checkConfirmPassword();
         });
-        // Listener cho xác nhận mật khẩu
-        confirmPasswordField.textProperty().addListener((observable, oldValue, newValue) -> checkConfirmPassword());
-        // Listener cho email
-        emailField.textProperty().addListener((observable, oldValue, newValue) -> validateEmail(newValue));
+        confirmPasswordField.textProperty().addListener((obs, old, newVal) -> checkConfirmPassword());
+        emailField.textProperty().addListener((obs, old, newVal) -> validateEmail(newVal));
 
+        // Đăng ký nhận phản hồi từ SocketService (thay vì tự tạo thread nghe)
         if (!AppConfig.isMockEnabled()) {
-            startListening();
+            SocketService.getInstance().setMessageHandler(this::handleServerResponse);
         }
     }
 
@@ -132,27 +127,6 @@ public class RegisterController {
         }
     }
 
-    private void startListening() {
-        listenerThread = new Thread(() -> {
-            while (running) {
-                try {
-                    String response = SocketManager.getInstance().receive();
-                    if (response != null) {
-                        final String res = response;
-                        Platform.runLater(() -> handleServerResponse(res));
-                    }
-                } catch (IOException e) {
-                    if (running) {
-                        Platform.runLater(() -> showMessage("Mất kết nối đến server.", false));
-                        break;
-                    }
-                }
-            }
-        });
-        listenerThread.setDaemon(true);
-        listenerThread.start();
-    }
-
     @FXML
     private void handleRegister() {
         String username = usernameField.getText().trim();
@@ -219,7 +193,7 @@ public class RegisterController {
             }).start();
         } else {
             String msg = "REGISTER|" + username + "|" + password + "|" + email;
-            SocketManager.getInstance().send(msg);
+            SocketService.getInstance().send(msg);
         }
     }
 
@@ -227,6 +201,7 @@ public class RegisterController {
         stopLoading();
         if (response.startsWith("REGISTER_OK")) {
             showMessage("Đăng ký thành công! Chuyển về đăng nhập...", true);
+            // Không cần shutdown hay disconnect gì cả, SocketService vẫn sống
             new Thread(() -> {
                 try { Thread.sleep(2000); } catch (InterruptedException e) {}
                 Platform.runLater(() -> {
@@ -237,6 +212,14 @@ public class RegisterController {
             showMessage("Tên đăng nhập đã tồn tại.", false);
         } else if (response.startsWith("REGISTER_ERR_EMAIL_EXISTS")) {
             showMessage("Email đã được sử dụng.", false);
+        } else if (response.startsWith("REG_ERR_WEAK_DATA")) {
+            showMessage("Dữ liệu không hợp lệ (mật khẩu phải >= 6 ký tự, không được bỏ trống).", false);
+        } else if (response.startsWith("REG_ERR_INVALID_EMAIL")) {
+            showMessage("Định dạng email không hợp lệ.", false);
+        } else if (response.startsWith("REG_ERR_DATABASE")) {
+            showMessage("Lỗi cơ sở dữ liệu, thử lại sau.", false);
+        } else if (response.startsWith("ERR|")) {
+            showMessage("Lỗi server: " + response.substring(4), false);
         } else {
             showMessage("Đăng ký thất bại: " + response, false);
         }
@@ -244,6 +227,7 @@ public class RegisterController {
 
     @FXML
     private void handleBack() {
+        // Chỉ chuyển màn hình, không cần dọn dẹp gì
         SceneSwitcher.getInstance().switchTo("/fxml/login.fxml", backButton, "Đăng nhập");
     }
 
@@ -275,10 +259,5 @@ public class RegisterController {
                 });
             }).start();
         }
-    }
-
-    public void shutdown() {
-        running = false;
-        if (listenerThread != null) listenerThread.interrupt();
     }
 }
