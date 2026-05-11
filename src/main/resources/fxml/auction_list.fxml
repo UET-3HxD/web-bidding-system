@@ -3,41 +3,88 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ProgressIndicator?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
 
-<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.team3HxD.controller.AuctionListController" style="-fx-background-color: #f0f2f5;">
-    <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
-    </padding>
-    <children>
-        <Label text="DANH SÁCH PHIÊN ĐẤU GIÁ" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+<BorderPane prefHeight="700.0" prefWidth="1000.0" stylesheets="@../styles/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.team3HxD.controller.AuctionListController">
 
-        <TableView fx:id="auctionTableView" VBox.vgrow="ALWAYS">
-            <columns>
-                <TableColumn fx:id="productNameColumn" text="Tên sản phẩm" prefWidth="200"/>
-                <TableColumn fx:id="currentPriceColumn" text="Giá hiện tại (VNĐ)" prefWidth="150"/>
-                <TableColumn fx:id="endTimeColumn" text="Thời gian kết thúc" prefWidth="200"/>
-                <TableColumn fx:id="sellerColumn" text="Người bán" prefWidth="150"/>
-            </columns>
-        </TableView>
+    <!-- ================= SIDEBAR TRÁI ================= -->
+    <left>
+        <VBox styleClass="sidebar" prefWidth="250.0">
+            <padding>
+                <Insets top="20" right="15" bottom="20" left="15"/>
+            </padding>
 
-        <!-- Thông báo và loading -->
-        <HBox alignment="CENTER" spacing="10">
-            <children>
-                <Label fx:id="messageLabel" text="" style="-fx-text-fill: red;" visible="false"/>
-                <ProgressIndicator fx:id="loadingIndicator" visible="false" prefWidth="30" prefHeight="30"/>
-            </children>
-        </HBox>
+            <!-- Logo -->
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <padding><Insets bottom="30" left="10"/></padding>
+                <Label text="⚖" styleClass="logo-icon"/>
+                <Label text="BidVN" styleClass="logo-text"/>
+            </HBox>
 
-        <HBox alignment="CENTER_RIGHT" spacing="15.0">
-            <children>
-                <Button fx:id="refreshButton" text="Làm mới" onAction="#handleRefresh"/>
-                <Button fx:id="detailButton" text="Xem chi tiết" onAction="#handleViewDetail"/>
-            </children>
-        </HBox>
-    </children>
-</VBox>
+            <!-- Menu điều hướng -->
+            <VBox spacing="5">
+                <Button text="👤   Tài khoản" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleMenuAccount"/>
+                <Button text="⏹   Sàn đấu giá" styleClass="menu-btn, menu-btn-active" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
+                <Button text="⏱   Bid đang tham gia" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleMenuMyBids"/>
+                <Button text="📦   Sản phẩm của bạn" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleMenuMyProducts"/>
+                <Button text="⚙   Trợ giúp" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleMenuHelp"/>
+            </VBox>
+
+            <Region VBox.vgrow="ALWAYS" />
+
+            <!-- Profile sidebar -->
+            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="sidebar-profile">
+                <StackPane>
+                    <Circle radius="18" fill="#5A6C8A"/>
+                    <Label fx:id="lblAvatarShort" text="NV" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+                </StackPane>
+                <VBox alignment="CENTER_LEFT">
+                    <Label fx:id="lblSidebarName" text="User" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+                    <Label text="Thành viên" style="-fx-text-fill: #A0ABC0; -fx-font-size: 11px;"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </left>
+
+    <!-- ================= NỘI DUNG CHÍNH ================= -->
+    <center>
+        <VBox styleClass="main-content" spacing="20">
+            <padding>
+                <Insets top="30" right="40" bottom="30" left="40"/>
+            </padding>
+
+            <!-- Breadcrumb + Tiêu đề -->
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label text="Trang chủ" styleClass="breadcrumb-link" onMouseClicked="#handleGoHome"/>
+                <Label text="/" styleClass="breadcrumb-text"/>
+                <Label text="Sàn đấu giá" styleClass="breadcrumb-text"/>
+            </HBox>
+            <Label text="Sàn đấu giá trực tuyến" styleClass="page-title"/>
+            <Label text="Khám phá và tham gia các phiên đấu giá đang diễn ra" styleClass="page-subtitle"/>
+
+            <!-- Thanh tìm kiếm & lọc -->
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <TextField fx:id="txtSearch" promptText="Tìm kiếm sản phẩm..." styleClass="input-field" HBox.hgrow="ALWAYS"/>
+                <Button text="🔍 Tìm" styleClass="action-btn-primary" onAction="#handleSearch"/>
+                <Button text="Bộ lọc" styleClass="action-btn-secondary"/>
+            </HBox>
+
+            <!-- Danh sách đấu giá (cuộn) -->
+            <ScrollPane fitToWidth="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
+                <FlowPane fx:id="auctionContainer" hgap="20" vgap="20" style="-fx-padding: 10;">
+                    <!-- Các card phiên đấu giá sẽ được thêm động bằng Java,
+                         nhưng ta thêm một vài card tĩnh để minh họa UI -->
+                </FlowPane>
+            </ScrollPane>
+        </VBox>
+    </center>
+</BorderPane>
