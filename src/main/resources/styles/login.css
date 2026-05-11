@@ -1,89 +1,124 @@
-/* Nền gradient cho toàn bộ cửa sổ */
-.login-root {
-    -fx-background-color: linear-gradient(to bottom right, #1a2a6c, #b21f1f, #fdbb4d);
-    -fx-font-family: 'Segoe UI', 'Arial', sans-serif;
+.root {
+    /* --- BẢNG MÀU ĐỒNG BỘ --- */
+    -fx-primary-blue: #3b82f6;
+    -fx-dark-bg: #0f172a;           /* Nền chính tối */
+    -fx-sidebar-bg: #1e293b;        /* Nền sidebar xám xanh */
+    -fx-text-main: #f8fafc;
+    -fx-text-muted: #94a3b8;
+    -fx-danger: #ef4444;
+
+    -fx-background-color: -fx-dark-bg;
+    -fx-font-family: "Segoe UI", "Tahoma", sans-serif;
 }
 
-/* Khung đăng nhập trong suốt, có hiệu ứng mờ, bo góc, đổ bóng */
-.login-container {
-    -fx-background-color: rgba(255, 255, 255, 0.85);
-    -fx-background-radius: 20;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 20, 0.1, 0, 5);
-    -fx-max-width: 400;
-    -fx-max-height: 400;
+/* --- SIDEBAR (Bên trái) --- */
+.sidebar {
+    -fx-background-color: -fx-sidebar-bg;
+    -fx-background-radius: 0 25 25 0; /* Bo góc phải giống Account */
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-width: 0 1 0 0;
 }
 
-/* Tiêu đề */
-.title {
+.logo {
+    -fx-text-fill: #38bdf8;
     -fx-font-size: 26px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #2c3e50;
-    -fx-padding: 0 0 10 0;
+    -fx-font-weight: 900;
 }
 
-/* Ô nhập liệu */
-.input-field {
-    -fx-pref-height: 45;
-    -fx-background-radius: 8;
-    -fx-border-radius: 8;
-    -fx-border-color: #dcdde1;
-    -fx-border-width: 1.5;
-    -fx-padding: 5 15;
-    -fx-font-size: 14px;
-    -fx-prompt-text-fill: #7f8c8d;
-    -fx-background-color: white;
+/* --- FORM ĐĂNG NHẬP (Nằm trong profile-card) --- */
+.main-content {
+    -fx-background-color: -fx-dark-bg;
 }
 
-.input-field:focused {
-    -fx-border-color: #3498db;
-    -fx-border-width: 2;
+.profile-card {
+    -fx-background-color: -fx-sidebar-bg;
+    -fx-background-radius: 24;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-width: 1;
+    -fx-border-radius: 24;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 20, 0, 0, 10);
 }
 
-/* Nút đăng nhập */
-.login-button {
-    -fx-background-color: #3498db;
+.header-title {
     -fx-text-fill: white;
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-pref-height: 45;
-    -fx-background-radius: 8;
-    -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(52, 152, 219, 0.4), 5, 0, 0, 2);
+    -fx-font-weight: 800;
 }
 
-.login-button:hover {
-    -fx-background-color: #2980b9;
-    -fx-scale-x: 1.02;
-    -fx-scale-y: 1.02;
-}
-
-/* Nút đăng ký */
-.register-button {
-    -fx-background-color: transparent;
-    -fx-text-fill: #2c3e50;
-    -fx-border-color: #2c3e50;
-    -fx-border-radius: 8;
-    -fx-pref-height: 40;
-    -fx-cursor: hand;
-    -fx-font-size: 14px;
-}
-
-.register-button:hover {
-    -fx-background-color: #2c3e50;
-    -fx-text-fill: white;
-}
-
-/* Thông báo */
-.message-label {
+.header-subtitle {
+    -fx-text-fill: #a7b3c4;
     -fx-font-size: 13px;
-    -fx-text-fill: #e74c3c;
-    -fx-padding: 5 0 0 0;
-    -fx-wrap-text: true;
+}
+
+.section-label {
+    -fx-text-fill: #38bdf8;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-letter-spacing: 1px;
+}
+
+/* --- Ô NHẬP LIỆU (Input Fields) --- */
+.input-field-dark {
+    -fx-pref-height: 48;
+    -fx-background-color: -fx-dark-bg; /* Nền tối hơn card để tạo chiều sâu */
+    -fx-background-radius: 12;
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: #475569;
+    -fx-padding: 0 16;
+    -fx-font-size: 14px;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+}
+
+.input-field-dark:focused {
+    -fx-border-color: -fx-primary-blue;
+    -fx-background-color: #162033;
+    -fx-effect: dropshadow(three-pass-box, rgba(59, 130, 246, 0.2), 10, 0, 0, 0);
+}
+
+/* --- NÚT BẤM (Buttons) --- */
+.btn-blue {
+    -fx-background-color: -fx-primary-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 12;
+    -fx-padding: 12 25;
+    -fx-cursor: hand;
+}
+
+.btn-blue:hover {
+    -fx-background-color: #2563eb;
+    -fx-effect: dropshadow(three-pass-box, rgba(59, 130, 246, 0.4), 10, 0, 0, 4);
+}
+
+.register-button-flat {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94a3b8; /* Màu xám xanh muted (Slate 400) */
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-cursor: hand;
+    -fx-padding: 5 10;
+    -fx-background-radius: 8;
+    -fx-transition: all 0.3s;
+}
+
+.register-button-flat:hover {
+    -fx-text-fill: #38bdf8; /* Chuyển sang xanh neon khi hover */
+    -fx-background-color: rgba(56, 189, 248, 0.1); /* Hiệu ứng nền mờ cực nhẹ */
+}
+
+/* --- THÔNG BÁO & LOADING --- */
+.message-label {
+    -fx-text-fill: -fx-danger;
+    -fx-font-size: 13px;
     -fx-alignment: center;
 }
 
-/* Loading indicator */
 .loading-indicator {
-    -fx-pref-width: 30;
-    -fx-pref-height: 30;
+    -fx-max-width: 30;
+    -fx-max-height: 30;
+}
+
+.loading-indicator .progress {
+    -fx-accent: -fx-primary-blue;
 }
