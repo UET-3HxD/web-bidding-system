@@ -2,6 +2,7 @@ package com.auction.team3HxD.network;
 
 import com.auction.team3HxD.services.AuctionService;
 import com.auction.team3HxD.services.UserService;
+import com.auction.team3HxD.util.AppConfig;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -55,7 +56,7 @@ public class ClientHandler implements Runnable {
                         } else {
                             out.println(res); // gửi mã lỗi
                         }
-                    }
+                    } else {}
                 } catch (Exception e) {
                     // Bắt mọi lỗi (SQL, logic...) để client không bị treo
                     out.println("ERR|Server error: " + e.getMessage());
@@ -68,40 +69,22 @@ public class ClientHandler implements Runnable {
             if (isAuthenticated) {
                 while ((message = in.readLine()) != null) {
                     try {
+                        System.out.println(">>> Received: " + message); // thêm để debug
                         String[] parts = message.split("\\|");
                         String cmd = parts[0];
-
-                        switch (cmd) {
-                            // Nhóm lệnh quản lý tài khoản
-                            case "CHANGE_PASSWORD":
-                            case "CHANGE_EMAIL":
-                                handleAccountCommands(message);
-                                break;
-
-                            // Nhóm lệnh đấu giá & tương tác
-                            case "BID":
-                            case "CHAT":
-                                handleAuctionCommands(message);
-                                break;
-
-                            // Nhóm lệnh xem thông tin
-                            case "VIEW_LIST":
-                            case "VIEW_HISTORY":
-                                // handleViewCommands(message);
-                                break;
-
-                            // Lệnh đăng xuất
-                            case "LOGOUT":
-                                isAuthenticated = false; // Thoát vòng lặp để đóng kết nối
-                                break;
-
-                            default:
-                                out.println("ERR|Lệnh không hợp lệ: " + cmd);
-                                out.flush();
+                        if (cmd.equals("CHANGE_PASSWORD")) {
+                            String cpRes = userService.changePassword(this.clientName, parts[1], parts[2]);
+                            out.println(cpRes);
+                        } else if (cmd.equals("CHANGE_EMAIL")) {
+                            String ceRes = userService.changeEmail(this.clientName, parts[1], parts[2]);
+                            out.println(ceRes);
+                            break;
+                        } else if(cmd.equals("LOGOUT")) {
+                            isAuthenticated = false;
+                            break;
                         }
                     } catch (Exception e) {
-                        out.println("ERR|Lỗi xử lý hệ thống: " + e.getMessage());
-                        out.flush();
+                        out.println("ERR|" + e.getMessage());
                     }
                 }
             }
@@ -138,42 +121,6 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    private void handleAccountCommands(String message) {
-        String[] parts = message.split("\\|");
-        String cmd = parts[0];
-
-        switch (cmd) {
-            case "CHANGE_PASSWORD":
-                // Lệnh: CHANGE_PASSWORD|oldPass|newPass
-                String oldPass = parts[1];
-                String newPass = parts[2];
-
-                // Vì ClientHandler của Captain lưu clientName (username),
-                // chúng ta sẽ dùng nó để định danh người dùng
-                String resPass = userService.changePassword(this.clientName, oldPass, newPass);
-
-                if (resPass.equals("SUCCESS")) {
-                    out.println("CP_SUCCESS");
-                } else {
-                    out.println("CP_ERR|" + resPass);
-                }
-                break;
-
-            case "CHANGE_EMAIL":
-                // Lệnh: CHANGE_EMAIL|newEmail|currentPass
-                String newEmail = parts[1];
-                String curPass = parts[2];
-
-                String resEmail = userService.changeEmail(this.clientName, newEmail, curPass);
-
-                if (resEmail.equals("SUCCESS")) {
-                    out.println("CE_SUCCESS");
-                } else {
-                    out.println("CE_ERR|" + resEmail);
-                }
-                break;
-        }
-    }
     public void sendMessage(String msg) {
         if (out != null) {
             out.println(msg);

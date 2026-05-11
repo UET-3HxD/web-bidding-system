@@ -10,93 +10,81 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class UserService {
     private final UserDAO userDAO = new UserDAO();
-    // Danh sách để quản lý những người đang online (Tránh login 2 nơi)
     private static final Set<String> onlineUsers = ConcurrentHashMap.newKeySet();
 
-    // logic đăng ký: kiểm tra tính hợp lệ
     public synchronized String register(String username, String password, String email) {
-        // 1. Kiểm tra các trường bị trống
         if (username.isBlank() || password.length() < 6 || email.isBlank()) {
             return "REG_ERR_WEAK_DATA";
         }
-
-        // 2. Kiểm tra định dạng Email (Sử dụng Util của bạn B nếu có)
         if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             return "REG_ERR_INVALID_EMAIL";
         }
-
-        // 3. Kiểm tra trùng Username
         if (userDAO.getUserByUsername(username) != null) {
-            return "REG_ERR_USER_EXISTS";
+            return "REGISTER_ERR_USERNAME_EXISTS";   // đúng như client mong đợi
         }
-
-        // 4. Kiểm tra trùng Email (Yêu cầu bạn DAO làm hàm này)
         if (userDAO.getUserByEmail(email) != null) {
-            return "REG_ERR_EMAIL_EXISTS";
+            return "REGISTER_ERR_EMAIL_EXISTS";      // đúng như client mong đợi
         }
 
-        // 5. Nếu mọi thứ ổn, tạo NormalUser với Role cố định
         User newUser = new NormalUser(username, password, email, Role.USER);
-
-        if (userDAO.insertUser(newUser)) {
-            return "REG_SUCCESS";
+        if (userDAO.insertUser(newUser) > 0) {
+            return "REGISTER_OK";                    // thành công
         }
-
         return "REG_ERR_DATABASE";
     }
 
-    // LOGIC ĐĂNG NHẬP
-    public String login(String username, String password) {
+    public synchronized String login(String username, String password) {
         User user = userDAO.getUserByUsername(username);
-
-        if(user == null) {
+        if (user == null) {
             return "LOGIN_ERR_USER_NOT_FOUND";
         }
+
         if (!user.getPassword().equals(password)) {
             return "LOGIN_ERR_INVALID"; // Sai user hoặc pass
-        }
 
-        // XỬ LÝ TRANH CHẤP: Kiểm tra xem có ai đang dùng tài khoản này không
+        }
         if (onlineUsers.contains(username)) {
-            return "LOGIN_ERR_ALREADY";
+            return "LOGIN_ERR_ALREADY_ONLINE";       // đúng như client mong đợi
         }
 
         onlineUsers.add(username);
-        return "LOGIN_SUCCESS";
+        // trả về thành công kèm role
+        return "LOGIN_OK|" + user.getRole().name() + "|" + user.getEmail();
     }
     public String changePassword(String username, String oldPass, String newPass) {
         User user = userDAO.getUserByUsername(username);
-        if (user == null) return "CHANGE_ERR_USER_NOT_FOUND";
+        if (user == null) return "CP_ERR|USER_NOT_FOUND";
 
+        // Kiểm tra mật khẩu cũ có khớp không
         if (!user.getPassword().equals(oldPass)) {
-            return "CHANGE_ERR_WRONG_PASSWORD";
+            return "CP_ERR|WRONG_PASSWORD";
         }
 
-        user.setPassword(newPass);
-
-        try {
-            userDAO.update(user);
-            return "CHANGE_SUCCESS";
-        } catch (Exception e) {
-            return "ERR_DATABASE";
-        }
+        // Cập nhật mật khẩu mới
+        boolean success = userDAO.updatePassword(username, newPass);
+        return success ? "CP_SUCCESS" : "CP_ERR|DB_ERROR";
     }
-    public String changeEmail(String username, String newEmail, String currentPass) {
+
+    public String changeEmail(String username, String newEmail, String password) {
         User user = userDAO.getUserByUsername(username);
-        if (user == null) return "CHANGE_ERR_USER_NOT_FOUND";
+        if (user == null) return "CE_ERR|USER_NOT_FOUND";
 
-        if (!user.getPassword().equals(currentPass)) return "CHANGE_ERR_WRONG_PASSWORD";
-
-        user.setEmail(newEmail);
-
-        try {
-            userDAO.update(user);
-            return "CHANGE_SUCCESS";
-        } catch (Exception e) {
-            return "ERR_DATABASE";
+        // Phải đúng mật khẩu mới cho đổi Email
+        if (!user.getPassword().equals(password)) {
+            return "CE_ERR|WRONG_PASSWORD";
         }
+
+        // Kiểm tra email mới đã có ai dùng chưa
+        if (userDAO.getUserByEmail(newEmail) != null) {
+            return "CE_ERR|EMAIL_TAKEN";
+        }
+
+        boolean success = userDAO.updateEmail(username, newEmail);
+        return success ? "CE_SUCCESS" : "CE_ERR|DB_ERROR";
     }
     public void logout(String username) {
-        if (username != null) onlineUsers.remove(username);
+        if (username != null) {
+            onlineUsers.remove(username);
+        }
     }
 }
