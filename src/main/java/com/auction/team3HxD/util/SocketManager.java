@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.function.Consumer;
 
 /**
  * Quản lý kết nối Socket đến Server (Singleton).
@@ -17,7 +18,7 @@ public class SocketManager {
     private PrintWriter out;
     private BufferedReader in;
     private boolean connected = false;
-
+    private Consumer<String> onMessageReceived;
     // Cấu hình server
     private final String SERVER_HOST = AppConfig.getServerHost();
     private final int SERVER_PORT = AppConfig.getServerPort();
@@ -81,7 +82,9 @@ public class SocketManager {
             System.out.println("Đã ngắt kết nối server.");
         }
     }
-
+    public void setOnMessageReceived(Consumer<String> callback) {
+        this.onMessageReceived = callback;
+    }
     public boolean isConnected() {
         return connected;
     }
