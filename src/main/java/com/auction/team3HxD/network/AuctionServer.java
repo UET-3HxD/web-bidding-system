@@ -22,7 +22,6 @@ public class AuctionServer {
         scheduler.scheduleAtFixedRate(() -> {
             if (timeLeft > 0) {
                 timeLeft--;
-                // Gửi thời gian mới cho tất cả Client
                 broadcast("TIME:" + timeLeft);
             } else {
                 stopAuction();
@@ -35,13 +34,18 @@ public class AuctionServer {
         broadcast("END:Winner is " + topBidder + " with " + currentPrice + "$");
         System.out.println("Auction ended!");
     }
+
     public static void main(String[] args) {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("Auction Server is running on port " + PORT);
+            System.out.flush(); // đảm bảo hiện ngay
 
             while (true) {
+                System.out.println("Waiting for connection..."); // debug
+                System.out.flush();
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("New member joined: " + clientSocket);
+                System.out.flush();
 
                 ClientHandler clientHandler = new ClientHandler(clientSocket);
                 clients.add(clientHandler);
@@ -52,25 +56,21 @@ public class AuctionServer {
         }
     }
 
-    // xử lý tranh chấp
     public static synchronized void handleBid(String bidderName, double bidAmount) {
         if (bidAmount > currentPrice && timeLeft > 0) {
             currentPrice = bidAmount;
             topBidder = bidderName;
 
-            // extend bid nếu có người snip
             if (timeLeft < 10) {
                 timeLeft += 30;
                 System.out.println("Time extended due to late bid!");
             }
 
             broadcast("NEW_BID:" + bidderName + ":" + currentPrice);
-        } else {
-            // Gửi thông báo riêng cho người bid lỗi...
         }
+        // các trường hợp khác có thể thêm sau
     }
 
-    // thông báo
     public static void broadcast(String message) {
         for (ClientHandler client : clients) {
             client.sendMessage(message);
