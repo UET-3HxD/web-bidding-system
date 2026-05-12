@@ -47,6 +47,7 @@ public class Auction extends Entity{
         this.bidHistory = new ArrayList<>();
         this.observers = new ArrayList<>();
         status = AuctionStatus.OPEN;
+        this.item.setStatus(AuctionStatus.OPEN);
     }
 
     // Constructor 2
@@ -74,6 +75,7 @@ public class Auction extends Entity{
     //Start : status -> RUNNING / Cho phép bid
     public void start() {
         status = AuctionStatus.RUNNING;
+        item.setStatus(AuctionStatus.RUNNING);
     }
 
     // Đặt bid , kiểm tra hợp lệ
@@ -96,7 +98,7 @@ public class Auction extends Entity{
             currentWinner = bidder;
 
             // Thêm vào lịch sử giao dịch
-            bidHistory.add(new BidTransaction(bidder , amount));
+            bidHistory.add(new BidTransaction(this, bidder , amount));
         }
         finally {
             lock.unlock();
@@ -106,6 +108,7 @@ public class Auction extends Entity{
     // Kết thúc đấu giá
     public void endAuction() {
         status = AuctionStatus.FINISHED;
+        item.setStatus(AuctionStatus.FINISHED);
     }
 
     // Kéo dài thời gian (Anti Sniping)

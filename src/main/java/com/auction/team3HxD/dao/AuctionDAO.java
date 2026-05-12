@@ -8,101 +8,25 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class AuctionDAO {
 
-    // Dùng lại UserDAO để lấy Seller
     private final UserDAO userDAO = new UserDAO();
+    private final ItemDAO itemDAO = new ItemDAO();
 
-    // ================= CREATE =================
-    // Thêm auction mới vào DB
-    public void insert(Auction auction) {
-        String sql = "INSERT INTO auctions " +
-                "(id, seller_id, item_id, start_price, current_price, bid_increment, status, start_time, end_time) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, String.valueOf(auction.getId()));
-            ps.setString(2, String.valueOf(auction.getSeller().getId()));
-            ps.setString(3, String.valueOf(auction.getItem().getId()));
-
-            ps.setDouble(4, auction.getStartPrice());
-            ps.setDouble(5, auction.getCurrentPrice());
-            ps.setDouble(6, auction.getBidIncrement());
-
-            ps.setString(7, auction.getStatus().name());
-            ps.setTimestamp(8, Timestamp.valueOf(auction.getStartTime()));
-            ps.setTimestamp(9, Timestamp.valueOf(auction.getEndTime()));
-
-            ps.executeUpdate();
-            System.out.println("Insert Auction thành công!");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    // ================= READ ALL =================
-    // Lấy toàn bộ auction
-    public List<Auction> findAll() {
-        List<Auction> list = new ArrayList<>();
-        String sql = "SELECT * FROM auctions";
+    // ================= INSERT =================
+    public int insert(Auction auction) {
+        String sql = """
+            INSERT INTO auctions 
+            (seller_id, item_id, start_price, current_price, bid_increment, status, start_time, end_time)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """;
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            while (rs.next()) {
-                Auction auction = mapResultSetToAuction(rs);
-                list.add(auction);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return list;
-    }
-
-    // ================= READ BY ID =================
-    // Tìm auction theo id
-    public Auction findById(UUID id) {
-        String sql = "SELECT * FROM auctions WHERE id = ?";
-        Auction auction = null;
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, id.toString());
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    auction = mapResultSetToAuction(rs);
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return auction;
-    }
-
-    // ================= UPDATE =================
-    // Cập nhật auction
-    public void update(Auction auction) {
-        String sql = "UPDATE auctions SET " +
-                "seller_id=?, item_id=?, start_price=?, current_price=?, bid_increment=?, status=?, start_time=?, end_time=? " +
-                "WHERE id=?";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, String.valueOf(auction.getSeller().getId()));
-            ps.setString(2, String.valueOf(auction.getItem().getId()));
+            ps.setInt(1, auction.getSeller().getId());
+            ps.setInt(2, auction.getItem().getId());
 
             ps.setDouble(3, auction.getStartPrice());
             ps.setDouble(4, auction.getCurrentPrice());
@@ -112,75 +36,153 @@ public class AuctionDAO {
             ps.setTimestamp(7, Timestamp.valueOf(auction.getStartTime()));
             ps.setTimestamp(8, Timestamp.valueOf(auction.getEndTime()));
 
-            ps.setString(9, String.valueOf(auction.getId()));
+            ps.executeUpdate();
+
+            // lấy ID auto increment
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int id = rs.getInt(1);
+                    auction.setId(id);
+                    return id;
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Insert auction failed", e);
+        }
+
+        return -1;
+    }
+
+    // ================= FIND ALL =================
+    public List<Auction> findAll() {
+        List<Auction> list = new ArrayList<>();
+        String sql = "SELECT * FROM auctions";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                list.add(mapResultSet(rs));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Find all failed", e);
+        }
+
+        return list;
+    }
+
+    // ================= FIND BY ID =================
+    public Auction findById(int id) {
+        String sql = "SELECT * FROM auctions WHERE id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSet(rs);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Find by id failed", e);
+        }
+
+        return null;
+    }
+
+    // ================= UPDATE =================
+    public void update(Auction auction) {
+        String sql = """
+            UPDATE auctions SET 
+                seller_id = ?, 
+                item_id = ?, 
+                start_price = ?, 
+                current_price = ?, 
+                bid_increment = ?, 
+                status = ?, 
+                start_time = ?, 
+                end_time = ?
+            WHERE id = ?
+        """;
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, auction.getSeller().getId());
+            ps.setInt(2, auction.getItem().getId());
+
+            ps.setDouble(3, auction.getStartPrice());
+            ps.setDouble(4, auction.getCurrentPrice());
+            ps.setDouble(5, auction.getBidIncrement());
+
+            ps.setString(6, auction.getStatus().name());
+            ps.setTimestamp(7, Timestamp.valueOf(auction.getStartTime()));
+            ps.setTimestamp(8, Timestamp.valueOf(auction.getEndTime()));
+
+            ps.setInt(9, auction.getId());
 
             ps.executeUpdate();
-            System.out.println("Update Auction thành công!");
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            throw new RuntimeException("Update failed", e);
         }
     }
 
     // ================= DELETE =================
-    // Xoá auction
-    public void delete(UUID id) {
+    public void delete(int id) {
         String sql = "DELETE FROM auctions WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, id.toString());
+            ps.setInt(1, id);
             ps.executeUpdate();
 
-            System.out.println("Delete Auction thành công!");
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            throw new RuntimeException("Delete failed", e);
         }
     }
 
     // ================= FIND BY SELLER =================
-    // Lấy tất cả auction của 1 seller
-    public List<Auction> findBySeller(UUID sellerId) {
+    public List<Auction> findBySeller(int sellerId) {
         List<Auction> list = new ArrayList<>();
         String sql = "SELECT * FROM auctions WHERE seller_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, sellerId.toString());
+            ps.setInt(1, sellerId);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    list.add(mapResultSetToAuction(rs));
+                    list.add(mapResultSet(rs));
                 }
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            throw new RuntimeException("Find by seller failed", e);
         }
 
         return list;
     }
 
     // ================= HELPER =================
-    // Convert ResultSet -> Auction object
-    private Auction mapResultSetToAuction(ResultSet rs) throws SQLException {
+    private Auction mapResultSet(ResultSet rs) throws SQLException {
 
         int id = rs.getInt("id");
 
-        // ===== Seller =====
         int sellerId = rs.getInt("seller_id");
         Seller seller = (Seller) userDAO.findById(sellerId);
 
-        // ===== Item =====
-        ItemDAO itemDAO = new ItemDAO();
-
-        UUID itemId = UUID.fromString(rs.getString("item_id"));
+        int itemId = rs.getInt("item_id");
         Item item = itemDAO.findById(itemId);
 
-        // ===== Data =====
         double startPrice = rs.getDouble("start_price");
         double currentPrice = rs.getDouble("current_price");
         double bidIncrement = rs.getDouble("bid_increment");
@@ -190,13 +192,10 @@ public class AuctionDAO {
         LocalDateTime startTime = rs.getTimestamp("start_time").toLocalDateTime();
         LocalDateTime endTime = rs.getTimestamp("end_time").toLocalDateTime();
 
-        // ===== Tạo object =====
-        Auction auction = new Auction(
+        return new Auction(
                 id, seller, item,
                 startPrice, currentPrice, bidIncrement,
                 status, startTime, endTime
         );
-
-        return auction;
     }
 }
