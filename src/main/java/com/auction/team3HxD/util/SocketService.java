@@ -31,6 +31,7 @@ public class SocketService {
         if (socket != null && !socket.isClosed()) {
             return; // Đã kết nối, không tạo lại
         }
+        running = true;
         socket = new Socket(host, port);
         out = new PrintWriter(socket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
