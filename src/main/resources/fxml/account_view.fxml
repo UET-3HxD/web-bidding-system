@@ -27,11 +27,12 @@
             </HBox>
 
             <VBox spacing="5">
-                <Button text="👤   Tài khoản" styleClass="menu-btn, menu-btn-active" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                <Button text="⏹   Sàn đấu giá" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                <Button text="⏱   Bid đang tham gia" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                <Button text="📦   Sản phẩm của bạn" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                <Button text="⚙   Trợ giúp" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
+                <!-- Trong <VBox spacing="5"> của sidebar -->
+                <Button fx:id="btnAccount" text="👤 Tài khoản" styleClass="menu-btn, menu-btn-active" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToAccount"/>
+                <Button fx:id="btnAuction" text="⏹ Sàn đấu giá" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToAuction"/>
+                <Button fx:id="btnBids" text="⏱ Bid đang tham gia" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToMyBids"/>
+                <Button fx:id="btnProducts" text="📦 Sản phẩm của bạn" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToMyProducts"/>
+                <Button fx:id="btnHelp" text="⚙ Trợ giúp" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToHelp"/>
             </VBox>
 
             <Region VBox.vgrow="ALWAYS" />

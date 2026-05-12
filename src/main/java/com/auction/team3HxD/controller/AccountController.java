@@ -12,9 +12,10 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ButtonBar;
-import java.util.Optional;
 
 public class AccountController {
+
+    // Các label hiển thị thông tin người dùng
     @FXML private Label lblFullName;
     @FXML private Label lblEmail;
     @FXML private Label lblEmailDisplay;
@@ -22,60 +23,94 @@ public class AccountController {
     @FXML private Label lblAvatarShort;
     @FXML private Label lblMainAvatarShort;
 
-    public void initialize() {
-        // 1. Lấy dữ liệu người dùng đang đăng nhập từ Session
-        UserSession user = UserSession.getInstance();
+    @FXML private Button btnAccount;
+    @FXML private Button btnAuction;
+    @FXML private Button btnBids;
+    @FXML private Button btnProducts;
+    @FXML private Button btnHelp;
+    @FXML private Button btnChangePassword;
+    @FXML private Button btnChangeEmail;
+    @FXML private Button btnLogout;
 
+    @FXML
+    public void initialize() {
+        UserSession user = UserSession.getInstance();
         if (user != null) {
-            // 2. Cập nhật Text cho các Label
-            lblFullName.setText(user.getUsername()); // Hoặc user.getFullName() nếu có
+            lblFullName.setText(user.getUsername());
             lblEmail.setText(user.getEmail());
+            lblEmailDisplay.setText(user.getEmail());
             lblSidebarName.setText(user.getUsername());
 
-            // Nếu Captain muốn chuyên nghiệp, hãy lấy 2 chữ cái đầu làm Avatar
-            // lblAvatarCircleText.setText(user.getUsername().substring(0, 2).toUpperCase());
+            // Avatar: lấy 2 ký tự đầu của tên
+            String shortName = user.getUsername().substring(0, Math.min(2, user.getUsername().length())).toUpperCase();
+            lblAvatarShort.setText(shortName);
+            lblMainAvatarShort.setText(shortName);
         }
     }
 
+    // ================== ĐIỀU HƯỚNG SIDEBAR ==================
+    @FXML
+    void handleGoToAccount(ActionEvent event) {
+        // Đang ở trang Tài khoản, không làm gì (hoặc reload nếu cần)
+        // Có thể hiển thị thông báo nhỏ: "Bạn đang ở trang tài khoản"
+    }
+
+    @FXML
+    void handleGoToAuction(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/auction_list.fxml",
+                (Node) event.getSource(), "Sàn đấu giá");
+    }
+
+    @FXML
+    void handleGoToMyBids(ActionEvent event) {
+        // Tạm thời dùng my_bids.fxml sẽ tạo sau (hiện có thể chưa tồn tại -> sẽ báo lỗi)
+        SceneSwitcher.getInstance().switchTo("/fxml/my_bids.fxml",
+                (Node) event.getSource(), "Bid đang tham gia");
+    }
+
+    @FXML
+    void handleGoToMyProducts(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/seller_products.fxml",
+                (Node) event.getSource(), "Sản phẩm của bạn");
+    }
+
+    @FXML
+    void handleGoToHelp(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/help.fxml",
+                (Node) event.getSource(), "Trợ giúp");
+    }
+
+    // ================== HÀNH ĐỘNG KHÁC (giữ nguyên) ==================
     @FXML
     void handleOpenChangePasswordDialog(ActionEvent event) {
-        // Ép kiểu event.getSource() thành Node để truyền cho SceneSwitcher
-        SceneSwitcher.getInstance().switchTo("/fxml/ChangePasswordView.fxml", (javafx.scene.Node) event.getSource(), "Đổi mật khẩu");
+        SceneSwitcher.getInstance().switchTo("/fxml/ChangePasswordView.fxml",
+                (Node) event.getSource(), "Đổi mật khẩu");
     }
 
     @FXML
     void handleOpenChangeEmailDialog(ActionEvent event) {
-        // Chuyển sang màn hình Đổi Email
-        SceneSwitcher.getInstance().switchTo("/fxml/ChangeEmailView.fxml", (javafx.scene.Node) event.getSource(), "Đổi Email");
+        SceneSwitcher.getInstance().switchTo("/fxml/ChangeEmailView.fxml",
+                (Node) event.getSource(), "Đổi Email");
     }
 
     @FXML
     void handleLogout(ActionEvent event) {
-        // 1. Tạo Popup xác nhận
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Xác nhận đăng xuất");
         alert.setHeaderText(null);
-        alert.setContentText("Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?");
+        alert.setContentText("Bạn có chắc chắn muốn đăng xuất?");
 
-        // 2. Tùy chỉnh chữ trên nút bấm cho chuyên nghiệp
-        javafx.scene.control.ButtonType btnLogout = new javafx.scene.control.ButtonType("Đăng xuất", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
-        javafx.scene.control.ButtonType btnCancel = new javafx.scene.control.ButtonType("Huỷ", javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType btnLogout = new ButtonType("Đăng xuất", ButtonBar.ButtonData.OK_DONE);
+        ButtonType btnCancel = new ButtonType("Huỷ", ButtonBar.ButtonData.CANCEL_CLOSE);
         alert.getButtonTypes().setAll(btnLogout, btnCancel);
 
-        // 3. Lắng nghe quyết định của người dùng
-        java.util.Optional<javafx.scene.control.ButtonType> result = alert.showAndWait();
+        java.util.Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == btnLogout) {
-            // 1. Gửi lệnh LOGOUT để Server biết
             SocketService.getInstance().send("LOGOUT");
-
-            // 2. Đóng kết nối ngay lập tức ở phía Client
             SocketService.getInstance().shutdown();
-
-            // 3. Xóa dữ liệu Session để đảm bảo an toàn
             UserSession.getInstance().logout();
-
-            // 4. Chuyển về màn hình Login
-            SceneSwitcher.getInstance().switchTo("/fxml/login.fxml", (Node) event.getSource(), "Đăng nhập");
+            SceneSwitcher.getInstance().switchTo("/fxml/login.fxml",
+                    (Node) event.getSource(), "Đăng nhập");
         }
     }
 }
