@@ -22,6 +22,9 @@ public abstract class User extends Entity{
     public int getId() {
         return super.getId();
     }
+    public void setPassword(String password) {
+      this.password = password;
+    }
     public String getPassword() {return password;}
 
     public String getEmail() {
