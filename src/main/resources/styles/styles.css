@@ -1,0 +1,210 @@
+/* --- GLOBAL --- */
+.root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* --- SIDEBAR --- */
+.sidebar {
+    -fx-background-color: #1A36A8; /* Xanh đậm */
+}
+
+.logo-icon {
+    -fx-text-fill: white;
+    -fx-font-size: 24px;
+}
+
+.logo-text {
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.menu-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #A5B4FC;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 12 15 12 15;
+    -fx-cursor: hand;
+    -fx-alignment: center-left;
+}
+
+.menu-btn:hover {
+    -fx-background-color: #2844C4;
+    -fx-background-radius: 8;
+}
+
+.menu-btn-active {
+    -fx-background-color: #314ED6;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+}
+
+.sidebar-profile {
+    -fx-padding: 15 0 0 10;
+}
+
+/* --- MAIN CONTENT --- */
+.main-content {
+    -fx-background-color: #222222; /* Xám đen */
+}
+
+.page-title {
+    -fx-text-fill: white;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.page-subtitle {
+    -fx-text-fill: #9CA3AF;
+    -fx-font-size: 14px;
+}
+
+.section-title {
+    -fx-text-fill: #9CA3AF;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 20 0 5 0;
+}
+
+/* --- CARDS --- */
+.card {
+    -fx-background-color: #2A2A2A;
+    -fx-background-radius: 12;
+    -fx-padding: 20;
+    -fx-border-color: #3A3A3A;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+}
+
+.profile-card {
+    -fx-padding: 25;
+}
+
+.card-title {
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.card-subtitle {
+    -fx-text-fill: #9CA3AF;
+    -fx-font-size: 14px;
+}
+
+.icon-container {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+}
+
+.icon {
+    -fx-font-size: 18px;
+}
+
+.badge {
+    -fx-background-color: #DBEAFE;
+    -fx-text-fill: #1E3A8A;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 3 8 3 8;
+    -fx-background-radius: 12;
+}
+
+/* --- BUTTONS --- */
+.action-btn-primary {
+    -fx-background-color: #1E40AF;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20 10 20;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.action-btn-primary:hover {
+    -fx-background-color: #2563EB;
+}
+
+.action-btn-secondary {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20 10 20;
+    -fx-background-radius: 6;
+    -fx-border-color: #555555;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+}
+
+.action-btn-secondary:hover {
+    -fx-background-color: #333333;
+}
+
+.logout-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #EF4444;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20 10 20;
+    -fx-background-radius: 6;
+    -fx-border-color: #EF4444;
+    -fx-border-radius: 6;
+    -fx-cursor: hand;
+}
+
+.logout-btn:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* --- MISC --- */
+.divider {
+    -fx-padding: 10 0 10 0;
+}
+.divider *.line {
+    -fx-border-color: #3A3A3A;
+    -fx-border-width: 1 0 0 0;
+}
+.breadcrumb-text {
+    -fx-text-fill: #9CA3AF;
+    -fx-font-size: 14px;
+}
+.icon-large-container {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-padding: 10 15 10 15;
+    -fx-font-size: 24px;
+}
+.input-label {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+.input-field {
+    -fx-background-color: #2A2A2A;
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: #6B7280;
+    -fx-border-color: #4B5563;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 12 15 12 15;
+    -fx-font-size: 14px;
+}
+.input-field:focused {
+    -fx-border-color: #3B82F6; /* Đổi màu viền xanh khi click vào ô nhập */
+}
+.breadcrumb-link {
+    -fx-text-fill: #3B82F6; /* Màu xanh link */
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+.breadcrumb-link:hover {
+    -fx-text-fill: #60A5FA;
+    -fx-underline: true;
+}
+
+.breadcrumb-text {
+    -fx-text-fill: #9CA3AF;
+    -fx-font-size: 14px;
+}
