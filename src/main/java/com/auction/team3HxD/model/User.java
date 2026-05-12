@@ -9,8 +9,8 @@ public abstract class User extends Entity{
     protected Role role;
 
     //Constructor
-    public User(String userName , String password, String email , Role role) {
-        this.username = userName;
+    public User(String username , String password, String email , Role role) {
+        this.username = username;
         this.password = password;
         this.email = email;
         this.role = role;
