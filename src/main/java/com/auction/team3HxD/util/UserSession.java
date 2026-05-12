@@ -7,7 +7,8 @@ package com.auction.team3HxD.util;
 public class UserSession {
     private static UserSession instance;
     private String username;
-    private String role;      // "BIDDER", "SELLER", "ADMIN"
+    private String role;
+    private String email;
     private boolean loggedIn;
     private int selectedAuctionId = -1;
 
@@ -25,9 +26,10 @@ public class UserSession {
      * @param username tên đăng nhập
      * @param role vai trò (BIDDER/SELLER/ADMIN)
      */
-    public void login(String username, String role) {
+    public void login(String username, String email, String role) {
         this.username = username;
         this.role = role;
+        this.email = email;
         this.loggedIn = true;
     }
 
@@ -37,6 +39,7 @@ public class UserSession {
     public void logout() {
         this.username = null;
         this.role = null;
+        this.email = null;
         this.loggedIn = false;
     }
 
@@ -53,5 +56,13 @@ public class UserSession {
 
     public String getRole() {
         return role;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String newEmail) {
+        this.email = newEmail;
     }
 }

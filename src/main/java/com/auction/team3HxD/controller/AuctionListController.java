@@ -1,149 +1,161 @@
 package com.auction.team3HxD.controller;
 
-import com.auction.team3HxD.model.AuctionInfo;
-import com.auction.team3HxD.util.AppConfig;
-import com.auction.team3HxD.util.SceneSwitcher;
-import com.auction.team3HxD.util.SocketManager;
-import com.auction.team3HxD.util.UserSession;
-import javafx.application.Platform;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import java.io.IOException;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.shape.Circle;
+import javafx.event.ActionEvent;
 
 public class AuctionListController {
 
-    @FXML private TableView<AuctionInfo> auctionTableView;
-    @FXML private TableColumn<AuctionInfo, String> productNameColumn;
-    @FXML private TableColumn<AuctionInfo, Double> currentPriceColumn;
-    @FXML private TableColumn<AuctionInfo, String> endTimeColumn;
-    @FXML private TableColumn<AuctionInfo, String> sellerColumn;
-    @FXML private Button refreshButton;
-    @FXML private Button detailButton;
-    @FXML private Label messageLabel;
-    @FXML private ProgressIndicator loadingIndicator;
+    @FXML
+    private TextField txtSearch;
 
-    private ObservableList<AuctionInfo> auctionList = FXCollections.observableArrayList();
-    private Thread listenerThread;
-    private volatile boolean running = true;
+    @FXML
+    private FlowPane auctionContainer;
+
+    @FXML
+    private Label lblAvatarShort;
+
+    @FXML
+    private Label lblSidebarName;
+
+    // Dữ liệu mẫu tạm thời (sẽ thay bằng service)
+    private final String[][] sampleAuctions = {
+            {"iPhone 15 Pro Max", "12.500.000 ₫", "⏳ Còn 2 giờ 15 phút", "Đang đấu giá", "status-badge-active", "🖼"},
+            {"MacBook Pro M3", "34.200.000 ₫", "⏳ Còn 4 giờ 20 phút", "Đang đấu giá", "status-badge-active", "💻"},
+            {"Đồng hồ Rolex Submariner", "280.000.000 ₫", "⏳ Còn 45 phút", "Sắp kết thúc", "status-badge-ending", "⌚"},
+            {"Tai nghe Sony WH-1000XM5", "4.200.000 ₫", "⏳ Còn 1 ngày", "Đang đấu giá", "status-badge-active", "🎧"},
+            {"Nike Air Jordan 1 High", "12.000.000 ₫", "⏳ Còn 3 giờ", "Đang đấu giá", "status-badge-active", "👟"},
+            {"Máy ảnh Canon EOS R6", "49.000.000 ₫", "⏳ Còn 1 giờ 10 phút", "Sắp kết thúc", "status-badge-ending", "📷"},
+            {"PlayStation 5", "10.500.000 ₫", "⏳ Còn 5 giờ", "Đang đấu giá", "status-badge-active", "🎮"},
+            {"Laptop Dell XPS 15", "24.800.000 ₫", "⏳ Còn 2 ngày", "Đang đấu giá", "status-badge-active", "💻"}
+    };
 
     @FXML
     public void initialize() {
-        // Dùng lambda để gán dữ liệu
-        productNameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getProductName()));
-        currentPriceColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getCurrentPrice()));
-        endTimeColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEndTime()));
-        sellerColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getSeller()));
+        // Gán dữ liệu mẫu cho sidebar (sau này sẽ lấy từ UserService)
+        lblAvatarShort.setText("ND");   // Ví dụ: Nguyễn Văn A -> "NV"
+        lblSidebarName.setText("Nguyễn Minh Đức");
 
-        auctionTableView.setItems(auctionList);
-        messageLabel.setVisible(false);
-        loadingIndicator.setVisible(false);
+        // Hiển thị danh sách đấu giá mẫu
+        loadSampleAuctions();
+    }
 
-        if (AppConfig.isMockEnabled()) {
-            loadMockData();
+    private void loadSampleAuctions() {
+        auctionContainer.getChildren().clear();
+        for (String[] item : sampleAuctions) {
+            auctionContainer.getChildren().add(createAuctionCard(item));
+        }
+    }
+
+    /**
+     * Tạo một card đấu giá với style class đã định nghĩa trong CSS.
+     */
+    private VBox createAuctionCard(String[] data) {
+        String title = data[0];
+        String price = data[1];
+        String time = data[2];
+        String statusText = data[3];
+        String statusClass = data[4];
+        String emoji = data[5];
+
+        VBox card = new VBox(12);
+        card.getStyleClass().add("auction-card");
+
+        // Ảnh placeholder
+        StackPane imagePane = new StackPane();
+        imagePane.getStyleClass().add("auction-image");
+        Label imgLabel = new Label(emoji);
+        imgLabel.getStyleClass().add("auction-image-placeholder");
+        imagePane.getChildren().add(imgLabel);
+
+        // Tên sản phẩm
+        Label lblTitle = new Label(title);
+        lblTitle.getStyleClass().add("auction-title");
+
+        // Giá hiện tại
+        Label lblPrice = new Label(price);
+        lblPrice.getStyleClass().add("auction-price");
+
+        // Thời gian còn lại
+        Label lblTime = new Label(time);
+        lblTime.getStyleClass().add("auction-time");
+
+        // Trạng thái
+        Label lblStatus = new Label(statusText);
+        lblStatus.getStyleClass().addAll("status-badge", statusClass);
+
+        // Nút "Đấu giá ngay"
+        Button btnBid = new Button("Đấu giá ngay");
+        btnBid.getStyleClass().add("bid-now-btn");
+        btnBid.setOnAction(e -> handleJoinAuction(title));
+
+        card.getChildren().addAll(imagePane, lblTitle, lblPrice, lblTime, lblStatus, btnBid);
+        return card;
+    }
+
+    // ==================== CÁC HÀNH ĐỘNG MENU ====================
+    @FXML
+    private void handleMenuAccount(ActionEvent event) {
+        // Chuyển sang màn Tài khoản (account_view.fxml)
+        System.out.println("Chuyển hướng: Tài khoản");
+        // TODO: Load account_view.fxml vào cùng stage
+    }
+
+    @FXML
+    private void handleMenuMyBids(ActionEvent event) {
+        // Chuyển sang màn Bid đang tham gia
+        System.out.println("Chuyển hướng: Bid đang tham gia");
+        // TODO: Load my_bids.fxml
+    }
+
+    @FXML
+    private void handleMenuMyProducts(ActionEvent event) {
+        // Chuyển sang màn Sản phẩm của bạn
+        System.out.println("Chuyển hướng: Sản phẩm của bạn");
+        // TODO: Load seller_products.fxml
+    }
+
+    @FXML
+    private void handleMenuHelp(ActionEvent event) {
+        // Chuyển sang màn Trợ giúp
+        System.out.println("Chuyển hướng: Trợ giúp");
+        // TODO: Load help.fxml
+    }
+
+    @FXML
+    private void handleSearch(ActionEvent event) {
+        String keyword = txtSearch.getText().trim();
+        if (keyword.isEmpty()) {
+            loadSampleAuctions(); // hiện lại tất cả
         } else {
-            startListening();
-            loadAuctionsFromServer();
-        }
-    }
-
-    private void startListening() {
-        listenerThread = new Thread(() -> {
-            while (running) {
-                try {
-                    String response = SocketManager.getInstance().receive();
-                    if (response != null) {
-                        final String res = response;
-                        Platform.runLater(() -> handleServerResponse(res));
-                    }
-                } catch (IOException e) {
-                    if (running) {
-                        Platform.runLater(() -> showMessage("Mất kết nối đến server.", false));
-                        break;
-                    }
+            // Lọc tạm đơn giản
+            auctionContainer.getChildren().clear();
+            for (String[] item : sampleAuctions) {
+                if (item[0].toLowerCase().contains(keyword.toLowerCase())) {
+                    auctionContainer.getChildren().add(createAuctionCard(item));
                 }
             }
-        });
-        listenerThread.setDaemon(true);
-        listenerThread.start();
-    }
-
-    private void loadMockData() {
-        auctionList.clear();
-        auctionList.add(new AuctionInfo(1, "iPhone 15 Pro Max", 15000000, "20/04/2025 18:00", "Nguyễn Văn A"));
-        auctionList.add(new AuctionInfo(2, "Tranh sơn dầu", 5000000, "21/04/2025 20:00", "Lê Thị B"));
-        auctionList.add(new AuctionInfo(3, "Xe máy Honda", 12000000, "22/04/2025 15:00", "Trần Văn C"));
-        System.out.println("Mock data loaded, size: " + auctionList.size());
-    }
-
-    private void loadAuctionsFromServer() {
-        if (!SocketManager.getInstance().isConnected()) {
-            showMessage("Chưa kết nối đến server. Hãy thử lại sau.", false);
-            return;
-        }
-        auctionList.clear();
-        SocketManager.getInstance().send("GET_AUCTIONS");
-    }
-
-    private void handleServerResponse(String response) {
-        if (response.startsWith("AUCTION|")) {
-            String[] parts = response.split("\\|");
-            if (parts.length >= 6) {
-                try {
-                    int id = Integer.parseInt(parts[1]);
-                    String productName = parts[2];
-                    double currentPrice = Double.parseDouble(parts[3]);
-                    String endTime = parts[4];
-                    String seller = parts[5];
-                    auctionList.add(new AuctionInfo(id, productName, currentPrice, endTime, seller));
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
-            }
-        } else if (response.equals("END_AUCTIONS")) {
-            System.out.println("Hoàn tất nhận danh sách.");
-        } else if (response.startsWith("ERR_")) {
-            showMessage("Lỗi server: " + response, false);
         }
     }
 
     @FXML
-    private void handleRefresh() {
-        if (AppConfig.isMockEnabled()) {
-            loadMockData();
-        } else {
-            loadAuctionsFromServer();
-        }
+    private void handleGoHome() {
+        // Giả sử quay về auction list (hiện tại đã ở đây)
+        System.out.println("Về trang chủ (Sàn đấu giá)");
+        // Có thể reload hoặc giữ nguyên
     }
 
-    @FXML
-    private void handleViewDetail() {
-        AuctionInfo selected = auctionTableView.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            showMessage("Vui lòng chọn một phiên đấu giá.", false);
-            return;
-        }
-        UserSession.getInstance().setSelectedAuctionId(selected.getId());
-        SceneSwitcher.getInstance().switchTo("/fxml/auction_detail.fxml", detailButton, "Chi tiết phiên đấu giá");
-    }
-
-    private void showMessage(String text, boolean isSuccess) {
-        messageLabel.setText(text);
-        messageLabel.setStyle(isSuccess ? "-fx-text-fill: #2ecc71;" : "-fx-text-fill: #e74c3c;");
-        messageLabel.setVisible(true);
-        if (!isSuccess) {
-            new Thread(() -> {
-                try { Thread.sleep(3000); } catch (InterruptedException e) {}
-                Platform.runLater(() -> messageLabel.setVisible(false));
-            }).start();
-        }
-    }
-
-    public void shutdown() {
-        running = false;
-        if (listenerThread != null) listenerThread.interrupt();
+    private void handleJoinAuction(String itemName) {
+        // Mở màn hình chi tiết đấu giá (auction_detail.fxml)
+        System.out.println("Tham gia đấu giá: " + itemName);
+        // TODO: Load auction_detail.fxml và truyền ID sản phẩm
     }
 }
