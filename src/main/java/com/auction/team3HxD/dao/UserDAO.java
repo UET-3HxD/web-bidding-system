@@ -82,7 +82,7 @@ public class UserDAO {
         return null;
     }
 
-    // ================= UPDATE =================
+    // ================= UPDATE ================
     public void update(User user) {
         String sql = "UPDATE users SET username=?, password=?, email=?, role=? WHERE id=?";
 
@@ -101,7 +101,29 @@ public class UserDAO {
             throw new RuntimeException("Update user failed", e);
         }
     }
+    public boolean updatePassword(String username, String newPass) {
+        String sql = "UPDATE users SET password = ? WHERE username = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, newPass);
+            pstmt.setString(2, username);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Update password failed", e);
+        }
+    }
 
+    public boolean updateEmail(String username, String newEmail) {
+        String sql = "UPDATE users SET email = ? WHERE username = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, newEmail);
+            pstmt.setString(2, username);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new  RuntimeException("Update email failed", e);
+        }
+    }
     // ================= DELETE =================
     public void delete(int id) {
         String sql = "DELETE FROM users WHERE id = ?";
