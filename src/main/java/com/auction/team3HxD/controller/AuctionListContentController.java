@@ -1,23 +1,27 @@
 package com.auction.team3HxD.controller;
 
-import com.auction.team3HxD.util.SceneSwitcher;
+import com.auction.team3HxD.util.NavigationHost;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.control.Button;
+import java.util.Optional;
 
-public class AuctionListController {
+public class AuctionListContentController implements NavigationConsumer {
 
     @FXML private TextField txtSearch;
     @FXML private FlowPane auctionContainer;
-    @FXML private Label lblAvatarShort;
-    @FXML private Label lblSidebarName;
+    @FXML private Button btnFilter;
 
+    private NavigationHost navigationHost;
+
+    public void setNavigationHost(NavigationHost host) {
+        this.navigationHost = host;
+    }
+
+    // Dữ liệu mẫu
     private final String[][] sampleAuctions = {
             {"iPhone 15 Pro Max", "12.500.000 ₫", "⏳ Còn 2 giờ 15 phút", "Đang đấu giá", "status-badge-active", "🖼"},
             {"MacBook Pro M3", "34.200.000 ₫", "⏳ Còn 4 giờ 20 phút", "Đang đấu giá", "status-badge-active", "💻"},
@@ -31,8 +35,6 @@ public class AuctionListController {
 
     @FXML
     public void initialize() {
-        lblAvatarShort.setText("ND");
-        lblSidebarName.setText("Nguyễn Minh Đức");
         loadSampleAuctions();
     }
 
@@ -80,53 +82,71 @@ public class AuctionListController {
         return card;
     }
 
-    // ================= ĐIỀU HƯỚNG MENU =================
-    @FXML
-    void handleMenuAccount(ActionEvent event) {
-        SceneSwitcher.getInstance().switchTo("/fxml/account_view.fxml",
-                (Node) event.getSource(), "Tài khoản");
-    }
-
-    @FXML
-    void handleMenuMyBids(ActionEvent event) {
-        SceneSwitcher.getInstance().switchTo("/fxml/my_bids.fxml",
-                (Node) event.getSource(), "Bid đang tham gia");
-    }
-
-    @FXML
-    void handleMenuMyProducts(ActionEvent event) {
-        SceneSwitcher.getInstance().switchTo("/fxml/seller_products.fxml",
-                (Node) event.getSource(), "Sản phẩm của bạn");
-    }
-
-    @FXML
-    void handleMenuHelp(ActionEvent event) {
-        SceneSwitcher.getInstance().switchTo("/fxml/help.fxml",
-                (Node) event.getSource(), "Trợ giúp");
+    private void handleJoinAuction(String itemName) {
+        if (navigationHost != null) {
+            navigationHost.navigateTo("/fxml/auction_detail_content.fxml", itemName);
+        }
     }
 
     @FXML
     void handleSearch(ActionEvent event) {
         String keyword = txtSearch.getText().trim();
-        if (keyword.isEmpty()) {
-            loadSampleAuctions();
-        } else {
-            auctionContainer.getChildren().clear();
-            for (String[] item : sampleAuctions) {
-                if (item[0].toLowerCase().contains(keyword.toLowerCase())) {
-                    auctionContainer.getChildren().add(createAuctionCard(item));
-                }
+        auctionContainer.getChildren().clear();
+        for (String[] item : sampleAuctions) {
+            if (keyword.isEmpty() || item[0].toLowerCase().contains(keyword.toLowerCase())) {
+                auctionContainer.getChildren().add(createAuctionCard(item));
             }
         }
     }
 
     @FXML
-    void handleGoHome() {
-        // Đã ở Sàn đấu giá, có thể refresh hoặc không làm gì
+    void handleFilter(ActionEvent event) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Bộ lọc");
+        alert.setHeaderText("Chọn tiêu chí lọc");
+
+        VBox content = new VBox(10);
+        content.getChildren().add(new Label("Trạng thái:"));
+        ChoiceBox<String> statusBox = new ChoiceBox<>();
+        statusBox.getItems().addAll("Tất cả", "Đang đấu giá", "Sắp kết thúc");
+        statusBox.setValue("Tất cả");
+        content.getChildren().add(statusBox);
+
+        content.getChildren().add(new Label("Giá tối thiểu:"));
+        TextField minPrice = new TextField();
+        content.getChildren().add(minPrice);
+
+        content.getChildren().add(new Label("Giá tối đa:"));
+        TextField maxPrice = new TextField();
+        content.getChildren().add(maxPrice);
+
+        alert.getDialogPane().setContent(content);
+        ButtonType btnApply = new ButtonType("Áp dụng", ButtonBar.ButtonData.OK_DONE);
+        alert.getButtonTypes().setAll(btnApply, ButtonType.CANCEL);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == btnApply) {
+            filterAuctions(statusBox.getValue(), minPrice.getText(), maxPrice.getText());
+        }
     }
 
-    private void handleJoinAuction(String itemName) {
-        // Mở chi tiết đấu giá (có thể dùng SceneSwitcher sau khi có file)
-        System.out.println("Tham gia đấu giá: " + itemName);
+    private void filterAuctions(String status, String minPriceStr, String maxPriceStr) {
+        auctionContainer.getChildren().clear();
+        for (String[] item : sampleAuctions) {
+            String itemStatus = item[3];
+            String priceStr = item[1].replace(" ₫", "").replace(",", "");
+            double price = Double.parseDouble(priceStr);
+
+            boolean statusOk = status.equals("Tất cả") ||
+                    (status.equals("Đang đấu giá") && itemStatus.equals("Đang đấu giá")) ||
+                    (status.equals("Sắp kết thúc") && itemStatus.equals("Sắp kết thúc"));
+
+            boolean minOk = minPriceStr.isEmpty() || price >= Double.parseDouble(minPriceStr);
+            boolean maxOk = maxPriceStr.isEmpty() || price <= Double.parseDouble(maxPriceStr);
+
+            if (statusOk && minOk && maxOk) {
+                auctionContainer.getChildren().add(createAuctionCard(item));
+            }
+        }
     }
 }

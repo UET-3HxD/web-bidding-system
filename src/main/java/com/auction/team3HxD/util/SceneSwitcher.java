@@ -2,27 +2,22 @@ package com.auction.team3HxD.util;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-/**
- * Lớp tiện ích dùng để chuyển đổi giữa các màn hình trong ứng dụng.
- * Áp dụng Singleton để đảm bảo chỉ có một bộ điều phối duy nhất.
- */
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 public class SceneSwitcher {
 
-    // 1. Biến tĩnh lưu thể hiện duy nhất của lớp
     private static SceneSwitcher instance;
+    private Map<String, Stage> openStages = new HashMap<>(); // Quản lý các cửa sổ đã mở
 
-    // 2. Hàm khởi tạo private -> không cho phép tạo đối tượng từ bên ngoài
-    private SceneSwitcher() {
-    }
+    private SceneSwitcher() {}
 
-    /**
-     * Lấy thể hiện duy nhất của SceneSwitcher (khởi tạo muộn, an toàn đa luồng).
-     * @return thể hiện duy nhất của SceneSwitcher
-     */
-    public static synchronized SceneSwitcher getInstance() {
+    public static SceneSwitcher getInstance() {
         if (instance == null) {
             instance = new SceneSwitcher();
         }
@@ -30,28 +25,54 @@ public class SceneSwitcher {
     }
 
     /**
-     * Chuyển cửa sổ hiện tại sang màn hình mới được định nghĩa bởi file FXML.
-     *
-     * @param fxmlPath   Đường dẫn đến file FXML (ví dụ: "/fxml/auction_list.fxml")
-     * @param currentNode Một node bất kỳ trong màn hình hiện tại (thường là nút bấm) để lấy Stage
-     * @param title       Tiêu đề cho cửa sổ mới
+     * Phương thức cũ: thay đổi Scene trên Stage hiện tại.
+     * Vẫn giữ nguyên để các màn hình khác (login, register) không bị ảnh hưởng.
      */
-    public void switchTo(String fxmlPath, Node currentNode, String title) {
+    public void switchTo(String fxmlPath, Node currentUIElement, String title) {
         try {
-            // Tải file FXML
+            Stage stage = (Stage) currentUIElement.getScene().getWindow();
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Scene scene = new Scene(loader.load());
-
-            // Lấy Stage từ node hiện tại
-            Stage stage = (Stage) currentNode.getScene().getWindow();
-
-            // Thiết lập Scene mới
-            stage.setScene(scene);
+            Parent root = loader.load();
             stage.setTitle(title);
-            stage.centerOnScreen(); // Căn giữa màn hình
-        } catch (Exception e) {
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
             e.printStackTrace();
-            // Có thể thêm thông báo lỗi cho người dùng nếu cần
         }
     }
+
+    /**
+     * Phương thức mới: mở FXML trong một cửa sổ (Stage) độc lập.
+     * @param fxmlPath đường dẫn file FXML
+     * @param title tiêu đề cửa sổ
+     * @return Stage mới được tạo, có thể dùng để điều khiển sau
+     */
+    public Stage switchToNewWindow(String fxmlPath, String title) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+            Stage newStage = new Stage();
+            newStage.setTitle(title);
+            newStage.setScene(new Scene(root));
+            newStage.show();
+            openStages.put(fxmlPath, newStage); // lưu lại nếu cần quản lý
+            return newStage;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Đóng một cửa sổ đã mở bằng switchToNewWindow (nếu biết fxmlPath hoặc Stage).
+     */
+    public void closeWindow(String fxmlPath) {
+        Stage stage = openStages.get(fxmlPath);
+        if (stage != null && stage.isShowing()) {
+            stage.close();
+            openStages.remove(fxmlPath);
+        }
+    }
+
+    // Có thể thêm các tiện ích khác như setResizable,...
 }
