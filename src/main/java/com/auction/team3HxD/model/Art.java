@@ -1,20 +1,19 @@
 package com.auction.team3HxD.model;
 
+import java.time.LocalDateTime;
+
 public class Art extends Item{
-    private String artist;
-    private int year;
-
-    // Constructor
-    public Art(String name , String description , double startingPrice) {
-        super(name , description , startingPrice);
+    public Art(int sellerId, String name, String desc, double price, String path) {
+        super(sellerId, name, desc, price, path);
     }
-
-    // Getter and setter
-    public void setArtist(String artist) {this.artist = artist;}
-
-    public String getArtist() {return artist;}
-
-    public void setYear(int year) {this.year = year;}
-
-    public int getYear() {return year;}
+    public Art(int id, int sellerId, String name, String desc, double price,
+                      String path, String status, LocalDateTime createdAt) {
+        super(id, sellerId, name, desc, price, path, status, createdAt);
+    }
+    public String getItemType(){
+        return "ART";
+    }
+    public Art(){
+        super();
+    }
 }
