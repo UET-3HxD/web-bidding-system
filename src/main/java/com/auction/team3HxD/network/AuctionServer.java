@@ -1,8 +1,12 @@
 package com.auction.team3HxD.network;
 
+import com.auction.team3HxD.util.DBConnection;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
@@ -70,7 +74,24 @@ public class AuctionServer {
         }
         // các trường hợp khác có thể thêm sau
     }
+    public void startAutoCloseTask() {
+        scheduler.scheduleAtFixedRate(() -> {
+            System.out.println(">>> Đang quét và đóng các phiên đấu giá hết hạn...");
+            try (Connection conn = DBConnection.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(
+                         "UPDATE auction_sessions SET status = 'FINISHED' " +
+                                 "WHERE status = 'ACTIVE' AND end_time <= NOW()")) {
 
+                int rows = ps.executeUpdate();
+                if (rows > 0) {
+                    System.out.println(">>> Đã đóng " + rows + " phiên đấu giá.");
+                    // (Nâng cao) Có thể gửi thông báo cho các Client để cập nhật UI
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, 0, 1, TimeUnit.MINUTES); // Chạy định kỳ mỗi 1 phút
+    }
     public static void broadcast(String message) {
         for (ClientHandler client : clients) {
             client.sendMessage(message);
