@@ -97,7 +97,6 @@ public class ItemDAO {
         } catch (SQLException e) { e.printStackTrace(); }
         return itemList;
     }
-    
     public boolean updateItemInfo(int itemId, String name, double price, String desc) {
         // Chỉ update nếu sản phẩm KHÔNG ở trạng thái LIVE hoặc SOLD
         String sql = "UPDATE items SET product_name = ?, starting_price = ?, description = ?, status = 'WAITING' " +
