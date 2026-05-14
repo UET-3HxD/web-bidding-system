@@ -1,20 +1,18 @@
 package com.auction.team3HxD.model;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class NormalItem extends Item {
 
-    public NormalItem(String name, String description, double startingPrice) {
-        super(name, description, startingPrice);
+    public NormalItem(int sellerId, String name, String desc, double price, String path) {
+        super(sellerId, name, desc, price, path);
     }
-
-    // Constructor dùng cho DB
-    public NormalItem(int id, String name, String description,
-                      double startingPrice, String imageURL, Seller owner) {
-
-        super(name, description, startingPrice);
-        this.setId(id);
-        this.setImageURL(imageURL);
-        this.setOwner(owner);
+    public NormalItem(int id, int sellerId, String name, String desc, double price,
+                      String path, String status, LocalDateTime createdAt) {
+        super(id, sellerId, name, desc, price, path, status, createdAt);
+    }
+    public String getItemType(){
+        return "NORMAL";
     }
 }
