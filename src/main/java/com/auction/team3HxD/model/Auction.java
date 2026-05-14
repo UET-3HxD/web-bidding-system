@@ -11,10 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.time.Duration;
 
 public class Auction extends Entity{
     private Item item;
-    private Seller seller;
+    private User seller;
 
     private AuctionStatus status;
     private LocalDateTime startTime , endTime;
@@ -22,22 +23,19 @@ public class Auction extends Entity{
     private double startPrice;
     private double currentPrice;
     private double bidIncrement;
-
-    private Bidder currentWinner;
+    private int bidCount;
+    private User currentWinner;
     private List<BidTransaction> bidHistory;
-    private List<AuctionObserver> observers;
 
     private final Lock lock = new ReentrantLock();
 
     //Getter and Setter
     public double getCurrentPrice() {return currentPrice;}
 
-    public Bidder currentWinner() {return currentWinner;}
-
-
+    public User currentWinner() {return currentWinner;}
 
     //Constructor 1
-    public Auction(Seller seller , Item item , double startPrice , double bidIncrement , String startTime , String endTime) {
+    public Auction(User seller , Item item , double startPrice , double bidIncrement , String startTime , String endTime) {
         this.seller = seller;
         this.item = item;
         this.startPrice = startPrice;
@@ -45,13 +43,11 @@ public class Auction extends Entity{
         this.startTime = LocalDateTime.parse(startTime);
         this.endTime = LocalDateTime.parse(endTime);
         this.bidHistory = new ArrayList<>();
-        this.observers = new ArrayList<>();
         status = AuctionStatus.OPEN;
-        this.item.setStatus(AuctionStatus.OPEN);
     }
 
     // Constructor 2
-    public Auction(int id, Seller seller, Item item,
+    public Auction(int id, User seller, Item item,
                    double startPrice, double currentPrice, double bidIncrement,
                    AuctionStatus status,
                    LocalDateTime startTime, LocalDateTime endTime) {
@@ -69,18 +65,16 @@ public class Auction extends Entity{
         this.endTime = endTime;
 
         this.bidHistory = new ArrayList<>();
-        this.observers = new ArrayList<>();
     }
 
     //Start : status -> RUNNING / Cho phép bid
     public void start() {
         status = AuctionStatus.RUNNING;
-        item.setStatus(AuctionStatus.RUNNING);
     }
 
     // Đặt bid , kiểm tra hợp lệ
     // Synchronized : Không nhiều luồng đặt bid cùng lúc
-    public void placeBid(Bidder bidder , double amount) throws AuctionClosedException , InvalidBidException{
+    public void placeBid(User bidder , double amount) throws AuctionClosedException , InvalidBidException{
         lock.lock();
         try {
             //Kiểm tra xem auction đã cho phép bid chưa
@@ -98,7 +92,7 @@ public class Auction extends Entity{
             currentWinner = bidder;
 
             // Thêm vào lịch sử giao dịch
-            bidHistory.add(new BidTransaction(this, bidder , amount));
+            bidHistory.add(new BidTransaction(bidder , amount));
         }
         finally {
             lock.unlock();
@@ -108,7 +102,6 @@ public class Auction extends Entity{
     // Kết thúc đấu giá
     public void endAuction() {
         status = AuctionStatus.FINISHED;
-        item.setStatus(AuctionStatus.FINISHED);
     }
 
     // Kéo dài thời gian (Anti Sniping)
@@ -120,18 +113,34 @@ public class Auction extends Entity{
         LocalDateTime newTime = endTime.plusHours(1);
         endTime = newTime;
     }
+    public String getTimeLeftFormatted() {
+        if (status == AuctionStatus.FINISHED || LocalDateTime.now().isAfter(endTime)) {
+            return "Đã kết thúc";
+        }
 
-    // Đăng ký theo dõi thông tin về sản phẩm
-    public void registerObserver(AuctionObserver auctionObserver) {
-        this.observers.add(auctionObserver);
+        Duration duration = Duration.between(LocalDateTime.now(), endTime);
+        long hours = duration.toHours();
+        long minutes = duration.toMinutesPart();
+        long seconds = duration.toSecondsPart();
+
+        if (hours > 0) {
+            return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+        } else {
+            return String.format("%02d:%02d", minutes, seconds);
+        }
     }
-
 //    GETTER
-    public Seller getSeller() { return seller; }
+    public User getSeller() { return seller; }
     public Item getItem() { return item; }
     public double getStartPrice() { return startPrice; }
     public double getBidIncrement() { return bidIncrement; }
     public AuctionStatus getStatus() { return status; }
     public LocalDateTime getStartTime() { return startTime; }
     public LocalDateTime getEndTime() { return endTime; }
+    public int getBidCount() {
+        return bidCount;
+    }
+    public void setBidCount(int bidCount) {
+        this.bidCount = bidCount;
+    }
 }
