@@ -1,20 +1,20 @@
 package com.auction.team3HxD.model;
 
-public class Electronics extends Item{
-    private String brand;
-    private int warrantyMonths;
+import java.time.LocalDateTime;
 
-    // Constructor
-    public Electronics(String name , String description , double startingPrice) {
-        super(name, description, startingPrice);
+public class Electronic extends Item {
+    public Electronic(int sellerId, String name, String desc, double price, String path) {
+        super(sellerId, name, desc, price, path);
     }
-
-    // Getter and setter
-    public void setBrand(String brand) {this.brand = brand;}
-
-    public String getBrand() {return brand;}
-
-    public void setWarrantyMonths(int warrantyMonths) {this.warrantyMonths = warrantyMonths;}
-
-    public int getWarrantyMonths() {return warrantyMonths;}
+    public Electronic(int id, int sellerId, String name, String desc, double price,
+                      String path, String status, LocalDateTime createdAt) {
+        super(id, sellerId, name, desc, price, path, status, createdAt);
+    }
+    public String getItemType(){
+        return "ELECTRONIC";
+    }
+    public Electronic(){
+        super();
+    }
 }
+
