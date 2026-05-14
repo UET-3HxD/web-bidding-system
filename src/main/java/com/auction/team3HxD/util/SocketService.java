@@ -43,6 +43,7 @@ public class SocketService {
             while (running) {
                 try {
                     String msg = in.readLine();
+                    System.out.println(">>> SocketService vừa đọc được: " + msg);
                     if (msg != null && messageHandler != null) {
                         // Đảm bảo cập nhật giao diện trên JavaFX Thread
                         javafx.application.Platform.runLater(() -> messageHandler.accept(msg));
