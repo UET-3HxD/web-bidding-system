@@ -1,0 +1,147 @@
+/* --- BIẾN MÀU SẮC CHUNG (DARK THEME) --- */
+* {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.panel-container {
+    -fx-background-color: #1E293B;
+    -fx-background-radius: 12px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 4);
+}
+
+/* --- TYPOGRAPHY --- */
+.header-title { -fx-text-fill: #F8FAFC; -fx-font-size: 22px; -fx-font-weight: bold; }
+.detail-title { -fx-text-fill: #F8FAFC; -fx-font-size: 24px; -fx-font-weight: bold; }
+.text-muted { -fx-text-fill: #94A3B8; -fx-font-size: 13px; }
+.text-muted-small { -fx-text-fill: #64748B; -fx-font-size: 11px; }
+.text-normal { -fx-text-fill: #E2E8F0; -fx-font-size: 14px; }
+.text-bold { -fx-text-fill: #F8FAFC; -fx-font-size: 14px; -fx-font-weight: bold; }
+.price-small { -fx-text-fill: #E2E8F0; -fx-font-size: 12px; -fx-font-weight: bold; }
+.price-large { -fx-text-fill: #3B82F6; -fx-font-size: 26px; -fx-font-weight: bold; }
+.time-small { -fx-text-fill: #10B981; -fx-font-size: 12px; }
+.time-large { -fx-text-fill: #10B981; -fx-font-size: 20px; -fx-font-weight: bold; }
+
+/* --- COMPONENTS --- */
+.dark-separator {
+    -fx-border-color: #334155;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 5 0 5 0;
+}
+
+.search-field, .combo-box-dark {
+    -fx-background-color: #0F172A;
+    -fx-text-fill: #F8FAFC;
+    -fx-border-color: #334155;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 6px;
+}
+
+/* ScrollPane trong suốt */
+.dark-scroll-pane {
+    -fx-background-color: transparent;
+    -fx-control-inner-background: transparent;
+    -fx-background: transparent;
+}
+.dark-scroll-pane .viewport { -fx-background-color: transparent; }
+
+/* --- CARD SẢN PHẨM --- */
+.auction-card {
+    -fx-background-color: #0F172A;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px;
+    -fx-border-color: #334155;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+}
+.auction-card:hover {
+    -fx-background-color: #27364B;
+    -fx-cursor: hand;
+}
+.auction-card-selected {
+    -fx-border-color: #3B82F6;
+    -fx-border-width: 1.5px;
+    -fx-background-color: #1E293B;
+}
+
+/* Khung ảnh thu nhỏ và ảnh bự */
+.image-thumb-placeholder {
+    -fx-background-color: #1E293B;
+    -fx-background-radius: 6px;
+}
+.image-cover-placeholder {
+    -fx-background-color: #0F172A;
+    -fx-background-radius: 8px;
+}
+
+/* --- BADGES & TAGS --- */
+.category-tag {
+    -fx-background-color: rgba(148, 163, 184, 0.15);
+    -fx-text-fill: #CBD5E1;
+    -fx-padding: 2 6 2 6;
+    -fx-background-radius: 4px;
+    -fx-font-size: 11px;
+}
+.badge-live {
+    -fx-background-color: rgba(59, 130, 246, 0.2);
+    -fx-text-fill: #60A5FA;
+    -fx-padding: 4 10 4 10;
+    -fx-background-radius: 12px;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+.badge-winning {
+    -fx-background-color: rgba(16, 185, 129, 0.2);
+    -fx-text-fill: #34D399;
+    -fx-padding: 4 10 4 10;
+    -fx-background-radius: 12px;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+/* Khung giữ chỗ cho biểu đồ */
+.chart-placeholder-box {
+    -fx-background-color: rgba(15, 23, 42, 0.5);
+    -fx-background-radius: 8px;
+    -fx-border-color: #334155;
+    -fx-border-radius: 8px;
+    -fx-border-style: dashed;
+}
+
+/* --- NÚT ĐẶT GIÁ --- */
+.btn-bid {
+    -fx-background-color: #10B981;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+    -fx-padding: 12px;
+    -fx-background-radius: 8px;
+    -fx-cursor: hand;
+}
+.btn-bid:hover {
+    -fx-background-color: #059669;
+}
+/* --- SIDEBAR --- */
+.sidebar {
+    -fx-background-color: #1E3A8A; /* Màu xanh đậm thương hiệu BidVN */
+}
+
+.nav-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #93C5FD;
+    -fx-font-size: 15px;
+    -fx-padding: 12 15 12 15;
+    -fx-background-radius: 8px;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+}
+
+.nav-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-text-fill: white;
+}
+
+.nav-btn-active {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+    -fx-text-fill: white;
+}
