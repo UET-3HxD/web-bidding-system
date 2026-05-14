@@ -1,5 +1,7 @@
 package com.auction.team3HxD.util;
 
+import com.auction.team3HxD.dao.UserDAO;
+
 /**
  * Lớp tiện ích Singleton lưu trữ thông tin phiên làm việc của người dùng.
  * Dùng để biết ai đang đăng nhập, vai trò, trạng thái online trên client.
@@ -11,7 +13,8 @@ public class UserSession {
     private String email;
     private boolean loggedIn;
     private int selectedAuctionId = -1;
-
+    private int id = 0;
+    private final UserDAO userDAO = new UserDAO();
     private UserSession() {}
 
     public static synchronized UserSession getInstance() {
@@ -31,6 +34,7 @@ public class UserSession {
         this.role = role;
         this.email = email;
         this.loggedIn = true;
+        this.id = userDAO.getUserByUsername(username).getId();
     }
 
     /**
@@ -64,5 +68,9 @@ public class UserSession {
 
     public void setEmail(String newEmail) {
         this.email = newEmail;
+    }
+
+    public int getId() {
+        return id;
     }
 }
