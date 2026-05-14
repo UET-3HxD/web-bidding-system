@@ -114,19 +114,16 @@
 
 /* --- BUTTONS --- */
 .action-btn-primary {
-    -fx-background-color: transparent;
+    -fx-background-color: #1E40AF;
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-padding: 10 20 10 20;
     -fx-background-radius: 6;
-    -fx-border-color: #555555;
-    -fx-border-radius: 6;
-    -fx-border-width: 1;
     -fx-cursor: hand;
 }
 
 .action-btn-primary:hover {
-    -fx-background-color: #333333;
+    -fx-background-color: #2563EB;
 }
 
 .action-btn-secondary {
