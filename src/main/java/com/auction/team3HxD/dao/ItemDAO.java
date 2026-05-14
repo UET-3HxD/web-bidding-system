@@ -97,46 +97,7 @@ public class ItemDAO {
         } catch (SQLException e) { e.printStackTrace(); }
         return itemList;
     }
-    public List<MyProductDTO> getMyProducts(int userId) {
-        List<MyProductDTO> list = new ArrayList<>();
-
-        // Nửa trên: Lấy đồ MÌNH BÁN (Chờ duyệt, Đã duyệt, Đang sàn, Đã đóng)
-        // Nửa dưới (Sau UNION): Lấy đồ MÌNH THẮNG (Mệnh danh 'WON')
-        String sql =
-                "SELECT i.id, i.product_name, i.item_type, i.image_path, i.starting_price, " +
-                        "   CASE " +
-                        "       WHEN a.id IS NULL THEN i.status " + // Nếu chưa có phiên đấu giá -> WAITING hoặc APPROVED
-                        "       WHEN a.end_time > NOW() THEN 'ACTIVE' " + // Phiên đang chạy
-                        "       ELSE 'CLOSED' " + // Phiên đã kết thúc
-                        "   END AS tag_status " +
-                        "FROM items i " +
-                        "LEFT JOIN auction_sessions a ON i.id = a.item_id " +
-                        "WHERE i.seller_id = ? " +
-
-                        "UNION " +
-
-                        "SELECT i.id, i.product_name, i.item_type, i.image_path, a.current_price as starting_price, " +
-                        "   'WON' AS tag_status " +
-                        "FROM items i " +
-                        "JOIN auction_sessions a ON i.id = a.item_id " +
-                        "WHERE a.end_time <= NOW() AND " +
-                        "   (SELECT user_id FROM bids WHERE auction_id = a.id ORDER BY bid_amount DESC LIMIT 1) = ?";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, userId); // Cho nửa đồ mình bán
-            ps.setInt(2, userId); // Cho nửa đồ mình thắng
-
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                // Đóng gói dữ liệu vào DTO hoặc gửi thẳng dạng chuỗi qua Socket
-                // Ví dụ: list.add(new MyProductDTO(rs.getInt("id"), ..., rs.getString("tag_status")));
-            }
-        } catch (Exception e) { e.printStackTrace(); }
-
-        return list;
-    }
+    
     public boolean updateItemInfo(int itemId, String name, double price, String desc) {
         // Chỉ update nếu sản phẩm KHÔNG ở trạng thái LIVE hoặc SOLD
         String sql = "UPDATE items SET product_name = ?, starting_price = ?, description = ?, status = 'WAITING' " +
