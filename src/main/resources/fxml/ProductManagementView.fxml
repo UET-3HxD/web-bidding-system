@@ -25,7 +25,7 @@
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <padding><Insets bottom="30" left="10" /></padding>
                 <Label styleClass="logo-icon" text="⚖" />
-                <Label styleClass="logo-text" text="BidVN" />
+                <Label styleClass="logo-text" text="3HxD" />
             </HBox>
             <VBox spacing="5">
                 <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="menu-btn" text="👤   Tài khoản" onAction="#handleGoToAccount"/>

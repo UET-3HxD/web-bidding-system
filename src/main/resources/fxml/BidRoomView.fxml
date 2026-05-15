@@ -12,7 +12,7 @@
         <padding><Insets top="30" right="15" bottom="30" left="15"/></padding>
         <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-padding: 0 0 30 10;">
             <Label text="⚖" style="-fx-font-size: 28px; -fx-text-fill: white;"/>
-            <Label text="BidVN" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            <Label text="3HxD" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;"/>
         </HBox>
         <Button text="👤 Tài khoản" styleClass="nav-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToAccount"/>
         <Button text="🎛 Khu vực chính" styleClass="nav-btn, nav-btn-active" maxWidth="Infinity" alignment="BASELINE_LEFT" />
