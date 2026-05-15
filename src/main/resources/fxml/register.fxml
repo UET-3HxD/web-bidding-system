@@ -1,51 +1,166 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.ProgressBar?>
-<?import javafx.scene.control.ProgressIndicator?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<AnchorPane stylesheets="@../styles/login.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.team3HxD.controller.RegisterController">
-    <children>
-        <VBox alignment="CENTER" spacing="15" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" styleClass="login-container">
+<AnchorPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.auction.team3HxD.controller.RegisterController"
+            stylesheets="@../styles/login.css"
+            styleClass="login-root">
+
+    <HBox AnchorPane.topAnchor="0"
+          AnchorPane.bottomAnchor="0"
+          AnchorPane.leftAnchor="0"
+          AnchorPane.rightAnchor="0">
+
+        <!-- LEFT PANEL -->
+        <VBox prefWidth="420"
+              styleClass="left-panel">
+
             <padding>
-                <Insets top="30" right="30" bottom="30" left="30"/>
+                <Insets top="45" right="45" bottom="45" left="45"/>
             </padding>
-            <children>
-                <Label text="📝 ĐĂNG KÝ TÀI KHOẢN" styleClass="title" />
 
-                <TextField fx:id="usernameField" promptText="Tên đăng nhập" styleClass="input-field" />
+            <!-- Logo -->
+            <HBox spacing="10">
+                <Label text="⚖" styleClass="logo-icon"/>
+                <Label text="3HxD" styleClass="logo-text"/>
+            </HBox>
 
-                <VBox spacing="5">
-                    <PasswordField fx:id="passwordField" promptText="Mật khẩu" styleClass="input-field" />
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <ProgressBar fx:id="passwordStrengthBar" prefWidth="200" visible="false" managed="false" />
-                        <Label fx:id="passwordStrengthLabel" text="" style="-fx-font-size: 12px;" visible="false" managed="false" />
-                    </HBox>
-                </VBox>
+            <Region VBox.vgrow="ALWAYS"/>
 
-                <VBox spacing="5">
-                    <PasswordField fx:id="confirmPasswordField" promptText="Xác nhận mật khẩu" styleClass="input-field" />
-                    <Label fx:id="confirmPasswordError" text="" style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false" />
-                </VBox>
+            <!-- Welcome -->
+            <VBox spacing="22">
 
-                <VBox spacing="5">
-                    <TextField fx:id="emailField" promptText="Email" styleClass="input-field" />
-                    <Label fx:id="emailError" text="" style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false" />
-                </VBox>
+                <Label text="Create&#10;Account!"
+                       wrapText="true"
+                       styleClass="welcome-title"/>
 
-                <Button fx:id="registerButton" text="ĐĂNG KÝ" onAction="#handleRegister" styleClass="login-button" />
-                <Button fx:id="backButton" text="← Quay lại đăng nhập" onAction="#handleBack" styleClass="register-button" />
+                <Label text="Tạo tài khoản mới để tham gia hệ thống đấu giá trực tuyến hiện đại."
+                       wrapText="true"
+                       maxWidth="280"
+                       styleClass="welcome-description"/>
+            </VBox>
 
-                <Label fx:id="messageLabel" styleClass="message-label" visible="false" managed="false" />
-                <ProgressIndicator fx:id="loadingIndicator" styleClass="loading-indicator" visible="false" managed="false" />
-            </children>
+            <Region VBox.vgrow="ALWAYS"/>
+
         </VBox>
-    </children>
+
+        <!-- RIGHT PANEL -->
+        <StackPane HBox.hgrow="ALWAYS"
+                   styleClass="right-panel">
+
+            <VBox alignment="CENTER"
+                  spacing="22"
+                  prefWidth="540"
+                  maxWidth="540"
+                  styleClass="login-card">
+
+                <padding>
+                    <Insets top="42" right="45" bottom="40" left="45"/>
+                </padding>
+
+                <!-- TITLE -->
+                <VBox alignment="CENTER" spacing="8">
+
+                    <Label text="ĐĂNG KÝ"
+                           styleClass="login-title"/>
+
+                    <Label text="TẠO TÀI KHOẢN MỚI"
+                           styleClass="login-subtitle"/>
+                </VBox>
+
+                <!-- INPUTS -->
+                <VBox spacing="16">
+
+                    <TextField fx:id="usernameField"
+                               promptText="Tên đăng nhập"
+                               styleClass="modern-input"/>
+
+                    <!-- PASSWORD -->
+                    <VBox spacing="6">
+
+                        <PasswordField fx:id="passwordField"
+                                       promptText="Mật khẩu"
+                                       styleClass="modern-input"/>
+
+                        <HBox alignment="CENTER_LEFT"
+                              spacing="10">
+
+                            <ProgressBar fx:id="passwordStrengthBar"
+                                         prefWidth="220"
+                                         visible="false"
+                                         managed="false"/>
+
+                            <Label fx:id="passwordStrengthLabel"
+                                   visible="false"
+                                   managed="false"
+                                   style="-fx-text-fill: white; -fx-font-size: 12px;"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- CONFIRM -->
+                    <VBox spacing="6">
+
+                        <PasswordField fx:id="confirmPasswordField"
+                                       promptText="Xác nhận mật khẩu"
+                                       styleClass="modern-input"/>
+
+                        <Label fx:id="confirmPasswordError"
+                               visible="false"
+                               managed="false"
+                               style="-fx-text-fill:#FF7A7A; -fx-font-size:12px;"/>
+                    </VBox>
+
+                    <!-- EMAIL -->
+                    <VBox spacing="6">
+
+                        <TextField fx:id="emailField"
+                                   promptText="Email"
+                                   styleClass="modern-input"/>
+
+                        <Label fx:id="emailError"
+                               visible="false"
+                               managed="false"
+                               style="-fx-text-fill:#FF7A7A; -fx-font-size:12px;"/>
+                    </VBox>
+
+                </VBox>
+
+                <!-- REGISTER BUTTON -->
+                <Button fx:id="registerButton"
+                        text="TẠO TÀI KHOẢN   →"
+                        onAction="#handleRegister"
+                        maxWidth="Infinity"
+                        styleClass="login-button"/>
+
+                <!-- BACK -->
+                <Button fx:id="backButton"
+                        text="← Quay lại đăng nhập"
+                        onAction="#handleBack"
+                        maxWidth="Infinity"
+                        styleClass="register-button"/>
+
+                <!-- MESSAGE -->
+                <StackPane>
+
+                    <ProgressIndicator fx:id="loadingIndicator"
+                                       visible="false"
+                                       managed="false"
+                                       maxHeight="26"/>
+
+                    <Label fx:id="messageLabel"
+                           visible="false"
+                           managed="false"
+                           styleClass="message-label"/>
+                </StackPane>
+
+            </VBox>
+
+        </StackPane>
+
+    </HBox>
+
 </AnchorPane>

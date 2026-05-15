@@ -138,3 +138,20 @@
     -fx-font-size: 14px;
     -fx-font-weight: bold;
 }
+
+/* PASSWORD STRENGTH */
+
+.progress-bar{
+    -fx-pref-height: 8px;
+    -fx-background-radius: 10px;
+}
+
+.progress-bar .track{
+    -fx-background-color: rgba(255,255,255,0.12);
+    -fx-background-radius: 10px;
+}
+
+.progress-bar .bar{
+    -fx-background-color: linear-gradient(to right, #38BDF8, #2563EB);
+    -fx-background-radius: 10px;
+}
