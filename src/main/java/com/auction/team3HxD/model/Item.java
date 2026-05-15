@@ -1,43 +1,52 @@
 package com.auction.team3HxD.model;
 
-import com.auction.team3HxD.model.enums.AuctionStatus;
+import java.time.LocalDateTime;
 
 public abstract class Item extends Entity{
-    private String name;
+    private int sellerId;
+    private String productName;
     private String description;
     private double startingPrice;
-    private String imageURL;
-    private Seller owner;
-    private AuctionStatus status;
+    private String imagePath;
+    private String status;
 
-    //Getter and setter
-    public String getName() {return name;}
-
-    public void setName(String name) {this.name = name;}
-
-    public String getDescription() {return description;}
-
-    public void setDescription(String description) {this.description = description;}
-
-    public double getStartingPrice() {return startingPrice;}
-
-    public void setStartingPrice(double startingPrice) {this.startingPrice = startingPrice;}
-
-    public AuctionStatus getStatus() {return status;}
-
-    public void setStatus(AuctionStatus status) {this.status = status;}
-
-    //Constructor
-    public Item(String name , String description , double startingPrice) {
-        this.name = name;
+    // Constructor chung cho các lớp con
+    public Item(){}
+    public Item(int sellerId, String productName, String description, double startingPrice, String imagePath) {
+        this.sellerId = sellerId;
+        this.productName = productName;
         this.description = description;
         this.startingPrice = startingPrice;
+        this.imagePath = imagePath;
     }
 
-    // Getter + Setter
-    public String getImageURL() { return imageURL; }
-    public void setImageURL(String imageURL) { this.imageURL = imageURL; }
+    // Constructor đầy đủ để nhận dữ liệu từ DB
+    public Item(int id, int sellerId, String productName, String description,
+                double startingPrice, String imagePath, String status, LocalDateTime createdAt) {
+        this.id = id;
+        this.sellerId = sellerId;
+        this.productName = productName;
+        this.description = description;
+        this.startingPrice = startingPrice;
+        this.imagePath = imagePath;
+        this.status = status;
+        this.createdAt = createdAt;
+    }
+    public abstract String getItemType();
+    //Getter and setter
+    public int getId() { return id; }
+    public int getSellerId() { return sellerId; }
+    public String getName() { return productName; }
+    public double getPrice() { return startingPrice; }
+    public String getImagePath() { return imagePath; }
+    public String getStatus() { return status; }
+    public String getDescription() { return description; }
+    public double getStartingPrice() { return startingPrice; }
+    public void setName(String name) { this.productName = name; }
+    public void setDescription(String description) { this.description = description; }
 
-    public Seller getOwner() { return owner; }
-    public void setOwner(Seller owner) { this.owner = owner; }
+    public void setSellerId(int sellerId) {this.sellerId = sellerId;}
+    public void setStatus(String status) { this.status = status; }
+    public void setImagePath(String imagePath) { this.imagePath = imagePath; }
+    public void setPrice(double price) { this.startingPrice = price; }
 }

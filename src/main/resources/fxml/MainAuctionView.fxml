@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.Circle?>
+
+<HBox style="-fx-background-color: #0F172A;" stylesheets="@../styles/main_auction.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.team3HxD.controller.MainAuctionController">
+
+    <VBox styleClass="sidebar" prefWidth="240" minWidth="240" spacing="10" HBox.hgrow="NEVER">
+        <padding>
+            <Insets top="30" right="15" bottom="30" left="15"/>
+        </padding>
+
+        <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-padding: 0 0 30 10;">
+            <Label text="⚖" style="-fx-font-size: 28px; -fx-text-fill: white;"/>
+            <Label text="BidVN" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+        </HBox>
+
+        <Button text="👤 Tài khoản" styleClass="nav-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToAccount" />
+        <Button text="🎛 Khu vực chính" styleClass="nav-btn, nav-btn-active" maxWidth="Infinity" alignment="BASELINE_LEFT" />
+        <Button text="🕒 Bid đang tham gia" styleClass="nav-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToBidRoom" />
+        <Button text="📦 Sản phẩm của bạn" styleClass="nav-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToProducts"/>
+        <Button text="❓ Trợ giúp" styleClass="nav-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" />
+
+        <Region VBox.vgrow="ALWAYS" />
+
+        <Separator styleClass="dark-separator"/>
+
+        <HBox alignment="CENTER_LEFT" spacing="12" style="-fx-padding: 15 0 0 0;">
+            <StackPane style="-fx-background-color: #3B82F6; -fx-background-radius: 50%;" prefWidth="40" prefHeight="40">
+                <Label text="NV" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+            </StackPane>
+            <VBox alignment="CENTER_LEFT">
+                <Label text="Nguyễn Văn A" styleClass="text-bold"/>
+                <Label text="Thành viên" styleClass="text-muted-small"/>
+            </VBox>
+        </HBox>
+    </VBox>
+
+
+    <HBox spacing="20.0" style="-fx-padding: 20;" HBox.hgrow="ALWAYS">
+
+        <VBox styleClass="panel-container" HBox.hgrow="SOMETIMES" prefWidth="450" maxWidth="500" spacing="15.0">
+            <padding>
+                <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
+            </padding>
+
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <VBox>
+                    <Label text="Sàn đấu giá" styleClass="header-title"/>
+                    <Label text="Các phiên đang diễn ra" styleClass="text-muted"/>
+                </VBox>
+            </HBox>
+
+            <HBox spacing="10">
+                <TextField fx:id="txtSearch" promptText="Tìm sản phẩm..." styleClass="search-field" HBox.hgrow="ALWAYS"/>
+                <ComboBox fx:id="cbCategoryFilter" promptText="Tất cả danh mục" styleClass="combo-box-dark" prefWidth="130"/>
+            </HBox>
+
+            <Separator styleClass="dark-separator"/>
+
+            <ScrollPane fitToWidth="true" styleClass="dark-scroll-pane" VBox.vgrow="ALWAYS">
+                <VBox fx:id="vboxAuctionList" spacing="10.0">
+                    <Label text="Đang tải dữ liệu từ máy chủ..." styleClass="text-muted"/>
+                </VBox>
+            </ScrollPane>
+        </VBox>
+
+        <VBox styleClass="panel-container" HBox.hgrow="ALWAYS" spacing="15.0">
+            <padding>
+                <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
+            </padding>
+
+            <StackPane styleClass="image-cover-placeholder" prefHeight="220.0">
+                <VBox alignment="CENTER" spacing="10">
+                    <Label text="📷" style="-fx-font-size: 40px; -fx-text-fill: #64748B;"/>
+                    <Label text="Ảnh sản phẩm" styleClass="text-muted"/>
+                </VBox>
+                <ImageView fx:id="imgProductDetail" fitWidth="200" fitHeight="200" preserveRatio="true" visible="false"/>
+            </StackPane>
+
+            <HBox alignment="CENTER_LEFT" spacing="15.0">
+                <Label fx:id="lblDetailName" text="Tên sản phẩm" styleClass="detail-title"/>
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="lblDetailStatus" text="Đang diễn ra" styleClass="badge-live"/>
+            </HBox>
+
+            <GridPane hgap="40" vgap="15">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" />
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" />
+                </columnConstraints>
+
+                <VBox GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <Label text="Người bán" styleClass="text-muted-small"/>
+                    <Label fx:id="lblDetailSeller" text="---" styleClass="text-normal"/>
+                </VBox>
+                <VBox GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <Label text="Danh mục" styleClass="text-muted-small"/>
+                    <Label fx:id="lblDetailCategory" text="---" styleClass="text-normal"/>
+                </VBox>
+                <VBox GridPane.columnIndex="0" GridPane.rowIndex="1">
+                    <Label text="Giá khởi điểm" styleClass="text-muted-small"/>
+                    <Label fx:id="lblDetailStartPrice" text="0 đ" styleClass="text-normal"/>
+                </VBox>
+                <VBox GridPane.columnIndex="1" GridPane.rowIndex="1">
+                    <Label text="Số lượt bid" styleClass="text-muted-small"/>
+                    <Label fx:id="lblDetailBidCount" text="0 lượt" styleClass="text-normal"/>
+                </VBox>
+            </GridPane>
+
+            <VBox spacing="5" VBox.vgrow="SOMETIMES">
+                <Label text="Mô tả sản phẩm" styleClass="text-bold"/>
+                <Label fx:id="lblDetailDesc" text="Chọn một sản phẩm để xem chi tiết..." wrapText="true" styleClass="text-muted"/>
+            </VBox>
+
+            <Region VBox.vgrow="ALWAYS" />
+
+            <VBox spacing="5">
+                <Label text="Biểu đồ giá" styleClass="text-bold"/>
+                <StackPane styleClass="chart-placeholder-box" prefHeight="100">
+                    <VBox alignment="CENTER" spacing="5">
+                        <Label text="📈" style="-fx-font-size: 24px;"/>
+                        <Label text="Tính năng biểu đồ đang được phát triển" styleClass="text-muted"/>
+                    </VBox>
+                </StackPane>
+            </VBox>
+
+            <Separator styleClass="dark-separator"/>
+
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <VBox>
+                    <Label text="Giá hiện tại" styleClass="text-muted-small"/>
+                    <Label fx:id="lblDetailCurrentPrice" text="0 đ" styleClass="price-large"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <VBox alignment="CENTER_RIGHT">
+                    <Label text="Thời gian còn lại" styleClass="text-muted-small"/>
+                    <Label fx:id="lblDetailTimeLeft" text="00:00" styleClass="time-large"/>
+                </VBox>
+            </HBox>
+
+            <Button fx:id="btnPlaceBid" text="🔨 Đặt giá" styleClass="btn-bid" maxWidth="Infinity" onAction="#handleGoToBidRoom"/>
+        </VBox>
+    </HBox>
+</HBox>

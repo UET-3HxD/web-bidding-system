@@ -192,8 +192,21 @@ public class RegisterController {
                 });
             }).start();
         } else {
-            String msg = "REGISTER|" + username + "|" + password + "|" + email;
-            SocketService.getInstance().send(msg);
+            new Thread(() -> {
+                try {
+                    if (!SocketService.getInstance().isConnected()) {
+                        SocketService.getInstance().connect(AppConfig.getServerHost(), AppConfig.getServerPort());
+                    }
+                    String msg = "REGISTER|" + username + "|" + password + "|" + email;
+                    SocketService.getInstance().send(msg);
+                } catch (Exception e) {
+                    Platform.runLater(() -> {
+                        stopLoading();
+                        showMessage("Không thể kết nối đến máy chủ!", false);
+                    });
+                    e.printStackTrace();
+                }
+            }).start();
         }
     }
 

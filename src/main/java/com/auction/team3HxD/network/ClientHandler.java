@@ -1,5 +1,10 @@
 package com.auction.team3HxD.network;
 
+import com.auction.team3HxD.dao.AuctionDAO;
+import com.auction.team3HxD.dao.ItemDAO;
+import com.auction.team3HxD.dao.UserDAO;
+import com.auction.team3HxD.model.Electronic;
+import com.auction.team3HxD.model.Item;
 import com.auction.team3HxD.services.AuctionService;
 import com.auction.team3HxD.services.UserService;
 import com.auction.team3HxD.util.AppConfig;
@@ -9,6 +14,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.List;
+
+import static com.auction.team3HxD.network.AuctionServer.broadcast;
 
 public class ClientHandler implements Runnable {
     private Socket socket;
@@ -16,6 +24,11 @@ public class ClientHandler implements Runnable {
     private BufferedReader in;
     private String clientName;
     private final UserService userService = new UserService();
+    private ItemDAO itemDAO = new ItemDAO();
+    private UserDAO userDAO = new UserDAO(); // Để dùng cho login
+    private AuctionDAO auctionDAO = new AuctionDAO();
+    private AuctionService auctionService = new AuctionService();
+    private int currentUserId = -1;
 
     public ClientHandler(Socket socket) {
         this.socket = socket;
@@ -50,9 +63,10 @@ public class ClientHandler implements Runnable {
                         String res = userService.login(parts[1], parts[2]);
                         if (res.startsWith("LOGIN_OK")) {
                             this.clientName = parts[1];
+                            this.currentUserId = userDAO.getUserByUsername(this.clientName).getId();
                             isAuthenticated = true;
                             out.println(res); // gửi LOGIN_OK|ROLE
-                            AuctionServer.broadcast("INFO|" + clientName + " đã tham gia phòng!");
+                            broadcast("INFO|" + clientName + " đã tham gia phòng!");
                         } else {
                             out.println(res); // gửi mã lỗi
                         }
@@ -75,13 +89,134 @@ public class ClientHandler implements Runnable {
                         if (cmd.equals("CHANGE_PASSWORD")) {
                             String cpRes = userService.changePassword(this.clientName, parts[1], parts[2]);
                             out.println(cpRes);
-                        } else if (cmd.equals("CHANGE_EMAIL")) {
+                        }
+                        else if (cmd.equals("CHANGE_EMAIL")) {
                             String ceRes = userService.changeEmail(this.clientName, parts[1], parts[2]);
                             out.println(ceRes);
                             break;
-                        } else if(cmd.equals("LOGOUT")) {
+                        }
+                        else if(cmd.equals("LOGOUT")) {
                             isAuthenticated = false;
                             break;
+                        }
+                        else if(cmd.equals("CREATE_ITEM")) {
+                            try {
+                                // bóc tách: [1]name, [2]price, [3]type, [4]desc, [5]path
+                                String name = parts[1];
+                                double price = Double.parseDouble(parts[2]);
+                                String type = parts[3];
+                                String desc = parts[4];
+                                String path = parts[5];
+
+                                // Gọi Service để xử lý (Service sẽ gọi DAO)
+                                boolean success = userService.createItem(currentUserId, name, price, type, desc, path);
+
+                                if (success) {
+                                    out.println("CREATE_ITEM_SUCCESS");
+                                } else {
+                                    out.println("CREATE_ITEM_ERR|Lỗi khi lưu vào Database");
+                                }
+                            } catch (Exception e) {
+                                out.println("CREATE_ITEM_ERR|Dữ liệu không hợp lệ");
+                            }
+                        }
+                        else if (cmd.equals("GET_MY_ITEMS")) {
+                            String response = userService.getMyItemsList(currentUserId);
+                            out.println(response);
+                        }
+                        else if (cmd.equals("UPDATE_ITEM")) {
+                            int itemId = Integer.parseInt(parts[1]);
+                            String name = parts[2];
+                            double price = Double.parseDouble(parts[3]);
+                            String desc = parts[4];
+
+                            boolean success = userService.updateItem(itemId, name, price, desc);
+                            out.println(success ? "UPDATE_ITEM_SUCCESS" : "UPDATE_ITEM_ERR|Không thể cập nhật sản phẩm này");
+                        }
+                        else if (cmd.equals("DELETE_ITEM")) {
+                            int itemId = Integer.parseInt(parts[1]);
+                            boolean success = userService.deleteItem(itemId);
+
+                            if (success) {
+                                out.println("DELETE_ITEM_SUCCESS");
+                            } else {
+                                out.println("DELETE_ITEM_ERR|Sản phẩm không tồn tại hoặc không thể xóa");
+                            }
+                        }
+                        else if(cmd.equals("START_AUCTION")) {
+                            try {
+                                // Cấu trúc: START_AUCTION|itemId|minutes
+                                int auctionItemId = Integer.parseInt(parts[1]);
+                                int minutes = Integer.parseInt(parts[2]);
+
+                                boolean isStarted = userService.startAuction(auctionItemId, minutes);
+
+                                if (isStarted) {
+                                    out.println("START_AUCTION_SUCCESS");
+                                } else {
+                                    out.println("START_AUCTION_ERR|Lỗi hệ thống khi khởi tạo phiên đấu giá");
+                                }
+                                out.flush();
+                            } catch (Exception e) {
+                                out.println("START_AUCTION_ERR|Dữ liệu không hợp lệ");
+                                out.flush();
+                            }
+                        }
+                        else if (cmd.equals("GET_LIVE_AUCTIONS")) {
+                            String response = userService.getLiveAuctionsMessage();
+                            out.println(response);
+                        }
+                        else if (cmd.equals("BID") || cmd.equals("CHAT")) {
+                            handleAuctionCommands(message);
+                        }
+                        else if (cmd.equals("PLACE_BID")) {
+                            try {
+                                int bidAuctionId = Integer.parseInt(parts[1]);
+                                int bidUserId = currentUserId;
+                                double bidAmount = Double.parseDouble(parts[3]);
+
+                                // Gọi hàm Transaction dưới DAO
+                                String result = auctionDAO.placeBidTransaction(bidAuctionId, bidUserId, bidAmount);
+
+                                if (result.startsWith("SUCCESS")) {
+                                    // 1. Phản hồi cho người vừa đặt giá: BẠN ĐÃ THÀNH CÔNG
+                                    out.println("BID_SUCCESS");
+                                    out.flush();
+
+                                    // 2. Tách dữ liệu từ chuỗi kết quả: SUCCESS|newPrice|bidderName
+                                    String[] resParts = result.split("\\|");
+                                    String newPrice = resParts[1];
+                                    String bidderName = resParts[2];
+
+                                    // 3. BROADCAST: Báo cáo biến động giá cho TOÀN BỘ Client đang kết nối
+                                    broadcast("BID_UPDATE|" + bidAuctionId + "#" + newPrice + "#" + bidderName);
+
+                                } else {
+                                    // Phản hồi lỗi: Trả lại đúng thông báo lỗi từ DAO
+                                    out.println("BID_ERROR|" + result.split("\\|")[1]);
+                                    out.flush();
+                                }
+
+                            } catch (Exception e) {
+                                out.println("BID_ERROR|Dữ liệu gửi lên không hợp lệ!");
+                                out.flush();
+                            }
+                        }
+                        else if (cmd.equals("GET_AUCTION_DETAIL")){
+                            try {
+                                int aId = Integer.parseInt(parts[1]);
+                                int uId = Integer.parseInt(parts[2]);
+                                String detailMessage = auctionService.getAuctionDetailMessage(aId, uId);
+                                out.println("AUCTION_DETAIL_SUCCESS|" + detailMessage);
+
+                                if (detailMessage != null) {
+                                    out.println("AUCTION_DETAIL_SUCCESS|" + detailMessage);
+                                } else {
+                                    out.println("AUCTION_DETAIL_ERROR|Không tìm thấy thông tin phiên đấu giá!");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
                     } catch (Exception e) {
                         out.println("ERR|" + e.getMessage());
@@ -113,7 +248,7 @@ public class ClientHandler implements Runnable {
 
             case "CHAT":
                 String content = parts[1];
-                AuctionServer.broadcast("CHAT|" + this.clientName + ": " + content);
+                broadcast("CHAT|" + this.clientName + ": " + content);
                 break;
 
             default:

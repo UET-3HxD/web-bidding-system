@@ -1,0 +1,68 @@
+/* --- DARK THEME BID ROOM --- */
+.sidebar { -fx-background-color: #1E3A8A; }
+.nav-btn { -fx-background-color: transparent; -fx-text-fill: #93C5FD; -fx-font-weight: bold; -fx-cursor: hand; }
+.nav-btn-active { -fx-background-color: rgba(255, 255, 255, 0.2); -fx-text-fill: white; }
+
+.breadcrumb-link { -fx-text-fill: #94A3B8; -fx-cursor: hand; }
+.breadcrumb-sep { -fx-text-fill: #475569; }
+.breadcrumb-current { -fx-text-fill: #E2E8F0; }
+
+.product-title-large { -fx-text-fill: #F8FAFC; -fx-font-size: 32px; -fx-font-weight: bold; }
+.image-hero-container { -fx-background-color: #1E293B; -fx-background-radius: 12px; -fx-border-color: #334155; -fx-border-radius: 12px; }
+
+.info-card { -fx-background-color: rgba(30, 41, 59, 0.5); -fx-background-radius: 8px; }
+.text-normal-bold { -fx-text-fill: #F1F5F9; -fx-font-weight: bold; }
+.text-muted-small { -fx-text-fill: #64748B; -fx-font-size: 13px; }
+.text-normal { -fx-text-fill: #CBD5E1; -fx-font-size: 14px; }
+
+.badge-outbid-large {
+    -fx-background-color: #F43F5E;
+    -fx-text-fill: white;
+    -fx-padding: 8 20 8 20;
+    -fx-background-radius: 20px;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.chart-container-bid {
+    -fx-background-color: #0F172A;
+    -fx-border-color: #334155;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.stat-large-time { -fx-text-fill: #F8FAFC; -fx-font-size: 24px; -fx-font-weight: bold; }
+.stat-highlight-green { -fx-text-fill: #10B981; -fx-font-size: 26px; -fx-font-weight: bold; }
+.stat-highlight-pink { -fx-text-fill: #F43F5E; -fx-font-size: 22px; -fx-font-weight: bold; }
+
+.bid-input-field {
+    -fx-background-color: #1E293B;
+    -fx-text-fill: white;
+    -fx-border-color: #334155;
+    -fx-border-radius: 8px;
+    -fx-padding: 12px;
+    -fx-font-size: 15px;
+}
+
+.btn-auto-bid {
+    -fx-background-color: #475569;
+    -fx-text-fill: white;
+    -fx-padding: 12;
+    -fx-background-radius: 8px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-bid-action {
+    -fx-background-color: #2563EB;
+    -fx-text-fill: white;
+    -fx-padding: 12;
+    -fx-background-radius: 8px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+.btn-bid-action:hover { -fx-background-color: #1D4ED8; }
+.stat-highlight-green { -fx-text-fill: #10B981; -fx-font-size: 26px; -fx-font-weight: bold; }
+.stat-highlight-pink { -fx-text-fill: #F43F5E; -fx-font-size: 22px; -fx-font-weight: bold; }
+.stat-large-time { -fx-text-fill: #F8FAFC; -fx-font-size: 24px; -fx-font-family: 'Monospace'; -fx-font-weight: bold; }
+.bid-stats-box { -fx-background-color: #1E293B; -fx-background-radius: 12px; -fx-border-color: #334155; -fx-border-radius: 12px; }

@@ -58,11 +58,11 @@ public class LoginController {
                     if (ok) {
                         UserSession.getInstance().login(username, "mocktest@email.com", "USER");
                         showMessage("Đăng nhập thành công!", true);
-                        // Chuyển sang MainLayout (có sidebar)
+                        // Đã sửa đường dẫn chuyển sang AccountView
                         SceneSwitcher.getInstance().switchTo(
-                                "/fxml/MainLayout.fxml",
+                                "/fxml/AccountView.fxml",
                                 loginButton,
-                                "BidVN - Hệ thống đấu giá"
+                                "Tài khoản"
                         );
                     } else {
                         showMessage("Sai tên đăng nhập hoặc mật khẩu.", false);
@@ -73,12 +73,17 @@ public class LoginController {
             // ---------- Chế độ thật (gửi qua socket) ----------
             new Thread(() -> {
                 try {
+                    // 1. Kiểm tra nếu chưa kết nối thì phải kết nối lại
                     if (!SocketService.getInstance().isConnected()) {
                         SocketService.getInstance().connect(AppConfig.getServerHost(), AppConfig.getServerPort());
                     }
+
+                    // 2. Gửi lệnh đăng nhập
                     String loginMessage = "LOGIN|" + username + "|" + password;
                     SocketService.getInstance().send(loginMessage);
+
                 } catch (Exception e) {
+                    // Nếu không kết nối được
                     Platform.runLater(() -> {
                         stopLoading();
                         showMessage("Không thể kết nối đến máy chủ!", false);
@@ -86,10 +91,12 @@ public class LoginController {
                     e.printStackTrace();
                 }
             }).start();
+            // Phản hồi sẽ được xử lý trong handleServerResponse
         }
     }
 
     private void handleServerResponse(String response) {
+        // Đảm bảo thao tác UI chạy trên luồng chính
         Platform.runLater(() -> {
             if (response.startsWith("INFO|") || response.startsWith("CHAT|")) {
                 return;
@@ -98,15 +105,18 @@ public class LoginController {
             stopLoading();
             if (response.startsWith("LOGIN_OK")) {
                 String[] parts = response.split("\\|");
+
+                // Cấu trúc parts: [0]: LOGIN_OK, [1]: ROLE, [2]: EMAIL
                 String role = (parts.length > 1) ? parts[1] : "USER";
-                String email = (parts.length > 2) ? parts[2] : "";
+                String email = (parts.length > 2) ? parts[2] : ""; // Lấy email từ Server
 
                 String username = usernameField.getText().trim();
+
+                // Lưu vào session - Hết báo đỏ vì đã đủ 3 tham số
                 UserSession.getInstance().login(username, email, role);
 
                 showMessage("Đăng nhập thành công!", true);
-                // Chuyển sang MainLayout
-                SceneSwitcher.getInstance().switchTo("/fxml/MainLayout.fxml", loginButton, "BidVN - Hệ thống đấu giá");
+                SceneSwitcher.getInstance().switchTo("/fxml/account_view.fxml", loginButton, "Tài khoản");
             }
             else if(response.startsWith("LOGIN_ERR_USER_NOT_FOUND")) {
                 showMessage("Tài khoản không tồn tại.", false);
@@ -125,6 +135,7 @@ public class LoginController {
 
     @FXML
     private void handleRegister() {
+        // Chỉ cần chuyển màn hình, không cần dừng listener hay đóng socket
         SceneSwitcher.getInstance().switchTo("/fxml/register.fxml", registerButton, "Đăng ký tài khoản");
     }
 

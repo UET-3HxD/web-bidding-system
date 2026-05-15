@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+
+<?import javafx.scene.control.Separator?>
+<BorderPane prefHeight="700.0" prefWidth="1200.0" styleClass="root-container" stylesheets="@../styles/styles.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.team3HxD.controller.ProductManagementController">
+
+    <left>
+        <VBox prefWidth="250.0" styleClass="sidebar">
+            <padding>
+                <Insets bottom="20" left="15" right="15" top="20" />
+            </padding>
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <padding><Insets bottom="30" left="10" /></padding>
+                <Label styleClass="logo-icon" text="⚖" />
+                <Label styleClass="logo-text" text="BidVN" />
+            </HBox>
+            <VBox spacing="5">
+                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="menu-btn" text="👤   Tài khoản" onAction="#handleGoToAccount"/>
+                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="menu-btn" text="⏹   Sàn đấu giá" onAction="#handleGoToAuction"/>
+                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="menu-btn" text="⏱   Bid đang tham gia" />
+                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="menu-btn, menu-btn-active" text="📦   Sản phẩm của bạn" />
+                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="menu-btn" text="⚙   Trợ giúp" />
+            </VBox>
+            <Region VBox.vgrow="ALWAYS" />
+            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="sidebar-profile">
+                <StackPane>
+                    <Circle fill="#5A6C8A" radius="18" />
+                    <Label fx:id="lblSidebarAvatar" style="-fx-text-fill: white; -fx-font-weight: bold;" text="NV" />
+                </StackPane>
+                <VBox alignment="CENTER_LEFT">
+                    <Label fx:id="lblSidebarName" style="-fx-text-fill: white; -fx-font-weight: bold;" text="Nguyễn Văn A" />
+                    <Label style="-fx-text-fill: #A0ABC0; -fx-font-size: 11px;" text="Thành viên" />
+                </VBox>
+            </HBox>
+        </VBox>
+    </left>
+
+    <center>
+        <HBox spacing="20" styleClass="main-content">
+            <padding>
+                <Insets bottom="20" left="20" right="20" top="20" />
+            </padding>
+
+            <VBox spacing="15" HBox.hgrow="ALWAYS">
+                <HBox alignment="CENTER_LEFT">
+                    <VBox>
+                        <Label styleClass="page-title" text="Sản phẩm của bạn" />
+                        <Label styleClass="page-subtitle" text="Quản lý và đăng bán sản phẩm đấu giá" />
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Label fx:id="lblProductCount" styleClass="stats-text" text="0 sản phẩm" />
+                </HBox>
+
+                <ScrollPane fitToWidth="true" styleClass="transparent-scroll">
+                    <VBox fx:id="vboxProductList" spacing="15">
+                    </VBox>
+                </ScrollPane>
+            </VBox>
+
+            <VBox prefWidth="400.0" spacing="15">
+                <StackPane fx:id="stackActionPanel" styleClass="action-card">
+
+                    <VBox fx:id="paneCreate" spacing="20">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label styleClass="icon-box" text="+" />
+                            <VBox>
+                                <Label styleClass="card-title" text="Tạo mới bid" />
+                                <Label styleClass="card-subtitle" text="Điền thông tin sản phẩm" />
+                            </VBox>
+                        </HBox>
+
+                        <VBox fx:id="uploadBox" alignment="CENTER" onMouseClicked="#handleUploadImage" spacing="10" styleClass="upload-box">
+                            <Label style="-fx-font-size: 30px;" text="📷" />
+                            <Label styleClass="upload-text" text="Tải ảnh sản phẩm" />
+                            <Label styleClass="upload-subtext" text="PNG, JPG tối đa 5MB" />
+                        </VBox>
+
+                        <VBox spacing="15">
+                            <VBox spacing="5">
+                                <Label styleClass="input-label" text="Tên sản phẩm" />
+                                <TextField fx:id="txtCreateName" styleClass="input-field" />
+                            </VBox>
+                            <VBox spacing="5">
+                                <Label styleClass="input-label" text="Loại sản phẩm" />
+                                <ComboBox fx:id="cbCreateCategory" maxWidth="Infinity" promptText="Chọn danh mục..." styleClass="input-field" />
+                            </VBox>
+                            <VBox spacing="5">
+                                <Label styleClass="input-label" text="Mô tả" />
+                                <TextArea fx:id="txtCreateDesc" prefHeight="100.0" promptText="Mô tả chi tiết sản phẩm..." styleClass="input-area" wrapText="true" />
+                            </VBox>
+                            <HBox spacing="10">
+                                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                                    <Label styleClass="input-label" text="Giá khởi điểm (đ)" />
+                                    <TextField fx:id="txtCreatePrice" prefHeight="55.0" prefWidth="188.0" promptText="500000" styleClass="input-field" />
+                                </VBox>
+                                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                                    <Label styleClass="input-label" text="Thời gian" />
+                                    <ComboBox fx:id="cbCreateDuration" maxWidth="Infinity" prefWidth="150.0" promptText="15 phút" styleClass="input-field" />
+                                </VBox>
+                            </HBox>
+                        </VBox>
+                        <Button maxWidth="Infinity" onAction="#handleCreateProduct" styleClass="action-btn-primary" text="🚀 Đăng sản phẩm &amp; chờ xét duyệt" />
+                    </VBox>
+
+                    <VBox fx:id="paneEdit" spacing="20" styleClass="edit-mode-panel" visible="false">
+                        <HBox alignment="CENTER_LEFT">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <Label styleClass="icon-box-edit" text="✎" />
+                                <VBox>
+                                    <Label styleClass="card-title" text="Chỉnh sửa" />
+                                    <Label styleClass="card-subtitle" text="Cập nhật thông tin bid" />
+                                </VBox>
+                            </HBox>
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Button fx:id="btnCloseEdit" onAction="#handleCloseEdit" styleClass="close-btn" text="✕" />
+                        </HBox>
+
+                        <VBox spacing="15">
+                            <VBox spacing="5">
+                                <Label styleClass="input-label" text="Tên sản phẩm" />
+                                <TextField fx:id="txtEditName" styleClass="input-field" />
+                            </VBox>
+                            <VBox spacing="5">
+                                <Label styleClass="input-label" text="Giá khởi điểm (đ)" />
+                                <TextField fx:id="txtEditPrice" styleClass="input-field" />
+                            </VBox>
+                            <VBox spacing="5">
+                                <Label styleClass="input-label" text="Mô tả" />
+                                <TextArea fx:id="txtEditDesc" prefHeight="150.0" styleClass="input-area" wrapText="true" />
+                            </VBox>
+                        </VBox>
+
+                        <HBox spacing="10">
+                            <Button maxWidth="Infinity" onAction="#handleUpdateProduct" styleClass="action-btn-primary" text="Lưu thay đổi" HBox.hgrow="ALWAYS" />
+                            <Button onAction="#handleDeleteProduct" styleClass="action-btn-danger" text="🗑" />
+                        </HBox>
+                        <Separator styleClass="dark-separator">
+                            <padding><Insets top="10" bottom="10"/></padding>
+                        </Separator>
+
+                        <Label text="Khởi tạo đấu giá" styleClass="text-bold" style="-fx-font-size: 16px;"/>
+
+                        <VBox spacing="8">
+                            <Label text="Thời lượng diễn ra" styleClass="text-muted-small"/>
+                            <ComboBox fx:id="cbAuctionDuration" promptText="Chọn thời gian" maxWidth="Infinity" styleClass="combo-box-dark"/>
+
+                            <Button text="🚀 Đăng lên sàn" maxWidth="Infinity" onAction="#handlePublishAuction"
+                                    style="-fx-background-color: #10B981; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10px; -fx-background-radius: 6px; -fx-cursor: hand;"/>
+                        </VBox>
+                    </VBox>
+
+                </StackPane>
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>
