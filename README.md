@@ -29,7 +29,7 @@ Dưới đây là danh sách các thành viên và phân công nhiệm vụ cụ
 - **Build Tool:** Maven (Quản lý dependencies)
 - **Giao tiếp:** TCP Socket (Client-Server Architecture)
 - **Kiểm thử:** JUnit 5
-- **Định dạng dữ liệu:** JSON (Jackson Databind)
+- **Định dạng dữ liệu:** MySQL
 
 ---
 
