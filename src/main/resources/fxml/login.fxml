@@ -1,39 +1,131 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.ProgressIndicator?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<AnchorPane fx:controller="com.auction.team3HxD.controller.LoginController"
-            styleClass="login-root"
-            xmlns="http://javafx.com/javafx/21"
+<AnchorPane xmlns="http://javafx.com/javafx/17.0.12"
             xmlns:fx="http://javafx.com/fxml/1"
-            stylesheets="@../styles/login.css">
+            fx:controller="com.auction.team3HxD.controller.LoginController"
+            stylesheets="@../styles/login.css"
+            styleClass="login-root">
 
-      <VBox styleClass="login-container"
-            alignment="CENTER"
-            spacing="15"
-            AnchorPane.bottomAnchor="0"
-            AnchorPane.leftAnchor="0"
-            AnchorPane.rightAnchor="0"
-            AnchorPane.topAnchor="0">
+   <HBox AnchorPane.topAnchor="0"
+         AnchorPane.bottomAnchor="0"
+         AnchorPane.leftAnchor="0"
+         AnchorPane.rightAnchor="0">
+
+      <!-- LEFT PANEL -->
+      <VBox prefWidth="420"
+            styleClass="left-panel">
+
          <padding>
-            <Insets top="30" right="30" bottom="30" left="30"/>
+            <Insets top="45" right="45" bottom="45" left="45"/>
          </padding>
 
-            <Label styleClass="title" text="ĐĂNG NHẬP HỆ THỐNG" />
-            <TextField fx:id="usernameField" promptText="Tên đăng nhập" styleClass="input-field" />
-            <PasswordField fx:id="passwordField" promptText="Mật khẩu" styleClass="input-field" />
-            <Button fx:id="loginButton" text="ĐĂNG NHẬP" onAction="#handleLogin" styleClass="login-button" />
-            <Label fx:id="messageLabel" styleClass="message-label" visible="false" />
-            <ProgressIndicator fx:id="loadingIndicator" styleClass="loading-indicator" visible="false" />
-            <Button fx:id="registerButton" text="Chưa có tài khoản? Đăng ký" onAction="#handleRegister" styleClass="register-button" />
+         <!-- Logo -->
+         <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label text="⚖" styleClass="logo-icon"/>
+            <Label text="3HxD" styleClass="logo-text"/>
+         </HBox>
+
+         <Region VBox.vgrow="ALWAYS"/>
+
+         <!-- Welcome -->
+         <VBox spacing="22">
+            <Label text="Welcome to&#10;3HxD!"
+                   wrapText="true"
+                   styleClass="welcome-title"/>
+
+            <Label text="Đăng nhập để tham gia sàn đấu giá sôi động nhất thế giới."
+                   wrapText="true"
+                   maxWidth="280"
+                   styleClass="welcome-description"/>
+         </VBox>
+
+         <Region VBox.vgrow="ALWAYS"/>
 
       </VBox>
+
+      <!-- RIGHT PANEL -->
+      <StackPane HBox.hgrow="ALWAYS"
+                 styleClass="right-panel">
+
+         <VBox alignment="CENTER"
+               spacing="28"
+               prefWidth="520"
+               maxWidth="520"
+               styleClass="login-card">
+
+            <padding>
+               <Insets top="50" right="45" bottom="45" left="45"/>
+            </padding>
+
+            <!-- HEADER -->
+            <VBox alignment="CENTER" spacing="10">
+               <Label text="ĐĂNG NHẬP"
+                      styleClass="login-title"/>
+
+               <Label text="THÔNG TIN HỆ THỐNG"
+                      styleClass="login-subtitle"/>
+            </VBox>
+
+            <!-- INPUTS -->
+            <VBox spacing="18">
+
+               <TextField fx:id="usernameField"
+                          promptText="Tên đăng nhập"
+                          styleClass="modern-input"/>
+
+               <PasswordField fx:id="passwordField"
+                              promptText="Mật khẩu"
+                              styleClass="modern-input"/>
+            </VBox>
+
+            <!-- LOGIN BUTTON -->
+            <Button fx:id="loginButton"
+                    text="ĐĂNG NHẬP   →"
+                    onAction="#handleLogin"
+                    maxWidth="Infinity"
+                    styleClass="login-button"/>
+
+            <!-- OR -->
+            <HBox alignment="CENTER"
+                  spacing="12">
+
+               <Separator prefWidth="120"
+                          styleClass="separator-modern"/>
+
+               <Label text="HOẶC"
+                      styleClass="or-text"/>
+
+               <Separator prefWidth="120"
+                          styleClass="separator-modern"/>
+            </HBox>
+
+            <!-- REGISTER -->
+            <Button fx:id="registerButton"
+                    text="👤  Bạn chưa có tài khoản? Đăng ký ngay"
+                    onAction="#handleRegister"
+                    maxWidth="Infinity"
+                    styleClass="register-button"/>
+
+            <!-- MESSAGE -->
+            <StackPane>
+
+               <ProgressIndicator fx:id="loadingIndicator"
+                                  visible="false"
+                                  maxHeight="26"/>
+
+               <Label fx:id="messageLabel"
+                      visible="false"
+                      styleClass="message-label"/>
+            </StackPane>
+
+         </VBox>
+
+      </StackPane>
+
+   </HBox>
 
 </AnchorPane>

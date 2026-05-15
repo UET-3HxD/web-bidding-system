@@ -1,89 +1,140 @@
-/* Nền gradient cho toàn bộ cửa sổ */
-.login-root {
-    -fx-background-color: linear-gradient(to bottom right, #1a2a6c, #b21f1f, #fdbb4d);
-    -fx-font-family: 'Segoe UI', 'Arial', sans-serif;
+.login-root{
+    -fx-background-color: radial-gradient(center 50% 20%, radius 90%, #071B44 0%, #020B1D 60%, #010611 100%);
+    -fx-font-family: "Segoe UI";
 }
 
-/* Khung đăng nhập trong suốt, có hiệu ứng mờ, bo góc, đổ bóng */
-.login-container {
-    -fx-background-color: rgba(255, 255, 255, 0.85);
-    -fx-background-radius: 20;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 20, 0.1, 0, 5);
-    -fx-max-width: 400;
-    -fx-max-height: 400;
+/* LEFT PANEL */
+
+.left-panel{
+    -fx-background-color: linear-gradient(to bottom right, rgba(24,40,76,0.96), rgba(10,18,42,0.96));
+    -fx-background-radius: 0 35 35 0;
 }
 
-/* Tiêu đề */
-.title {
-    -fx-font-size: 26px;
+.logo-icon,.logo-text{
+    -fx-text-fill: #21C7FF;
+    -fx-font-size: 32px;
     -fx-font-weight: bold;
-    -fx-text-fill: #2c3e50;
-    -fx-padding: 0 0 10 0;
 }
 
-/* Ô nhập liệu */
-.input-field {
-    -fx-pref-height: 45;
-    -fx-background-radius: 8;
-    -fx-border-radius: 8;
-    -fx-border-color: #dcdde1;
-    -fx-border-width: 1.5;
-    -fx-padding: 5 15;
-    -fx-font-size: 14px;
-    -fx-prompt-text-fill: #7f8c8d;
-    -fx-background-color: white;
-}
-
-.input-field:focused {
-    -fx-border-color: #3498db;
-    -fx-border-width: 2;
-}
-
-/* Nút đăng nhập */
-.login-button {
-    -fx-background-color: #3498db;
+.welcome-title{
     -fx-text-fill: white;
-    -fx-font-size: 16px;
+    -fx-font-size: 58px;
+    -fx-font-weight: 800;
+}
+
+.welcome-description{
+    -fx-text-fill: rgba(255,255,255,0.78);
+    -fx-font-size: 22px;
+    -fx-line-spacing: 8px;
+}
+
+/* LOGIN CARD */
+
+.login-card{
+    -fx-background-color: linear-gradient(to bottom right, rgba(17,34,68,0.92), rgba(7,16,40,0.96));
+    -fx-background-radius: 34px;
+
+    -fx-border-color: rgba(74,144,255,0.45);
+    -fx-border-radius: 34px;
+
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.55), 45, 0.25, 0, 12);
+}
+
+.login-title{
+    -fx-text-fill: white;
+    -fx-font-size: 54px;
+    -fx-font-weight: 900;
+}
+
+.login-subtitle{
+    -fx-text-fill: #19C2FF;
+    -fx-font-size: 20px;
     -fx-font-weight: bold;
-    -fx-pref-height: 45;
-    -fx-background-radius: 8;
-    -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(52, 152, 219, 0.4), 5, 0, 0, 2);
 }
 
-.login-button:hover {
-    -fx-background-color: #2980b9;
-    -fx-scale-x: 1.02;
-    -fx-scale-y: 1.02;
+/* INPUT */
+
+.modern-input{
+    -fx-background-color: linear-gradient(to bottom, #FFFFFF, #F1F5F9);
+    -fx-background-radius: 14px;
+
+    -fx-pref-height: 60px;
+    -fx-padding: 0 18;
+
+    -fx-font-size: 20px;
+    -fx-text-fill: #0F172A;
+
+    -fx-border-color: transparent;
+    -fx-border-radius: 14px;
 }
 
-/* Nút đăng ký */
-.register-button {
-    -fx-background-color: transparent;
-    -fx-text-fill: #2c3e50;
-    -fx-border-color: #2c3e50;
-    -fx-border-radius: 8;
-    -fx-pref-height: 40;
-    -fx-cursor: hand;
-    -fx-font-size: 14px;
+.modern-input:focused{
+    -fx-border-color: #2EA7FF;
+    -fx-border-width: 2px;
+
+    -fx-effect: dropshadow(gaussian, rgba(46,167,255,0.45), 16, 0.2, 0, 0);
 }
 
-.register-button:hover {
-    -fx-background-color: #2c3e50;
+/* BUTTON */
+
+.login-button{
+    -fx-background-color: linear-gradient(to right, #1FA2FF, #3B82F6, #2563EB);
+    -fx-background-radius: 18px;
+
     -fx-text-fill: white;
+    -fx-font-size: 24px;
+    -fx-font-weight: 800;
+
+    -fx-pref-height: 68px;
+    -fx-cursor: hand;
+
+    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.55), 18, 0.2, 0, 5);
 }
 
-/* Thông báo */
-.message-label {
-    -fx-font-size: 13px;
-    -fx-text-fill: #e74c3c;
-    -fx-padding: 5 0 0 0;
-    -fx-wrap-text: true;
-    -fx-alignment: center;
+.login-button:hover{
+    -fx-background-color: linear-gradient(to right, #38BDF8, #60A5FA, #3B82F6);
+    -fx-translate-y: -1px;
 }
 
-/* Loading indicator */
-.loading-indicator {
-    -fx-pref-width: 30;
-    -fx-pref-height: 30;
+/* OR */
+
+.separator-modern .line{
+    -fx-border-color: rgba(255,255,255,0.18);
+}
+
+.or-text{
+    -fx-text-fill: rgba(255,255,255,0.55);
+    -fx-font-size: 18px;
+}
+
+/* REGISTER */
+
+.register-button{
+    -fx-background-color: linear-gradient(to bottom right, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+    -fx-background-radius: 18px;
+
+    -fx-border-color: rgba(255,255,255,0.18);
+    -fx-border-radius: 18px;
+
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+
+    -fx-pref-height: 64px;
+    -fx-cursor: hand;
+}
+
+.register-button:hover{
+    -fx-background-color: linear-gradient(to bottom right, rgba(255,255,255,0.16), rgba(255,255,255,0.08));
+    -fx-border-color: rgba(56,189,248,0.6);
+
+    -fx-translate-y: -1px;
+}
+
+/* MESSAGE */
+
+.message-label{
+    -fx-text-fill: #FF7A7A;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
 }
