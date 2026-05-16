@@ -60,7 +60,7 @@ public class LoginController {
                         showMessage("Đăng nhập thành công!", true);
                         // Đã sửa đường dẫn chuyển sang AccountView
                         SceneSwitcher.getInstance().switchTo(
-                                "/fxml/AccountView.fxml",
+                                "/fxml/account.fxml",
                                 loginButton,
                                 "Tài khoản"
                         );
@@ -116,7 +116,7 @@ public class LoginController {
                 UserSession.getInstance().login(username, email, role);
 
                 showMessage("Đăng nhập thành công!", true);
-                SceneSwitcher.getInstance().switchTo("/fxml/account_view.fxml", loginButton, "Tài khoản");
+                SceneSwitcher.getInstance().switchTo("/fxml/account.fxml", loginButton, "Tài khoản");
             }
             else if(response.startsWith("LOGIN_ERR_USER_NOT_FOUND")) {
                 showMessage("Tài khoản không tồn tại.", false);

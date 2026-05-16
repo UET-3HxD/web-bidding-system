@@ -1,14 +1,12 @@
 package com.auction.team3HxD.controller;
 
 import com.auction.team3HxD.util.SceneSwitcher;
-import com.auction.team3HxD.util.SocketManager;
-import javafx.application.Platform;
+import javafx.scene.Node;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
-import javafx.scene.control.Button;
 
 public class ChangePasswordController {
 
@@ -58,13 +56,13 @@ public class ChangePasswordController {
     void handleCancel(ActionEvent event) {
         // Quay về trang AccountView
         // Giả sử nút bấm Hủy kích hoạt chuyển trang, truyền event.getSource() làm node
-        SceneSwitcher.getInstance().switchTo("/fxml/account_view.fxml", (javafx.scene.Node) event.getSource(), "Tài khoản");
+        SceneSwitcher.getInstance().switchTo("/fxml/account.fxml", (javafx.scene.Node) event.getSource(), "Tài khoản");
     }
 
     @FXML
     void handleBackToAccount(javafx.scene.input.MouseEvent event) {
         com.auction.team3HxD.util.SceneSwitcher.getInstance().switchTo(
-                "/fxml/account_view.fxml",
+                "/fxml/account.fxml",
                 (javafx.scene.Node) event.getSource(),
                 "Tài khoản"
         );
@@ -80,6 +78,16 @@ public class ChangePasswordController {
             String errorMsg = response.split("\\|")[1];
             showAlert("Thất bại", "Lỗi: " + errorMsg);
         }
+    }
+
+    @FXML void handleGoToAccount(ActionEvent e)  { switchTo("/fxml/account.fxml", e); }
+    @FXML void handleGoToAuction(ActionEvent e)  { switchTo("/fxml/main_auction.fxml", e); }
+    @FXML void handleGoToMyBids(ActionEvent e)   { switchTo("/fxml/my_bids.fxml", e); }
+    @FXML void handleGoToProducts(ActionEvent e) { switchTo("/fxml/product_management.fxml", e); }
+    @FXML void handleGoToHelp(ActionEvent e)    { switchTo("/fxml/help.fxml", e); }
+
+    private void switchTo(String fxml, ActionEvent e) {
+        SceneSwitcher.getInstance().switchTo(fxml, (Node) e.getSource(), "");
     }
 
     private void showAlert(String title, String content) {

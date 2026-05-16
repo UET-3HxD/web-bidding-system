@@ -1,18 +1,13 @@
 package com.auction.team3HxD.controller;
 
-import com.auction.team3HxD.model.User;
 import com.auction.team3HxD.util.SceneSwitcher;
 import com.auction.team3HxD.util.SocketService;
 import com.auction.team3HxD.util.UserSession;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.Button;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ButtonBar;
-import java.util.Optional;
 
 public class AccountController {
     @FXML private Label lblFullName;
@@ -37,16 +32,11 @@ public class AccountController {
         }
     }
 
-    @FXML
-    void handleOpenChangePasswordDialog(ActionEvent event) {
-        // Ép kiểu event.getSource() thành Node để truyền cho SceneSwitcher
-        SceneSwitcher.getInstance().switchTo("/fxml/ChangePasswordView.fxml", (javafx.scene.Node) event.getSource(), "Đổi mật khẩu");
+    @FXML void handleOpenChangePasswordDialog(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/change_password.fxml", (Node) event.getSource(), "Đổi mật khẩu");
     }
-
-    @FXML
-    void handleOpenChangeEmailDialog(ActionEvent event) {
-        // Chuyển sang màn hình Đổi Email
-        SceneSwitcher.getInstance().switchTo("/fxml/ChangeEmailView.fxml", (javafx.scene.Node) event.getSource(), "Đổi Email");
+    @FXML void handleOpenChangeEmailDialog(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/change_email.fxml", (Node) event.getSource(), "Đổi Email");
     }
 
     @FXML
@@ -78,22 +68,17 @@ public class AccountController {
             SceneSwitcher.getInstance().switchTo("/fxml/login.fxml", (Node) event.getSource(), "Đăng nhập");
         }
     }
-    @FXML
-    void handleGoToProducts(ActionEvent event) {
-        // Chuyển sang màn hình Quản lý sản phẩm
-        com.auction.team3HxD.util.SceneSwitcher.getInstance().switchTo(
-                "/fxml/ProductManagementView.fxml", // Đường dẫn file FXML sản phẩm của Captain
-                (javafx.scene.Node) event.getSource(),
-                "Quản lý sản phẩm - BidVN"
-        );
+
+    @FXML void handleGoToAuction(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/main_auction.fxml", (Node) event.getSource(), "Sàn đấu giá");
     }
-    @FXML
-    void handleGoToAuction(ActionEvent event) {
-        // Chuyển sang màn hình acc
-        com.auction.team3HxD.util.SceneSwitcher.getInstance().switchTo(
-                "/fxml/MainAuctionView.fxml",
-                (javafx.scene.Node) event.getSource(),
-                "Sàn đấu giá"
-        );
+    @FXML void handleGoToProducts(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/product_management.fxml", (Node) event.getSource(), "Quản lý sản phẩm");
+    }
+    @FXML void handleGoToMyBids(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/my_bids.fxml", (Node) event.getSource(), "Bid đang tham gia");
+    }
+    @FXML void handleGoToHelp(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/help.fxml", (Node) event.getSource(), "Trợ giúp");
     }
 }

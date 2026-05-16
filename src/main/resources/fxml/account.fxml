@@ -29,9 +29,9 @@
             <VBox spacing="5">
                 <Button text="👤   Tài khoản" styleClass="menu-btn, menu-btn-active" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
                 <Button text="⏹   Sàn đấu giá" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToAuction"/>
-                <Button text="⏱   Bid đang tham gia" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
+                <Button text="⏱   Bid đang tham gia" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToMyBids"/>
                 <Button text="📦   Sản phẩm của bạn" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToProducts"/>
-                <Button text="⚙   Trợ giúp" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
+                <Button text="⚙   Trợ giúp" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToHelp"/>
             </VBox>
 
             <Region VBox.vgrow="ALWAYS" />
