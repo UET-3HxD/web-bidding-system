@@ -26,6 +26,11 @@ public class HelpController {
     @FXML void handleGoToMyBids(ActionEvent e)   { switchTo("/fxml/my_bids.fxml", e); }
     @FXML void handleGoToProducts(ActionEvent e) { switchTo("/fxml/product_management.fxml", e); }
 
+    // Dành cho Admin (sidebar Admin)
+    @FXML void handleGoToDashboard(ActionEvent e) { switchTo("/fxml/admin_dashboard.fxml", e); }
+    @FXML void handleGoToApprove(ActionEvent e)   { switchTo("/fxml/admin_approve_products.fxml", e); }
+    @FXML void handleGoToUsers(ActionEvent e)     { switchTo("/fxml/admin_manage_users.fxml", e); }
+    @FXML void handleGoToAdminHelp(ActionEvent e) { switchTo("/fxml/admin_help.fxml", e); }
     private void switchTo(String fxml, ActionEvent e) {
         SceneSwitcher.getInstance().switchTo(fxml, (Node) e.getSource(), "");
     }

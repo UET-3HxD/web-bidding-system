@@ -81,4 +81,40 @@ public class AccountController {
     @FXML void handleGoToHelp(ActionEvent event) {
         SceneSwitcher.getInstance().switchTo("/fxml/help.fxml", (Node) event.getSource(), "Trợ giúp");
     }
+
+    @FXML
+    void handleGoToDashboard(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo(
+                "/fxml/admin_dashboard.fxml",
+                (Node) event.getSource(),
+                "Admin Dashboard"
+        );
+    }
+
+    @FXML
+    void handleGoToApprove(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo(
+                "/fxml/admin_approve_products.fxml",
+                (Node) event.getSource(),
+                "Duyệt sản phẩm"
+        );
+    }
+
+    @FXML
+    void handleGoToUsers(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo(
+                "/fxml/admin_manage_users.fxml",
+                (Node) event.getSource(),
+                "Quản lý người dùng"
+        );
+    }
+
+    @FXML
+    void handleGoToAdminHelp(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo(
+                "/fxml/admin_help.fxml",
+                (Node) event.getSource(),
+                "Trợ giúp"
+        );
+    }
 }
