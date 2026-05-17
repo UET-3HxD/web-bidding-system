@@ -34,10 +34,10 @@ public class AdminDashboardController {
     }
 
     // Điều hướng sidebar
-    @FXML void handleGoToAccount(ActionEvent e) { switchTo("/fxml/admin_account.fxml", e); }
+    @FXML void handleGoToAccount(ActionEvent e) { switchTo("/fxml/account.fxml", e); }
     @FXML void handleGoToApprove(ActionEvent e)  { switchTo("/fxml/admin_approve_products.fxml", e); }
     @FXML void handleGoToUsers(ActionEvent e)    { switchTo("/fxml/admin_manage_users.fxml", e); }
-    @FXML void handleGoToAdminHelp(ActionEvent e)    { switchTo("/fxml/admin_help.fxml", e); }
+    @FXML void handleGoToAdminHelp(ActionEvent e)    { switchTo("/fxml/help.fxml", e); }
 
     private void switchTo(String fxml, ActionEvent e) {
         SceneSwitcher.getInstance().switchTo(fxml, (Node) e.getSource(), "");

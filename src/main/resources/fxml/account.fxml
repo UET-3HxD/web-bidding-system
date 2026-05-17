@@ -12,30 +12,35 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
 
-<BorderPane prefHeight="700.0" prefWidth="1000.0" stylesheets="@../styles/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.team3HxD.controller.AccountController">
+<BorderPane prefHeight="700.0" prefWidth="1100.0" stylesheets="@../styles/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.team3HxD.controller.AccountController">
 
     <left>
         <VBox styleClass="sidebar" prefWidth="250.0">
             <padding>
                 <Insets top="20" right="15" bottom="20" left="15"/>
             </padding>
-
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <padding><Insets bottom="30" left="10"/></padding>
                 <Label text="⚖" styleClass="logo-icon"/>
                 <Label text="3HxD" styleClass="logo-text"/>
             </HBox>
-
             <VBox spacing="5">
-                <Button text="👤   Tài khoản" styleClass="menu-btn, menu-btn-active" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                <Button text="⏹   Sàn đấu giá" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToAuction"/>
-                <Button text="⏱   Bid đang tham gia" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToMyBids"/>
-                <Button text="📦   Sản phẩm của bạn" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToProducts"/>
-                <Button text="⚙   Trợ giúp" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToHelp"/>
+                <!-- Nút Tài khoản (active) -->
+                <Button fx:id="btnAccount" text="👤   Tài khoản" styleClass="menu-btn, menu-btn-active" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
+
+                <!-- USER -->
+                <Button fx:id="btnAuction" text="⏹   Sàn đấu giá" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToAuction"/>
+                <Button fx:id="btnMyBids" text="⏱   Bid đang tham gia" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToMyBids"/>
+                <Button fx:id="btnProducts" text="📦   Sản phẩm của bạn" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToProducts"/>
+                <Button fx:id="btnHelp" text="⚙   Trợ giúp" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToHelp"/>
+
+                <!-- ADMIN -->
+                <Button fx:id="btnDashboard" text="🛡   Dashboard" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToDashboard" visible="false" managed="false"/>
+                <Button fx:id="btnApprove" text="📋   Duyệt sản phẩm" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToApprove" visible="false" managed="false"/>
+                <Button fx:id="btnUsers" text="👥   Quản lý người dùng" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToUsers" visible="false" managed="false"/>
+                <Button fx:id="btnAdminHelp" text="⚙   Trợ giúp" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToAdminHelp" visible="false" managed="false"/>
             </VBox>
-
             <Region VBox.vgrow="ALWAYS" />
-
             <HBox alignment="CENTER_LEFT" spacing="10" styleClass="sidebar-profile">
                 <StackPane>
                     <Circle radius="18" fill="#5A6C8A"/>
@@ -54,12 +59,10 @@
             <padding>
                 <Insets top="40" right="60" bottom="40" left="60"/>
             </padding>
-
             <VBox spacing="5">
                 <Label text="Tài khoản" styleClass="page-title"/>
                 <Label text="Quản lý thông tin và bảo mật tài khoản của bạn" styleClass="page-subtitle"/>
             </VBox>
-
             <HBox styleClass="card, profile-card" spacing="20" alignment="CENTER_LEFT">
                 <StackPane>
                     <Circle radius="35" fill="#1E40AF"/>
@@ -71,10 +74,8 @@
                     <Label text="Thành viên xác thực" styleClass="badge"/>
                 </VBox>
             </HBox>
-
             <VBox spacing="15">
                 <Label text="BẢO MẬT" styleClass="section-title"/>
-
                 <HBox styleClass="card" alignment="CENTER_LEFT" spacing="15">
                     <StackPane styleClass="icon-container">
                         <Label text="🔒" styleClass="icon"/>
@@ -86,7 +87,6 @@
                     <Region HBox.hgrow="ALWAYS"/>
                     <Button fx:id="btnChangePassword" text="Đổi mật khẩu" styleClass="action-btn-primary" onAction="#handleOpenChangePasswordDialog"/>
                 </HBox>
-
                 <HBox styleClass="card" alignment="CENTER_LEFT" spacing="15">
                     <StackPane styleClass="icon-container">
                         <Label text="✉" styleClass="icon"/>
@@ -99,11 +99,8 @@
                     <Button fx:id="btnChangeEmail" text="Đổi email" styleClass="action-btn-secondary" onAction="#handleOpenChangeEmailDialog"/>
                 </HBox>
             </VBox>
-
             <Separator styleClass="divider"/>
-
             <Button fx:id="btnLogout" text="🚪 Đăng xuất" styleClass="logout-btn" onAction="#handleLogout"/>
-
         </VBox>
     </center>
 </BorderPane>

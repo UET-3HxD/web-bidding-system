@@ -12,30 +12,34 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
 
-<BorderPane prefHeight="700.0" prefWidth="1000.0" stylesheets="@../styles/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.team3HxD.controller.ChangeEmailController">
+<BorderPane prefHeight="700.0" prefWidth="1100.0" stylesheets="@../styles/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.team3HxD.controller.ChangeEmailController">
 
     <left>
         <VBox styleClass="sidebar" prefWidth="250.0">
             <padding>
                 <Insets top="20" right="15" bottom="20" left="15"/>
             </padding>
-
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <padding><Insets bottom="30" left="10"/></padding>
                 <Label text="⚖" styleClass="logo-icon"/>
                 <Label text="3HxD" styleClass="logo-text"/>
             </HBox>
-
             <VBox spacing="5">
-                <Button text="👤   Tài khoản" styleClass="menu-btn, menu-btn-active" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToAccount"/>
-                <Button text="⏹   Sàn đấu giá" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToAuction"/>
-                <Button text="⏱   Bid đang tham gia" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToMyBids"/>
-                <Button text="📦   Sản phẩm của bạn" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToProducts"/>
-                <Button text="⚙   Trợ giúp" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToHelp"/>
+                <!-- USER -->
+                <Button fx:id="btnAccount" text="👤   Tài khoản" styleClass="menu-btn, menu-btn-active" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToAccount"/>
+                <Button fx:id="btnAuction" text="⏹   Sàn đấu giá" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToAuction"/>
+                <Button fx:id="btnMyBids" text="⏱   Bid đang tham gia" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToMyBids"/>
+                <Button fx:id="btnProducts" text="📦   Sản phẩm của bạn" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToProducts"/>
+                <Button fx:id="btnHelp" text="⚙   Trợ giúp" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToHelp"/>
+
+                <!-- ADMIN -->
+                <Button fx:id="btnAdminAccount" text="👤   Tài khoản" styleClass="menu-btn, menu-btn-active" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToAdminAccount" visible="false" managed="false"/>
+                <Button fx:id="btnDashboard" text="🛡   Dashboard" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToDashboard" visible="false" managed="false"/>
+                <Button fx:id="btnApprove" text="📋   Duyệt sản phẩm" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToApprove" visible="false" managed="false"/>
+                <Button fx:id="btnUsers" text="👥   Quản lý người dùng" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToUsers" visible="false" managed="false"/>
+                <Button fx:id="btnAdminHelp" text="⚙   Trợ giúp" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToAdminHelp" visible="false" managed="false"/>
             </VBox>
-
             <Region VBox.vgrow="ALWAYS" />
-
             <HBox alignment="CENTER_LEFT" spacing="10" styleClass="sidebar-profile">
                 <StackPane>
                     <Circle radius="18" fill="#5A6C8A"/>
@@ -43,7 +47,7 @@
                 </StackPane>
                 <VBox alignment="CENTER_LEFT">
                     <Label fx:id="lblSidebarName" text="User" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
-                    <Label text="Thành viên" style="-fx-text-fill: #A0ABC0; -fx-font-size: 11px;"/>
+                    <Label fx:id="lblSidebarRole" text="Thành viên" style="-fx-text-fill: #A0ABC0; -fx-font-size: 11px;"/>
                 </VBox>
             </HBox>
         </VBox>
@@ -54,12 +58,10 @@
             <padding>
                 <Insets top="40" right="150" bottom="40" left="60"/>
             </padding>
-
             <HBox spacing="5" alignment="CENTER_LEFT">
                 <Label onMouseClicked="#handleBackToAccount" styleClass="breadcrumb-link" text="Tài khoản" />
                 <Label styleClass="breadcrumb-text" text="  &gt;  Đổi email" />
             </HBox>
-
             <HBox alignment="CENTER_LEFT" spacing="15">
                 <Label styleClass="icon-large-container" text="✉" />
                 <VBox spacing="2">
@@ -67,21 +69,17 @@
                     <Label styleClass="page-subtitle" text="Nhập địa chỉ email mới và mật khẩu hiện tại để xác thực" />
                 </VBox>
             </HBox>
-
             <VBox spacing="20">
                 <VBox spacing="8">
                     <Label styleClass="input-label" text="Địa chỉ email mới" />
                     <TextField fx:id="txtNewEmail" promptText="Ví dụ: nguyenvana@email.com" styleClass="input-field" />
                 </VBox>
-
                 <VBox spacing="8">
                     <Label styleClass="input-label" text="Mật khẩu hiện tại" />
                     <PasswordField fx:id="txtCurrentPass" promptText="Nhập mật khẩu của bạn để xác nhận" styleClass="input-field" />
                 </VBox>
             </VBox>
-
             <Region VBox.vgrow="ALWAYS" />
-
             <HBox alignment="CENTER_LEFT" spacing="15">
                 <Button onAction="#handleSaveEmail" prefWidth="300" styleClass="action-btn-primary" text="Lưu thay đổi" />
                 <Button onAction="#handleCancel" prefWidth="100" styleClass="action-btn-secondary" text="Huỷ" />
