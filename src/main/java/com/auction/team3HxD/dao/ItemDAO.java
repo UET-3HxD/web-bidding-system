@@ -3,25 +3,20 @@ package com.auction.team3HxD.dao;
 import com.auction.team3HxD.model.*;
 import com.auction.team3HxD.util.DBConnection;
 
-import com.auction.team3HxD.model.Item;
-import com.auction.team3HxD.util.DBConnection;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.sql.*;
-import java.util.UUID;
-
 public class ItemDAO {
 
     private final UserDAO userDAO = new UserDAO();
 
-    public Item findById(int id) { // Đảm bảo là int chứ không phải UUID
+    public Item findById(int id) {
         String sql = "SELECT * FROM items WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, id); // Dùng setInt
+            ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return mapResultSetToItem(rs);
@@ -32,27 +27,27 @@ public class ItemDAO {
     }
 
     public boolean saveItem(Item item, String type) {
-        // 1. Thêm cột item_type vào câu lệnh SQL
         String sql = "INSERT INTO items (seller_id, product_name, starting_price, description, image_path, item_type) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            // 2. Lấy dữ liệu từ đối tượng Item (Polymorphism)
             pstmt.setInt(1, item.getSellerId());
             pstmt.setString(2, item.getName());
             pstmt.setDouble(3, item.getPrice());
             pstmt.setString(4, item.getDescription());
             pstmt.setString(5, item.getImagePath());
-
-            // 3. Sử dụng tham số type được truyền vào từ UserService
-            // Đảm bảo type khớp với ENUM ('ELECTRONIC', 'ART', 'VEHICLE') trong MySQL
             pstmt.setString(6, type.toUpperCase());
+
+            System.out.println(">>> saveItem: sellerId=" + item.getSellerId() +
+                    ", name=" + item.getName() +
+                    ", price=" + item.getPrice() +
+                    ", type=" + type.toUpperCase());
 
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Lỗi SQL khi lưu Item: " + e.getMessage());
+            System.err.println(">>> Lỗi SQL khi lưu Item: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -78,7 +73,6 @@ public class ItemDAO {
                 double price = rs.getDouble("starting_price");
                 String path = rs.getString("image_path");
                 String status = rs.getString("status");
-                // Sử dụng getObject cho LocalDateTime
                 LocalDateTime createdAt = rs.getObject("created_at", LocalDateTime.class);
 
                 switch (type) {
@@ -97,8 +91,8 @@ public class ItemDAO {
         } catch (SQLException e) { e.printStackTrace(); }
         return itemList;
     }
+
     public boolean updateItemInfo(int itemId, String name, double price, String desc) {
-        // Chỉ update nếu sản phẩm KHÔNG ở trạng thái LIVE hoặc SOLD
         String sql = "UPDATE items SET product_name = ?, starting_price = ?, description = ?, status = 'WAITING' " +
                 "WHERE id = ? AND status NOT IN ('LIVE', 'SOLD')";
 
@@ -116,8 +110,8 @@ public class ItemDAO {
             return false;
         }
     }
+
     public boolean deleteItem(int itemId) {
-        // Chỉ cho phép xóa nếu sản phẩm KHÔNG ở trạng thái LIVE hoặc SOLD để đảm bảo tính minh bạch của sàn
         String sql = "DELETE FROM items WHERE id = ? AND status NOT IN ('LIVE', 'SOLD')";
 
         try (Connection conn = DBConnection.getConnection();
@@ -130,6 +124,75 @@ public class ItemDAO {
             return false;
         }
     }
+
+    // ==================== ADMIN: Lấy sản phẩm theo trạng thái ====================
+    /**
+     * Lấy danh sách sản phẩm theo trạng thái (WAITING, APPROVED, REJECTED, ACTIVE...).
+     * JOIN với bảng users để lấy tên người bán.
+     */
+    public List<Item> getItemsByStatus(String status) {
+        List<Item> list = new ArrayList<>();
+        String sql = "SELECT * FROM items WHERE status = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                String type = rs.getString("item_type");
+                Item item = null;
+
+                int id = rs.getInt("id");
+                int sellerId = rs.getInt("seller_id");
+                String name = rs.getString("product_name");
+                String desc = rs.getString("description");
+                double price = rs.getDouble("starting_price");
+                String path = rs.getString("image_path");
+                String itemStatus = rs.getString("status");
+                LocalDateTime createdAt = rs.getObject("created_at", LocalDateTime.class);
+
+                switch (type != null ? type : "ELECTRONIC") {
+                    case "ELECTRONIC":
+                        item = new Electronic(id, sellerId, name, desc, price, path, itemStatus, createdAt);
+                        break;
+                    case "ART":
+                        item = new Art(id, sellerId, name, desc, price, path, itemStatus, createdAt);
+                        break;
+                    case "VEHICLE":
+                        item = new Vehicle(id, sellerId, name, desc, price, path, itemStatus, createdAt);
+                        break;
+                    default:
+                        item = new Electronic(id, sellerId, name, desc, price, path, itemStatus, createdAt);
+                }
+
+                if (item != null) {
+                    list.add(item);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // ==================== ADMIN: Cập nhật trạng thái sản phẩm ====================
+    /**
+     * Cập nhật trạng thái cho sản phẩm (APPROVED, REJECTED...).
+     */
+    public boolean updateItemStatus(int itemId, String newStatus) {
+        String sql = "UPDATE items SET status = ? WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newStatus);
+            ps.setInt(2, itemId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     // ===== MAPPING =====
     private Item mapResultSetToItem(ResultSet rs) throws SQLException {
         String typeFromDB = rs.getString("item_type");
@@ -150,7 +213,6 @@ public class ItemDAO {
                 break;
         }
 
-        // Sau khi đã có đối tượng (đã được khởi tạo lớp con), ta nạp các thuộc tính chung
         item.setId(rs.getInt("id"));
         item.setSellerId(rs.getInt("seller_id"));
         item.setName(rs.getString("product_name"));
