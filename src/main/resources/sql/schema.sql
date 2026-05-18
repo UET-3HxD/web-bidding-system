@@ -33,37 +33,37 @@ CREATE TABLE `users` (
 
 DROP TABLE IF EXISTS `items`;
 CREATE TABLE `items` (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    seller_id INT NOT NULL,
-    product_name VARCHAR(255) NOT NULL,
-    description TEXT,
-    starting_price DECIMAL(15, 2),
-    image_path TEXT,
+                         id INT AUTO_INCREMENT PRIMARY KEY,
+                         seller_id INT NOT NULL,
+                         product_name VARCHAR(255) NOT NULL,
+                         description TEXT,
+                         starting_price DECIMAL(15, 2),
+                         image_path TEXT,
     -- Cột phân loại quan trọng
-    item_type ENUM('ELECTRONIC', 'ART', 'VEHICLE') NOT NULL, 
-    status ENUM('WAITING', 'LIVE', 'SOLD', 'APPROVED') DEFAULT 'WAITING',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
+                         item_type ENUM('ELECTRONIC', 'ART', 'VEHICLE') NOT NULL,
+                         status ENUM('WAITING', 'LIVE', 'SOLD', 'APPROVED', 'REJECTED') DEFAULT 'WAITING',
+                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                         FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
 );
 USE auction_db;
 DROP TABLE IF EXISTS `auction_sessions`;
 CREATE TABLE auction_sessions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    item_id INT NOT NULL,
-    start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    end_time TIMESTAMP NOT NULL,
-    status ENUM('ACTIVE', 'ENDED', 'CANCELLED') DEFAULT 'ACTIVE',
-    FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
+                                  id INT AUTO_INCREMENT PRIMARY KEY,
+                                  item_id INT NOT NULL,
+                                  start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                  end_time TIMESTAMP NOT NULL,
+                                  status ENUM('ACTIVE', 'ENDED', 'CANCELLED') DEFAULT 'ACTIVE',
+                                  FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
 );
 DROP TABLE IF EXISTS `bids`;
 CREATE TABLE bids (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    auction_id INT NOT NULL,
-    user_id INT NOT NULL,
-    bid_amount DECIMAL(15, 2) NOT NULL,
-    bid_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (auction_id) REFERENCES auction_sessions(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                      id INT AUTO_INCREMENT PRIMARY KEY,
+                      auction_id INT NOT NULL,
+                      user_id INT NOT NULL,
+                      bid_amount DECIMAL(15, 2) NOT NULL,
+                      bid_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                      FOREIGN KEY (auction_id) REFERENCES auction_sessions(id) ON DELETE CASCADE,
+                      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 /*!40101 SET character_set_client = @saved_cs_client */;
 

@@ -250,6 +250,32 @@ public class BidRoomController {
             lblYourLastBid.setStyle("-fx-text-fill: #F43F5E; -fx-font-size: 22px; -fx-font-weight: bold;");
         }
     }
+    private void handleAuctionEnd() {
+        Platform.runLater(() -> {
+            txtBidInput.setDisable(true);
+            btnPlaceBid.setDisable(true);
+
+            if (myLastBid > 0 && myLastBid >= currentHighestPrice) {
+
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Chúc mừng!");
+                alert.setHeaderText(null);
+                alert.setContentText("bạn đã thắng sản phẩm này! vào mục \"bid đang tham gia\" để xem sản phẩm vừa thắng.");
+
+                alert.showAndWait();
+                navigateToMainArea();
+
+            } else {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Phiên đấu giá kết thúc");
+                alert.setHeaderText(null);
+                alert.setContentText("phiên đấu giá đã kết thúc. nhấn \"Ok\" để quay trở về khu vực chính.");
+
+                alert.showAndWait();
+                navigateToMainArea();
+            }
+        });
+    }
     private void startCountdown() {
         // 1. Dọn dẹp Timeline cũ nếu có (để tránh lỗi đếm lùi nhanh gấp đôi nếu gọi hàm 2 lần)
         if (countdownTimeline != null) {
@@ -271,12 +297,9 @@ public class BidRoomController {
             } else {
                 // Khi hết giờ
                 lblTimeLeft.setText("Đã kết thúc");
-                lblTimeLeft.setStyle("-fx-text-fill: #F43F5E;"); // Đổi màu đỏ hồng cảnh báo
-
-                btnPlaceBid.setDisable(true); // Khóa luôn nút đặt giá
-                txtBidInput.setDisable(true); // Khóa ô nhập tiền
-
-                countdownTimeline.stop(); // Dừng đồng hồ
+                lblTimeLeft.setStyle("-fx-text-fill: #F43F5E;");
+                handleAuctionEnd();
+                countdownTimeline.stop();
             }
         }));
 
@@ -284,18 +307,20 @@ public class BidRoomController {
         countdownTimeline.play(); // Bắt đầu đếm!
     }
 
-    @FXML void handleGoToAccount(ActionEvent event) {
-        SceneSwitcher.getInstance().switchTo("/fxml/account.fxml", (Node) event.getSource(), "Tài khoản");
-    }
-    @FXML void handleGoToProducts(ActionEvent event) {
-        SceneSwitcher.getInstance().switchTo("/fxml/product_management.fxml", (Node) event.getSource(), "Quản lý sản phẩm");
-    }
-    // Thêm các nút thiếu
-    @FXML void handleGoToMyBids(ActionEvent event) {
-        SceneSwitcher.getInstance().switchTo("/fxml/my_bids.fxml", (Node) event.getSource(), "Bid đang tham gia");
-    }
-    @FXML void handleGoToHelp(ActionEvent event) {
-        SceneSwitcher.getInstance().switchTo("/fxml/help.fxml", (Node) event.getSource(), "Trợ giúp");
+    @FXML void handleGoToAccount(ActionEvent event) {SceneSwitcher.getInstance().switchTo("/fxml/account.fxml", (Node) event.getSource(), "Tài khoản");}
+    @FXML void handleGoToProducts(ActionEvent event) {SceneSwitcher.getInstance().switchTo("/fxml/product_management.fxml", (Node) event.getSource(), "Quản lý sản phẩm");}
+    @FXML void handleGoToMyBids(ActionEvent event) {SceneSwitcher.getInstance().switchTo("/fxml/my_bids.fxml", (Node) event.getSource(), "Bid đang tham gia");}
+    @FXML void handleGoToHelp(ActionEvent event) {SceneSwitcher.getInstance().switchTo("/fxml/help.fxml", (Node) event.getSource(), "Trợ giúp");}
+    private void navigateToMainArea() {
+        try {
+            com.auction.team3HxD.util.SceneSwitcher.getInstance().switchTo(
+                    "/fxml/main_auction.fxml",
+                    btnPlaceBid,
+                    "Sàn Đấu Giá"
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void showAlert(String title, String content, Alert.AlertType type) {

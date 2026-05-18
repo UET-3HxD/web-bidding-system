@@ -97,4 +97,19 @@ public class SocketService {
     public boolean isConnected() {
         return socket != null && !socket.isClosed();
     }
+    private void handleForcedLogout(String reason) {
+        javafx.application.Platform.runLater(() -> {
+            com.auction.team3HxD.util.UserSession.getInstance().logout();
+            com.auction.team3HxD.util.SceneSwitcher.getInstance().switchTo(
+                    "/fxml/login.fxml",
+                    com.auction.team3HxD.Main.globalStage,
+                    "Đăng nhập"
+            );
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+            alert.setTitle("Tài khoản bị khóa");
+            alert.setHeaderText("Bắt buộc đăng xuất!");
+            alert.setContentText(reason);
+            alert.showAndWait();
+        });
+    }
 }

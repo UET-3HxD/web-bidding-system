@@ -6,27 +6,18 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class Main extends Application {
+    public static Stage globalStage;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-
-        FXMLLoader loader =
-                new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
-
+        globalStage = primaryStage;
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
         Scene scene = new Scene(loader.load());
 
         primaryStage.setTitle("Hệ thống đấu giá trực tuyến");
         primaryStage.setScene(scene);
-
-        // Fullscreen
-        primaryStage.setFullScreen(true);
-
-        // Optional: ẩn thông báo ESC to exit
+        primaryStage.setFullScreen(false);
         primaryStage.setFullScreenExitHint("");
-
-        // Optional: phím thoát fullscreen
-        // primaryStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
-
         primaryStage.show();
     }
 

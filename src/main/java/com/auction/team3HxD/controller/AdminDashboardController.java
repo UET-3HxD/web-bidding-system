@@ -1,7 +1,9 @@
 package com.auction.team3HxD.controller;
 
 import com.auction.team3HxD.util.SceneSwitcher;
+import com.auction.team3HxD.util.SocketService;
 import com.auction.team3HxD.util.UserSession;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -25,15 +27,34 @@ public class AdminDashboardController {
             String shortName = username.substring(0, Math.min(username.length(), 2)).toUpperCase();
             lblSidebarAvatar.setText(shortName);
         }
-        // TODO: Lấy dữ liệu thống kê từ server
-        lblPendingCount.setText("...");
-        lblLiveCount.setText("...");
-        lblUserCount.setText("...");
-        lblServerStatus.setText("🟢 Đang hoạt động");
-        lblUptime.setText("...");
+
+        // 1. Đăng ký nhận tin nhắn từ Server
+        SocketService.getInstance().setMessageHandler(this::handleServerResponse);
+
+        // 2. Gửi lệnh yêu cầu lấy dữ liệu thống kê
+        SocketService.getInstance().send("GET_ADMIN_DASHBOARD");
     }
 
-    // Điều hướng sidebar
+    // Hàm xử lý dữ liệu Server trả về
+    private void handleServerResponse(String message) {
+        Platform.runLater(() -> {
+            String[] parts = message.split("\\|");
+            String cmd = parts[0];
+
+            if (cmd.equals("ADMIN_DASHBOARD_SUCCESS")) {
+                // Định dạng nhận: ADMIN_DASHBOARD_SUCCESS|pendingCount|liveCount|userCount|uptime
+                if (parts.length >= 5) {
+                    lblPendingCount.setText(parts[1]);
+                    lblLiveCount.setText(parts[2]);
+                    lblUserCount.setText(parts[3]);
+                    lblUptime.setText(parts[4]);
+                    lblServerStatus.setText("🟢 Đang hoạt động");
+                }
+            }
+        });
+    }
+
+    // --- Các hàm điều hướng sidebar giữ nguyên ---
     @FXML void handleGoToAccount(ActionEvent e) { switchTo("/fxml/account.fxml", e); }
     @FXML void handleGoToApprove(ActionEvent e)  { switchTo("/fxml/admin_approve_products.fxml", e); }
     @FXML void handleGoToUsers(ActionEvent e)    { switchTo("/fxml/admin_manage_users.fxml", e); }

@@ -15,6 +15,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.auction.team3HxD.network.AuctionServer.broadcast;
 
@@ -29,6 +31,7 @@ public class ClientHandler implements Runnable {
     private AuctionDAO auctionDAO = new AuctionDAO();
     private AuctionService auctionService = new AuctionService();
     private int currentUserId = -1;
+    public static final Map<Integer, ClientHandler> activeClients = new ConcurrentHashMap<>();
 
     public ClientHandler(Socket socket) {
         this.socket = socket;
@@ -173,51 +176,19 @@ public class ClientHandler implements Runnable {
                             String response = userService.getLiveAuctionsMessage();
                             out.println(response);
                         }
-                        // ===== ADMIN COMMANDS =====
-                        else if (cmd.equals("GET_PENDING_ITEMS")) {
+                        else if (cmd.equals("GET_BID_HISTORY")) {
                             try {
-                                if (!userService.isAdmin(currentUserId)) {
-                                    out.println("ERR|Bạn không có quyền thực hiện thao tác này!");
-                                    continue;
-                                }
-                                String response = userService.getPendingItemsList();
-                                out.println(response);
-                            } catch (Exception e) {
-                                out.println("PENDING_ITEMS_EMPTY");
-                            }
-                        }
-                        else if (cmd.equals("APPROVE_ITEM")) {
-                            try {
-                                if (!userService.isAdmin(currentUserId)) {
-                                    out.println("ERR|Bạn không có quyền!");
-                                    continue;
-                                }
-                                int itemId = Integer.parseInt(parts[1]);
-                                boolean success = userService.approveItem(itemId);
-                                if (success) {
-                                    out.println("APPROVE_SUCCESS");
+                                int historyUserId = this.currentUserId;
+                                List<String> historyRecords = auctionDAO.getBidHistory(historyUserId);
+                                if (historyRecords.isEmpty()) {
+                                    out.println("BID_HISTORY_SUCCESS|EMPTY");
                                 } else {
-                                    out.println("APPROVE_ERR|Không thể duyệt sản phẩm này");
+                                    String payload = String.join("|", historyRecords);
+                                    out.println("BID_HISTORY_SUCCESS|" + payload);
                                 }
+                                out.flush();
                             } catch (Exception e) {
-                                out.println("APPROVE_ERR|Dữ liệu không hợp lệ");
-                            }
-                        }
-                        else if (cmd.equals("REJECT_ITEM")) {
-                            try {
-                                if (!userService.isAdmin(currentUserId)) {
-                                    out.println("ERR|Bạn không có quyền!");
-                                    continue;
-                                }
-                                int itemId = Integer.parseInt(parts[1]);
-                                boolean success = userService.rejectItem(itemId);
-                                if (success) {
-                                    out.println("REJECT_SUCCESS");
-                                } else {
-                                    out.println("REJECT_ERR|Không thể từ chối sản phẩm này");
-                                }
-                            } catch (Exception e) {
-                                out.println("REJECT_ERR|Dữ liệu không hợp lệ");
+                                e.printStackTrace();
                             }
                         }
                         else if (cmd.equals("BID") || cmd.equals("CHAT")) {
@@ -272,6 +243,88 @@ public class ClientHandler implements Runnable {
                                 e.printStackTrace();
                             }
                         }
+                        // ===== ADMIN COMMANDS =====
+                        else if (cmd.equals("GET_PENDING_ITEMS")) {
+                            try {
+                                if (!userService.isAdmin(currentUserId)) {
+                                    out.println("ERR|Bạn không có quyền thực hiện thao tác này!");
+                                    continue;
+                                }
+                                String response = userService.getPendingItemsList();
+                                out.println(response);
+                            } catch (Exception e) {
+                                out.println("PENDING_ITEMS_EMPTY");
+                            }
+                        }
+                        else if (cmd.equals("APPROVE_ITEM")) {
+                            try {
+                                if (!userService.isAdmin(currentUserId)) {
+                                    out.println("ERR|Bạn không có quyền!");
+                                    continue;
+                                }
+                                int itemId = Integer.parseInt(parts[1]);
+                                boolean success = userService.approveItem(itemId);
+                                if (success) {
+                                    out.println("APPROVE_SUCCESS");
+                                } else {
+                                    out.println("APPROVE_ERR|Không thể duyệt sản phẩm này");
+                                }
+                            } catch (Exception e) {
+                                out.println("APPROVE_ERR|Dữ liệu không hợp lệ");
+                            }
+                        }
+                        else if (cmd.equals("REJECT_ITEM")) {
+                            try {
+                                if (!userService.isAdmin(currentUserId)) {
+                                    out.println("ERR|Bạn không có quyền!");
+                                    continue;
+                                }
+                                int itemId = Integer.parseInt(parts[1]);
+                                boolean success = userService.rejectItem(itemId);
+                                if (success) {
+                                    out.println("REJECT_SUCCESS");
+                                } else {
+                                    out.println("REJECT_ERR|Không thể từ chối sản phẩm này");
+                                }
+                            } catch (Exception e) {
+                                out.println("REJECT_ERR|Dữ liệu không hợp lệ");
+                            }
+                        }
+                        else if (cmd.equals("BAN_USER")) {
+                            try {
+                                int targetUserId = Integer.parseInt(parts[1]);
+                                boolean success = userDAO.updateRole(targetUserId, "BANNED");
+                                if (success) {
+                                    out.println("ADMIN_BAN_SUCCESS|Đã khóa tài khoản thành công.");
+                                    ClientHandler targetClient = activeClients.get(targetUserId);
+                                    if (targetClient != null) {
+                                        targetClient.sendKickMessage();
+                                    }
+                                } else {
+                                    out.println("ADMIN_BAN_ERROR|Lỗi khi khóa tài khoản.");
+                                }
+                                out.flush();
+                            } catch (Exception e) { e.printStackTrace(); }
+                        }
+                        else if (cmd.equals("GET_ADMIN_DASHBOARD")) {
+                            try {
+                                int pendingCount = itemDAO.countPendingItems();
+                                int liveCount = auctionDAO.countLiveAuctions();
+                                int userCount = userDAO.countTotalUsers();
+
+                                // 2. Tính thời gian hoạt động (Uptime)
+                                long uptimeMillis = System.currentTimeMillis() - AuctionServer.START_TIME;
+                                long hours = java.util.concurrent.TimeUnit.MILLISECONDS.toHours(uptimeMillis);
+                                long minutes = java.util.concurrent.TimeUnit.MILLISECONDS.toMinutes(uptimeMillis) % 60;
+                                String uptimeStr = hours + " giờ " + minutes + " phút";
+
+                                // 3. Gửi trả kết quả về Client
+                                out.println("ADMIN_DASHBOARD_SUCCESS|" + pendingCount + "|" + liveCount + "|" + userCount + "|" + uptimeStr);
+                                out.flush();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
                     } catch (Exception e) {
                         out.println("ERR|" + e.getMessage());
                     }
@@ -282,6 +335,7 @@ public class ClientHandler implements Runnable {
             // Mất kết nối đột ngột
         } finally {
             userService.logout(clientName);
+            removeActiveClient(currentUserId);
             closeConnection();
         }
     }
@@ -309,7 +363,17 @@ public class ClientHandler implements Runnable {
                 out.println("ERR|Lệnh không hợp lệ");
         }
     }
+    public static void addActiveClient(int userId, ClientHandler handler) {
+        activeClients.put(userId, handler);
+    }
 
+    public static void removeActiveClient(int userId) {
+        activeClients.remove(userId);
+    }
+    public void sendKickMessage() {
+        out.println("YOU_ARE_BANNED|Tài khoản của bạn vừa bị khóa!");
+        out.flush();
+    }
     public void sendMessage(String msg) {
         if (out != null) {
             out.println(msg);

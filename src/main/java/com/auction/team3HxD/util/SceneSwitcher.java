@@ -20,26 +20,25 @@ public class SceneSwitcher {
     }
 
     public void switchTo(String fxmlPath, Node currentNode, String title) {
-
         try {
-
-            FXMLLoader loader =
-                    new FXMLLoader(getClass().getResource(fxmlPath));
-
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
-
-            // Lấy Stage hiện tại
-            Stage stage =
-                    (Stage) currentNode.getScene().getWindow();
-
-            // Lấy Scene hiện tại
+            Stage stage = (Stage) currentNode.getScene().getWindow();
             Scene currentScene = stage.getScene();
-
-            // Chỉ thay root -> mượt hơn, không nháy fullscreen
             currentScene.setRoot(root);
-
             stage.setTitle(title);
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public void switchTo(String fxmlPath, Stage targetStage, String title) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+            Scene currentScene = targetStage.getScene();
+            currentScene.setRoot(root);
+            targetStage.setTitle(title);
         } catch (Exception e) {
             e.printStackTrace();
         }

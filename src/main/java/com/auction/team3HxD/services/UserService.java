@@ -42,7 +42,9 @@ public class UserService {
         if (user == null) {
             return "LOGIN_ERR_USER_NOT_FOUND";
         }
-
+        if (user.getRole() == Role.BANNED) {
+            return "LOGIN_ERR_BANNED";
+        }
         if (!user.getPassword().equals(password)) {
             return "LOGIN_ERR_INVALID"; // Sai user hoặc pass
 
@@ -233,16 +235,10 @@ public class UserService {
         return sb.toString();
     }
 
-    /**
-     * Duyệt sản phẩm: chuyển status từ WAITING sang APPROVED.
-     */
     public boolean approveItem(int itemId) {
         return itemDAO.updateItemStatus(itemId, "APPROVED");
     }
 
-    /**
-     * Từ chối sản phẩm: chuyển status từ WAITING sang REJECTED.
-     */
     public boolean rejectItem(int itemId) {
         return itemDAO.updateItemStatus(itemId, "REJECTED");
     }
