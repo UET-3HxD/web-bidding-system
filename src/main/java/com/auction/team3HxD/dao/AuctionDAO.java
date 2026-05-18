@@ -91,7 +91,7 @@ public class AuctionDAO {
             conn.setAutoCommit(false);
 
             // khóa dòng dữ liệu (pessimesistic lock)
-            String lockSql = "SELECT current_price, start_price FROM auction_sessions WHERE id = ? FOR UPDATE";
+            String lockSql = "SELECT current_price FROM auction_sessions WHERE id = ? FOR UPDATE";
             double currentPrice = 0;
             double startPrice = 0;
 
@@ -100,7 +100,6 @@ public class AuctionDAO {
                 try (ResultSet rs = psLock.executeQuery()) {
                     if (rs.next()) {
                         currentPrice = rs.getDouble("current_price");
-                        startPrice = rs.getDouble("start_price");
                     } else {
                         conn.rollback();
                         return "BID_ERROR|Không tìm thấy phiên đấu giá!";
@@ -111,13 +110,21 @@ public class AuctionDAO {
             // kiem tra logic nghiep vu
             double minIncrement = startPrice * 0.02;
 
-            if (bidAmount <= currentPrice) {
-                conn.rollback();
-                return "BID_ERROR|Mức giá phải lớn hơn giá hiện tại!";
+            if (currentPrice == 0) {
+                if (bidAmount < startPrice) {
+                    conn.rollback();
+                    return "BID_ERROR|Lượt ra giá đầu tiên phải lớn hơn hoặc bằng giá khởi điểm (" + String.format("%.0f", startPrice) + " VNĐ)!";
+                }
             }
-            if (bidAmount < (currentPrice + minIncrement)) {
-                conn.rollback();
-                return "BID_ERROR|Mức giá phải cộng thêm ít nhất bước giá tối thiểu!";
+            else {
+                if (bidAmount <= currentPrice) {
+                    conn.rollback();
+                    return "BID_ERROR|Mức giá phải lớn hơn giá hiện tại!";
+                }
+                if (bidAmount < (currentPrice + minIncrement)) {
+                    conn.rollback();
+                    return "BID_ERROR|Mức giá phải cộng thêm ít nhất bước giá tối thiểu!";
+                }
             }
 
             // update gia moi

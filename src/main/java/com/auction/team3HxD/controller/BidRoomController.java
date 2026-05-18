@@ -67,16 +67,17 @@ public class BidRoomController {
                     break;
 
                 case "BID_SUCCESS":
-                    showAlert("Thành công", "Bạn đã đặt giá thành công!", Alert.AlertType.INFORMATION);
-
+                    double confirmedPrice = Double.parseDouble(parts[1]);
                     // Cập nhật dòng chữ màu đỏ bằng số tiền vừa nhập
                     if (txtBidInput.getText() != null && !txtBidInput.getText().isEmpty()) {
-                        myLastBid = Double.parseDouble(txtBidInput.getText());
+                        myLastBid = confirmedPrice;
                         currentHighestPrice = myLastBid;
+                        lblHighestBid.setText(df.format(currentHighestPrice) + " VNĐ");
                         lblYourLastBid.setText(df.format(Double.parseDouble(txtBidInput.getText())) + " VNĐ");
                         updateYourLastBidDisplay();
                     }
                     txtBidInput.clear();
+                    showAlert("Thành công", "Bạn đã đặt giá thành công!", Alert.AlertType.INFORMATION);
                     break;
 
                 case "BID_ERROR":
@@ -86,9 +87,28 @@ public class BidRoomController {
                     break;
 
                 case "BID_UPDATE":
-                    if (parts.length > 1) {
-                        updateNewBid(parts[1]);
-                    }
+                    Platform.runLater(() -> {
+                        try {
+                            if (parts.length >= 3) {
+                                int updatedAuctionId = Integer.parseInt(parts[1]);
+                                double newHighestPrice = Double.parseDouble(parts[2]);
+
+                                System.out.println(">>> [DEBUG CLIENT] Nhận BID_UPDATE phòng: " + updatedAuctionId + " | Giá: " + newHighestPrice);
+                                System.out.println(">>> [DEBUG CLIENT] Phòng hiện tại của tôi là: " + this.currentAuctionId);
+
+                                if (this.currentAuctionId.equals(String.valueOf(updatedAuctionId))) {
+                                    this.currentHighestPrice = newHighestPrice;
+
+                                    lblHighestBid.setText(df.format(currentHighestPrice) + " VNĐ");
+                                    updateYourLastBidDisplay();
+
+                                    System.out.println(">>> [REAL-TIME] Đã cập nhật giá mới thành công lên giao diện!");
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
                     break;
             }
         });
@@ -311,6 +331,17 @@ public class BidRoomController {
     @FXML void handleGoToProducts(ActionEvent event) {SceneSwitcher.getInstance().switchTo("/fxml/product_management.fxml", (Node) event.getSource(), "Quản lý sản phẩm");}
     @FXML void handleGoToMyBids(ActionEvent event) {SceneSwitcher.getInstance().switchTo("/fxml/my_bids.fxml", (Node) event.getSource(), "Bid đang tham gia");}
     @FXML void handleGoToHelp(ActionEvent event) {SceneSwitcher.getInstance().switchTo("/fxml/help.fxml", (Node) event.getSource(), "Trợ giúp");}
+    private void refreshBidRoom(){
+        try {
+            com.auction.team3HxD.util.SceneSwitcher.getInstance().switchTo(
+                    "/fxml/bid_room.fxml",
+                    btnPlaceBid,
+                    "Đấu Giá"
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     private void navigateToMainArea() {
         try {
             com.auction.team3HxD.util.SceneSwitcher.getInstance().switchTo(
