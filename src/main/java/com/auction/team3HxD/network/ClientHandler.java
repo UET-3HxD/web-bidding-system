@@ -145,11 +145,16 @@ public class ClientHandler implements Runnable {
                         }
                         else if(cmd.equals("START_AUCTION")) {
                             try {
-                                // Cấu trúc: START_AUCTION|itemId|minutes
                                 int auctionItemId = Integer.parseInt(parts[1]);
                                 int minutes = Integer.parseInt(parts[2]);
 
+                                System.out.println(">>> DEBUG: START_AUCTION received, itemId=" + auctionItemId + ", minutes=" + minutes);
+                                System.out.flush();
+
                                 boolean isStarted = userService.startAuction(auctionItemId, minutes);
+
+                                System.out.println(">>> DEBUG: startAuction result=" + isStarted);
+                                System.out.flush();
 
                                 if (isStarted) {
                                     out.println("START_AUCTION_SUCCESS");
@@ -158,6 +163,8 @@ public class ClientHandler implements Runnable {
                                 }
                                 out.flush();
                             } catch (Exception e) {
+                                System.out.println(">>> DEBUG: Exception in START_AUCTION: " + e.getMessage());
+                                e.printStackTrace();
                                 out.println("START_AUCTION_ERR|Dữ liệu không hợp lệ");
                                 out.flush();
                             }
@@ -165,6 +172,53 @@ public class ClientHandler implements Runnable {
                         else if (cmd.equals("GET_LIVE_AUCTIONS")) {
                             String response = userService.getLiveAuctionsMessage();
                             out.println(response);
+                        }
+                        // ===== ADMIN COMMANDS =====
+                        else if (cmd.equals("GET_PENDING_ITEMS")) {
+                            try {
+                                if (!userService.isAdmin(currentUserId)) {
+                                    out.println("ERR|Bạn không có quyền thực hiện thao tác này!");
+                                    continue;
+                                }
+                                String response = userService.getPendingItemsList();
+                                out.println(response);
+                            } catch (Exception e) {
+                                out.println("PENDING_ITEMS_EMPTY");
+                            }
+                        }
+                        else if (cmd.equals("APPROVE_ITEM")) {
+                            try {
+                                if (!userService.isAdmin(currentUserId)) {
+                                    out.println("ERR|Bạn không có quyền!");
+                                    continue;
+                                }
+                                int itemId = Integer.parseInt(parts[1]);
+                                boolean success = userService.approveItem(itemId);
+                                if (success) {
+                                    out.println("APPROVE_SUCCESS");
+                                } else {
+                                    out.println("APPROVE_ERR|Không thể duyệt sản phẩm này");
+                                }
+                            } catch (Exception e) {
+                                out.println("APPROVE_ERR|Dữ liệu không hợp lệ");
+                            }
+                        }
+                        else if (cmd.equals("REJECT_ITEM")) {
+                            try {
+                                if (!userService.isAdmin(currentUserId)) {
+                                    out.println("ERR|Bạn không có quyền!");
+                                    continue;
+                                }
+                                int itemId = Integer.parseInt(parts[1]);
+                                boolean success = userService.rejectItem(itemId);
+                                if (success) {
+                                    out.println("REJECT_SUCCESS");
+                                } else {
+                                    out.println("REJECT_ERR|Không thể từ chối sản phẩm này");
+                                }
+                            } catch (Exception e) {
+                                out.println("REJECT_ERR|Dữ liệu không hợp lệ");
+                            }
                         }
                         else if (cmd.equals("BID") || cmd.equals("CHAT")) {
                             handleAuctionCommands(message);

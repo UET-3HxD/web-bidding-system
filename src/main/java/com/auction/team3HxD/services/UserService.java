@@ -137,51 +137,113 @@ public class UserService {
         return itemDAO.deleteItem(itemId);
     }
     public String getLiveAuctionsMessage() {
-        // 1. Lấy danh sách Object Auction (Sử dụng hàm findLiveAuctions() mà DAO trả về List<Auction>)
-        List<Auction> auctions = auctionDAO.findLiveAuctions();
+        try {
+            // 1. Lấy danh sách Object Auction
+            List<Auction> auctions = auctionDAO.findLiveAuctions();
+            System.out.println(">>> getLiveAuctionsMessage: found " + (auctions != null ? auctions.size() : 0) + " auctions");
 
-        if (auctions == null || auctions.isEmpty()) {
-            return "LIVE_AUCTIONS_EMPTY";
-        }
-
-        StringBuilder sb = new StringBuilder("LIVE_AUCTIONS_SUCCESS");
-
-        // 2. Chuyển Object thành chuỗi bằng cách gọi các Method bên trong Object
-        for (Auction auction : auctions) {
-            Item item = auction.getItem();
-            User seller = auction.getSeller();
-
-            // CHỐT CHẶN AN TOÀN: Nếu không thấy Item, bỏ qua phiên này để không gây lỗi Null
-            if (item == null || seller == null) {
-                System.err.println(">>> Cảnh báo: Bỏ qua Auction ID " + auction.getId() + " do không tìm thấy Item hoặc Seller tương ứng.");
-                continue;
+            if (auctions == null || auctions.isEmpty()) {
+                return "LIVE_AUCTIONS_EMPTY";
             }
 
-            // Logic xử lý category và thời gian (giữ nguyên như cũ)
-            String category = (item.getItemType() != null && item.getItemType().equals("VEHICLE")) ? "Phương tiện" :
-                    (item.getItemType() != null && item.getItemType().equals("ART")) ? "Nghệ thuật" : "Điện tử";
+            StringBuilder sb = new StringBuilder("LIVE_AUCTIONS_SUCCESS");
 
-            String timeLeftStr = auction.getTimeLeftFormatted();
-            String desc = item.getDescription() != null ? item.getDescription().replace("|", "-").replace("#", "-") : "";
-            double currentDisplayPrice = auction.getCurrentPrice() > 0 ? auction.getCurrentPrice() : auction.getStartPrice();
+            // 2. Chuyển Object thành chuỗi
+            for (Auction auction : auctions) {
+                Item item = auction.getItem();
+                User seller = auction.getSeller();
 
-            // Nối chuỗi gửi về Client
-            String formattedRow = String.format("%d#%s#%s#%s#%d#%.0f#%.0f#%d#%s#%s#%s",
-                    auction.getId(),
-                    item.getName(),
-                    category,
-                    seller.getUsername(),
-                    seller.getId(),
-                    auction.getStartPrice(),
-                    currentDisplayPrice,
-                    auction.getBidCount(),
-                    timeLeftStr,
-                    desc,
-                    item.getImagePath() != null ? item.getImagePath() : "");
+                System.out.println(">>> Auction ID=" + auction.getId() +
+                        ", item=" + (item != null ? item.getName() : "NULL") +
+                        ", seller=" + (seller != null ? seller.getUsername() : "NULL") +
+                        ", status=" + auction.getStatus() +
+                        ", endTime=" + auction.getEndTime());
 
-            sb.append("|").append(formattedRow);
+                if (item == null || seller == null) {
+                    System.err.println(">>> Cảnh báo: Bỏ qua Auction ID " + auction.getId());
+                    continue;
+                }
+
+                String category = (item.getItemType() != null && item.getItemType().equals("VEHICLE")) ? "Phương tiện" :
+                        (item.getItemType() != null && item.getItemType().equals("ART")) ? "Nghệ thuật" : "Điện tử";
+
+                String timeLeftStr = auction.getTimeLeftFormatted();
+                String desc = item.getDescription() != null ? item.getDescription().replace("|", "-").replace("#", "-") : "";
+                double currentDisplayPrice = auction.getCurrentPrice() > 0 ? auction.getCurrentPrice() : auction.getStartPrice();
+
+                String formattedRow = String.format("%d#%s#%s#%s#%d#%.0f#%.0f#%d#%s#%s#%s",
+                        auction.getId(),
+                        item.getName(),
+                        category,
+                        seller.getUsername(),
+                        seller.getId(),
+                        auction.getStartPrice(),
+                        currentDisplayPrice,
+                        auction.getBidCount(),
+                        timeLeftStr,
+                        desc,
+                        item.getImagePath() != null ? item.getImagePath() : "");
+
+                sb.append("|").append(formattedRow);
+            }
+
+            System.out.println(">>> getLiveAuctionsMessage result: " + sb.toString());
+            return sb.toString();
+
+        } catch (Exception e) {
+            System.err.println(">>> ERROR in getLiveAuctionsMessage: " + e.getMessage());
+            e.printStackTrace();
+            return "LIVE_AUCTIONS_EMPTY";
         }
+    }
 
+    // ==================== ADMIN ====================
+
+    /**
+     * Kiểm tra người dùng có phải Admin không.
+     */
+    public boolean isAdmin(int userId) {
+        User user = userDAO.getUserById(userId);
+        return user != null && user.getRole() == Role.ADMIN;
+    }
+
+    /**
+     * Lấy danh sách sản phẩm đang chờ duyệt (status = WAITING).
+     * Trả về chuỗi PENDING_ITEMS_SUCCESS|id#name#price#seller#desc#path|...
+     * hoặc PENDING_ITEMS_EMPTY nếu không có sản phẩm nào.
+     */
+    public String getPendingItemsList() {
+        List<Item> items = itemDAO.getItemsByStatus("WAITING");
+        if (items == null || items.isEmpty()) {
+            return "PENDING_ITEMS_EMPTY";
+        }
+        StringBuilder sb = new StringBuilder("PENDING_ITEMS_SUCCESS");
+        for (Item item : items) {
+            // Lấy tên người bán từ UserDAO
+            User seller = userDAO.getUserById(item.getSellerId());
+            String sellerName = seller != null ? seller.getUsername() : "Unknown";
+
+            sb.append("|").append(item.getId()).append("#")
+                    .append(item.getName()).append("#")
+                    .append(item.getPrice()).append("#")
+                    .append(sellerName).append("#")
+                    .append(item.getDescription() != null ? item.getDescription() : "").append("#")
+                    .append(item.getImagePath() != null ? item.getImagePath() : "");
+        }
         return sb.toString();
+    }
+
+    /**
+     * Duyệt sản phẩm: chuyển status từ WAITING sang APPROVED.
+     */
+    public boolean approveItem(int itemId) {
+        return itemDAO.updateItemStatus(itemId, "APPROVED");
+    }
+
+    /**
+     * Từ chối sản phẩm: chuyển status từ WAITING sang REJECTED.
+     */
+    public boolean rejectItem(int itemId) {
+        return itemDAO.updateItemStatus(itemId, "REJECTED");
     }
 }

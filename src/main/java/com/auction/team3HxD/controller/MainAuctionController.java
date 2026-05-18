@@ -10,10 +10,12 @@ import javafx.scene.layout.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
-public class MainAuctionController {
+import com.auction.team3HxD.util.SceneSwitcher;
+import javafx.scene.Node;
+
+public class
+MainAuctionController {
 
     // === KHU VỰC TRÁI: DANH SÁCH ===
     @FXML private TextField txtSearch;
@@ -232,7 +234,7 @@ public class MainAuctionController {
             UserSession.getInstance().setSelectedAuctionId(Integer.parseInt(selectedAuctionId));
 
             com.auction.team3HxD.util.SceneSwitcher.getInstance().switchTo(
-                    "/fxml/BidRoomView.fxml",
+                    "/fxml/bid_room.fxml",
                     (javafx.scene.Node) event.getSource(),
                     "Phòng Đặt Giá - Sàn Đấu Giá"
             );
@@ -241,23 +243,17 @@ public class MainAuctionController {
             e.printStackTrace();
         }
     }
-    @FXML
-    void handleGoToAccount(ActionEvent event) {
-        // Chuyển sang màn hình acc
-        com.auction.team3HxD.util.SceneSwitcher.getInstance().switchTo(
-                "/fxml/account_view.fxml",
-                (javafx.scene.Node) event.getSource(),
-                "Tài khoản"
-        );
+    @FXML void handleGoToAccount(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/account.fxml", (Node) event.getSource(), "Tài khoản");
     }
-    @FXML
-    void handleGoToProducts(ActionEvent event) {
-        // Chuyển sang màn hình Quản lý sản phẩm
-        com.auction.team3HxD.util.SceneSwitcher.getInstance().switchTo(
-                "/fxml/ProductManagementView.fxml", // Đường dẫn file FXML sản phẩm của Captain
-                (javafx.scene.Node) event.getSource(),
-                "Quản lý sản phẩm - BidVN"
-        );
+    @FXML void handleGoToProducts(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/product_management.fxml", (Node) event.getSource(), "Quản lý sản phẩm");
+    }
+    @FXML void handleGoToMyBids(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/my_bids.fxml", (Node) event.getSource(), "Bid đang tham gia");
+    }
+    @FXML void handleGoToHelp(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/help.fxml", (Node) event.getSource(), "Trợ giúp");
     }
 
 }

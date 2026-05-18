@@ -15,7 +15,7 @@
 <?import javafx.scene.shape.Circle?>
 
 <?import javafx.scene.control.Separator?>
-<BorderPane prefHeight="700.0" prefWidth="1200.0" styleClass="root-container" stylesheets="@../styles/styles.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.team3HxD.controller.ProductManagementController">
+<BorderPane prefHeight="700.0" prefWidth="1000.0" styleClass="root-container" stylesheets="@../styles/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.team3HxD.controller.ProductManagementController">
 
     <left>
         <VBox prefWidth="250.0" styleClass="sidebar">
@@ -30,9 +30,11 @@
             <VBox spacing="5">
                 <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="menu-btn" text="👤   Tài khoản" onAction="#handleGoToAccount"/>
                 <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="menu-btn" text="⏹   Sàn đấu giá" onAction="#handleGoToAuction"/>
-                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="menu-btn" text="⏱   Bid đang tham gia" />
+                <!-- ĐÃ SỬA: Thêm onAction cho Bid đang tham gia -->
+                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="menu-btn" text="⏱   Bid đang tham gia" onAction="#handleGoToMyBids"/>
                 <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="menu-btn, menu-btn-active" text="📦   Sản phẩm của bạn" />
-                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="menu-btn" text="⚙   Trợ giúp" />
+                <!-- ĐÃ SỬA: Thêm onAction cho Trợ giúp -->
+                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="menu-btn" text="⚙   Trợ giúp" onAction="#handleGoToHelp"/>
             </VBox>
             <Region VBox.vgrow="ALWAYS" />
             <HBox alignment="CENTER_LEFT" spacing="10" styleClass="sidebar-profile">
@@ -47,7 +49,6 @@
             </HBox>
         </VBox>
     </left>
-
     <center>
         <HBox spacing="20" styleClass="main-content">
             <padding>

@@ -21,6 +21,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import java.io.ByteArrayInputStream;
 
+import com.auction.team3HxD.util.SceneSwitcher;
+import javafx.scene.Node;
+
 public class ProductManagementController {
 
     // --- CÁC COMPONENT TỪ FXML ---
@@ -483,24 +486,21 @@ public class ProductManagementController {
             default: return 60;
         }
     }
-    @FXML
-    void handleGoToAccount(ActionEvent event) {
-        // Chuyển sang màn hình acc
-        com.auction.team3HxD.util.SceneSwitcher.getInstance().switchTo(
-                "/fxml/account_view.fxml",
-                (javafx.scene.Node) event.getSource(),
-                "Tài khoản"
-        );
+
+    @FXML void handleGoToAccount(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/account.fxml", (Node) event.getSource(), "Tài khoản");
     }
-    @FXML
-    void handleGoToAuction(ActionEvent event) {
-        // Chuyển sang màn hình acc
-        com.auction.team3HxD.util.SceneSwitcher.getInstance().switchTo(
-                "/fxml/MainAuctionView.fxml",
-                (javafx.scene.Node) event.getSource(),
-                "Sàn đấu giá"
-        );
+    @FXML void handleGoToAuction(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/main_auction.fxml", (Node) event.getSource(), "Sàn đấu giá");
     }
+    // Thêm
+    @FXML void handleGoToMyBids(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/my_bids.fxml", (Node) event.getSource(), "Bid đang tham gia");
+    }
+    @FXML void handleGoToHelp(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/help.fxml", (Node) event.getSource(), "Trợ giúp");
+    }
+
     // --- CLASS ĐỐI TƯỢNG MẪU (Thực tế lấy từ Model của Captain) ---
     class Product {
         String id, name, price, description, status, imagePath;
