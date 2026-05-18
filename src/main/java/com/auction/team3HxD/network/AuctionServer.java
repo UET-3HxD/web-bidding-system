@@ -18,7 +18,7 @@ public class AuctionServer {
     private static List<ClientHandler> clients = new CopyOnWriteArrayList<>();
     private static double currentPrice = 0;
     private static String topBidder = "None";
-
+    public static final long START_TIME = System.currentTimeMillis();
     private static int timeLeft = 300;
     private static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 

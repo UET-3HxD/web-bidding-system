@@ -112,6 +112,16 @@ public class UserDAO {
             throw new RuntimeException("Update password failed", e);
         }
     }
+    public boolean updateRole(int id, String role) {
+        String sql = "UPDATE users SET role = ? WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, role);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Ban user failed", e);
+        }
+    }
 
     public boolean updateEmail(String username, String newEmail) {
         String sql = "UPDATE users SET email = ? WHERE username = ?";
@@ -181,9 +191,6 @@ public class UserDAO {
 
         return null;
     }
-    /**
-     * Tìm user theo ID (dùng cho Admin và các chức năng khác).
-     */
     public User getUserById(int id) {
         String sql = "SELECT * FROM users WHERE id = ?";
 
@@ -223,5 +230,21 @@ public class UserDAO {
         }
 
         return user;
+    }
+    public int countTotalUsers() {
+        String sql = "SELECT count(*) FROM users";
+        int count = 0;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            System.err.println(">>> [LỖI DB] Không thể đếm người dùng trực tuyến: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return count;
     }
 }

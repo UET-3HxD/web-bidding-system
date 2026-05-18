@@ -242,13 +242,14 @@ public class ProductManagementController {
                 lblStatusTag.setText("Đang sàn");
                 lblStatusTag.setStyle("-fx-background-color: #10B981; -fx-text-fill: white; -fx-background-radius: 12; -fx-padding: 4 12;"); // Màu xanh lá
                 break;
-
-            // --- 2 TAG MỚI THÊM VÀO ---
             case "CLOSED":
                 lblStatusTag.setText("Đã đóng");
                 lblStatusTag.setStyle("-fx-background-color: #64748B; -fx-text-fill: white; -fx-background-radius: 12; -fx-padding: 4 12;"); // Màu xám tro
                 break;
-
+            case "REJECTED":
+                lblStatusTag.setText("Bị từ chối");
+                lblStatusTag.setStyle("-fx-background-color: #64748B; -fx-text-fill: #ff0000; -fx-background-radius: 12; -fx-padding: 4 12;"); // Màu xám tro
+                break;
             case "WON":
                 lblStatusTag.setText("Đã thắng");
                 // Màu Vàng Gold sang trọng cho người chiến thắng
@@ -446,6 +447,9 @@ public class ProductManagementController {
             return;
         } else if (status.equals("LIVE") || status.equals("SOLD")) {
             showAlert("Thông báo", "Sản phẩm này đã ở trên sàn hoặc đã bán!", Alert.AlertType.WARNING);
+            return;
+        } else if (status.equals("REJECTED")) {
+            showAlert("Thông báo", "Sản phẩm đã bị từ chối bởi admin! Vui lòng chỉnh sửa hoặc tạo mới sản phẩm phù hợp với quy định.", Alert.AlertType.WARNING);
             return;
         }
 

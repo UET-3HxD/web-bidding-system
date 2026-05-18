@@ -223,4 +223,20 @@ public class ItemDAO {
 
         return item;
     }
+    public int countPendingItems() {
+        String sql = "SELECT COUNT(*) FROM items WHERE status = 'WAITING';";
+        int count = 0;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            System.err.println(">>> [LỖI DB] Không thể đếm người dùng trực tuyến: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return count;
+    }
 }

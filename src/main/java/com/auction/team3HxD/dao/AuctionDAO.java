@@ -87,40 +87,48 @@ public class AuctionDAO {
         Connection conn = null;
         try {
             conn = DBConnection.getConnection();
+            // tắt Auto Commit để bắt đầu Transaction
             conn.setAutoCommit(false);
 
-            // SỬA: Dùng JOIN thay vì subquery để tránh lỗi forward reference
-            String checkSql = "SELECT a.current_price, a.status, a.end_time, i.bid_increment " +
-                    "FROM auction_sessions a " +
-                    "JOIN items i ON a.item_id = i.id " +
-                    "WHERE a.id = ? FOR UPDATE";
-
+            // khóa dòng dữ liệu (pessimesistic lock)
+            String lockSql = "SELECT current_price, start_price FROM auction_sessions WHERE id = ? FOR UPDATE";
             double currentPrice = 0;
-            double increment = 0;
+            double startPrice = 0;
 
-            try (PreparedStatement psCheck = conn.prepareStatement(checkSql)) {
-                psCheck.setInt(1, auctionId);
-                try (ResultSet rs = psCheck.executeQuery()) {
+            try (PreparedStatement psLock = conn.prepareStatement(lockSql)) {
+                psLock.setInt(1, auctionId);
+                try (ResultSet rs = psLock.executeQuery()) {
                     if (rs.next()) {
-                        String status = rs.getString("status");
-                        if (!"ACTIVE".equals(status)) {
-                            conn.rollback();
-                            return "ERROR|Phiên đấu giá đã kết thúc!";
-                        }
                         currentPrice = rs.getDouble("current_price");
-                        increment = rs.getDouble("bid_increment");
+                        startPrice = rs.getDouble("start_price");
                     } else {
                         conn.rollback();
-                        return "ERROR|Không tìm thấy phiên đấu giá!";
+                        return "BID_ERROR|Không tìm thấy phiên đấu giá!";
                     }
                 }
             }
 
-            if (bidAmount < (currentPrice + increment)) {
+            // kiem tra logic nghiep vu
+            double minIncrement = startPrice * 0.02;
+
+            if (bidAmount <= currentPrice) {
                 conn.rollback();
-                return "ERROR|Giá đặt phải lớn hơn giá hiện tại cộng bước giá!";
+                return "BID_ERROR|Mức giá phải lớn hơn giá hiện tại!";
+            }
+            if (bidAmount < (currentPrice + minIncrement)) {
+                conn.rollback();
+                return "BID_ERROR|Mức giá phải cộng thêm ít nhất bước giá tối thiểu!";
             }
 
+            // update gia moi
+            String updateSql = "UPDATE auction_sessions SET current_price = ? WHERE id = ?";
+            try (PreparedStatement psUpdate = conn.prepareStatement(updateSql)) {
+                psUpdate.setDouble(1, bidAmount);
+                psUpdate.setInt(2, auctionId);
+                psUpdate.executeUpdate();
+            }
+
+            // ghi lich su bid
             String insertBidSql = "INSERT INTO bids (auction_id, user_id, bid_amount, bid_time) VALUES (?, ?, ?, NOW())";
             try (PreparedStatement psInsert = conn.prepareStatement(insertBidSql)) {
                 psInsert.setInt(1, auctionId);
@@ -129,33 +137,28 @@ public class AuctionDAO {
                 psInsert.executeUpdate();
             }
 
-            String updateAuctionSql = "UPDATE auction_sessions SET current_price = ? WHERE id = ?";
-            try (PreparedStatement psUpdate = conn.prepareStatement(updateAuctionSql)) {
-                psUpdate.setDouble(1, bidAmount);
-                psUpdate.setInt(2, auctionId);
-                psUpdate.executeUpdate();
-            }
-
+            // thong bao bid thanh cong & mo khoa
             conn.commit();
-
-            User bidder = userDAO.findById(userId);
-            String bidderName = (bidder != null) ? bidder.getUsername() : "Unknown";
-
-            return "SUCCESS|" + bidAmount + "|" + bidderName;
+            return "BID_SUCCESS|" + bidAmount;
 
         } catch (SQLException e) {
-            try {
-                if (conn != null) conn.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
             }
             e.printStackTrace();
-            return "ERROR|Lỗi hệ thống khi xử lý giao dịch!";
+            return "BID_ERROR|Lỗi hệ thống khi đặt giá!";
         } finally {
-            try {
-                if (conn != null) conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                e.printStackTrace();
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
     }
@@ -205,7 +208,46 @@ public class AuctionDAO {
         } catch (SQLException e) { e.printStackTrace(); }
         return 0;
     }
+    public List<String> getBidHistory(int userId) {
+        List<String> historyList = new ArrayList<>();
 
+        // sử dụng GROUP BY để không bị lặp lại nếu user đặt giá nhiều lần trong cùng 1 phiên
+        String sql =
+                "SELECT a.id, i.product_name, i.item_type, i.image_path, a.current_price, " +
+                        "   CASE " +
+                        "       WHEN a.end_time > NOW() THEN 'ACTIVE' " +
+                        "       WHEN (SELECT user_id FROM bids b2 WHERE b2.auction_id = a.id ORDER BY b2.bid_amount DESC LIMIT 1) = ? THEN 'WON' " +
+                        "       ELSE 'LOST' " +
+                        "   END AS bid_status " +
+                        "FROM auction_sessions a " +
+                        "JOIN items i ON a.item_id = i.id " +
+                        "JOIN bids b ON a.id = b.auction_id " +
+                        "WHERE b.user_id = ? " +
+                        "GROUP BY a.id, i.product_name, i.item_type, i.image_path, a.current_price, a.end_time";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ps.setInt(2, userId);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                // Định dạng chuỗi: id#name#type#image#currentPrice#status
+                String record = String.format("%d#%s#%s#%s#%.0f#%s",
+                        rs.getInt("id"),
+                        rs.getString("product_name"),
+                        rs.getString("item_type"),
+                        rs.getString("image_path") != null ? rs.getString("image_path") : "",
+                        rs.getDouble("current_price"),
+                        rs.getString("bid_status")
+                );
+                historyList.add(record);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+
+        return historyList;
+    }
     private Auction mapResultSetToAuction(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
         int itemId = rs.getInt("item_id");
@@ -241,5 +283,21 @@ public class AuctionDAO {
             auction.endAuction();
         }
         return auction;
+    }
+    public int countLiveAuctions() {
+        String sql = "SELECT COUNT(*) FROM auction_sessions WHERE end_time > NOW()";
+        int count = 0;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            System.err.println(">>> [LỖI DB] Không thể đếm số cuộc đấu giá: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return count;
     }
 }

@@ -45,6 +45,8 @@ public class UserSession {
         this.role = null;
         this.email = null;
         this.loggedIn = false;
+        this.selectedAuctionId = -1;
+        this.id = 0;
     }
 
     public void setSelectedAuctionId(int id) { this.selectedAuctionId = id; }

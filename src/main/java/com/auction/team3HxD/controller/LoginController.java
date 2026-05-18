@@ -127,6 +127,9 @@ public class LoginController {
             else if (response.startsWith("LOGIN_ERR_ALREADY_ONLINE")) {
                 showMessage("Tài khoản đang được đăng nhập ở nơi khác.", false);
             }
+            else if (response.startsWith("LOGIN_ERR_BANNED")) {
+                showMessage("Tài khoản đã bị cấm.", false);
+            }
             else {
                 showMessage("Lỗi không xác định từ server: " + response, false);
             }
