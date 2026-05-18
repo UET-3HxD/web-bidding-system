@@ -15,6 +15,9 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 
+import com.auction.team3HxD.util.SceneSwitcher;
+import javafx.scene.Node;
+
 public class BidRoomController {
 
     // --- FXML BINDING ---
@@ -223,17 +226,8 @@ public class BidRoomController {
     }
 
     // Hàm sự kiện khi bấm nút "✖ Đóng phòng"
-    @FXML
-    void handleExitRoom(ActionEvent event) {
-        try {
-            com.auction.team3HxD.util.SceneSwitcher.getInstance().switchTo(
-                    "/fxml/MainAuctionView.fxml",
-                    (javafx.scene.Node) event.getSource(),
-                    "Sàn Đấu Giá"
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    @FXML void handleExitRoom(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/main_auction.fxml", (Node) event.getSource(), "Sàn Đấu Giá");
     }
 
     // Hàm dùng chung để cập nhật màu sắc thông minh
@@ -290,24 +284,20 @@ public class BidRoomController {
         countdownTimeline.play(); // Bắt đầu đếm!
     }
 
-    @FXML
-    void handleGoToProducts(ActionEvent event) {
-        // Chuyển sang màn hình Quản lý sản phẩm
-        com.auction.team3HxD.util.SceneSwitcher.getInstance().switchTo(
-                "/fxml/ProductManagementView.fxml", // Đường dẫn file FXML sản phẩm của Captain
-                (javafx.scene.Node) event.getSource(),
-                "Quản lý sản phẩm - BidVN"
-        );
+    @FXML void handleGoToAccount(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/account.fxml", (Node) event.getSource(), "Tài khoản");
     }
-    @FXML
-    void handleGoToAccount(ActionEvent event) {
-        // Chuyển sang màn hình acc
-        com.auction.team3HxD.util.SceneSwitcher.getInstance().switchTo(
-                "/fxml/account_view.fxml",
-                (javafx.scene.Node) event.getSource(),
-                "Tài khoản"
-        );
+    @FXML void handleGoToProducts(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/product_management.fxml", (Node) event.getSource(), "Quản lý sản phẩm");
     }
+    // Thêm các nút thiếu
+    @FXML void handleGoToMyBids(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/my_bids.fxml", (Node) event.getSource(), "Bid đang tham gia");
+    }
+    @FXML void handleGoToHelp(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/help.fxml", (Node) event.getSource(), "Trợ giúp");
+    }
+
     private void showAlert(String title, String content, Alert.AlertType type) {
         Alert alert = new Alert(type);
         alert.setTitle(title);

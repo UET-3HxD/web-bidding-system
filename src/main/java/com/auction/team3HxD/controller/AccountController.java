@@ -1,6 +1,5 @@
 package com.auction.team3HxD.controller;
 
-import com.auction.team3HxD.model.User;
 import com.auction.team3HxD.util.SceneSwitcher;
 import com.auction.team3HxD.util.SocketService;
 import com.auction.team3HxD.util.UserSession;
@@ -10,9 +9,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ButtonBar;
-import java.util.Optional;
 
 public class AccountController {
     @FXML private Label lblFullName;
@@ -22,78 +18,82 @@ public class AccountController {
     @FXML private Label lblAvatarShort;
     @FXML private Label lblMainAvatarShort;
 
+    // Nút sidebar
+    @FXML private Button btnAuction, btnMyBids, btnProducts, btnHelp;        // User
+    @FXML private Button btnDashboard, btnApprove, btnUsers, btnAdminHelp;   // Admin
+
+    @FXML
     public void initialize() {
-        // 1. Lấy dữ liệu người dùng đang đăng nhập từ Session
         UserSession user = UserSession.getInstance();
-
         if (user != null) {
-            // 2. Cập nhật Text cho các Label
-            lblFullName.setText(user.getUsername()); // Hoặc user.getFullName() nếu có
+            lblFullName.setText(user.getUsername());
             lblEmail.setText(user.getEmail());
+            lblEmailDisplay.setText(user.getEmail());
             lblSidebarName.setText(user.getUsername());
+            String shortName = user.getUsername().substring(0, Math.min(2, user.getUsername().length())).toUpperCase();
+            lblAvatarShort.setText(shortName);
+            lblMainAvatarShort.setText(shortName);
 
-            // Nếu Captain muốn chuyên nghiệp, hãy lấy 2 chữ cái đầu làm Avatar
-            // lblAvatarCircleText.setText(user.getUsername().substring(0, 2).toUpperCase());
+            // Ẩn/hiện nút sidebar dựa trên role
+            boolean isAdmin = "ADMIN".equalsIgnoreCase(user.getRole());
+            btnAuction.setVisible(!isAdmin);
+            btnAuction.setManaged(!isAdmin);
+            btnMyBids.setVisible(!isAdmin);
+            btnMyBids.setManaged(!isAdmin);
+            btnProducts.setVisible(!isAdmin);
+            btnProducts.setManaged(!isAdmin);
+            btnHelp.setVisible(!isAdmin);
+            btnHelp.setManaged(!isAdmin);
+
+            btnDashboard.setVisible(isAdmin);
+            btnDashboard.setManaged(isAdmin);
+            btnApprove.setVisible(isAdmin);
+            btnApprove.setManaged(isAdmin);
+            btnUsers.setVisible(isAdmin);
+            btnUsers.setManaged(isAdmin);
+            btnAdminHelp.setVisible(isAdmin);
+            btnAdminHelp.setManaged(isAdmin);
         }
     }
 
-    @FXML
-    void handleOpenChangePasswordDialog(ActionEvent event) {
-        // Ép kiểu event.getSource() thành Node để truyền cho SceneSwitcher
-        SceneSwitcher.getInstance().switchTo("/fxml/ChangePasswordView.fxml", (javafx.scene.Node) event.getSource(), "Đổi mật khẩu");
+    // ==================== USER ====================
+    @FXML void handleGoToAuction(ActionEvent e)  { switchTo("/fxml/main_auction.fxml", e); }
+    @FXML void handleGoToMyBids(ActionEvent e)   { switchTo("/fxml/my_bids.fxml", e); }
+    @FXML void handleGoToProducts(ActionEvent e) { switchTo("/fxml/product_management.fxml", e); }
+    @FXML void handleGoToHelp(ActionEvent e)     { switchTo("/fxml/help.fxml", e); }
+
+    // ==================== ADMIN ====================
+    @FXML void handleGoToDashboard(ActionEvent e) { switchTo("/fxml/admin_dashboard.fxml", e); }
+    @FXML void handleGoToApprove(ActionEvent e)   { switchTo("/fxml/admin_approve_products.fxml", e); }
+    @FXML void handleGoToUsers(ActionEvent e)     { switchTo("/fxml/admin_manage_users.fxml", e); }
+    @FXML void handleGoToAdminHelp(ActionEvent e) { switchTo("/fxml/help.fxml", e); }
+
+    private void switchTo(String fxml, ActionEvent e) {
+        SceneSwitcher.getInstance().switchTo(fxml, (Node) e.getSource(), "");
     }
 
-    @FXML
-    void handleOpenChangeEmailDialog(ActionEvent event) {
-        // Chuyển sang màn hình Đổi Email
-        SceneSwitcher.getInstance().switchTo("/fxml/ChangeEmailView.fxml", (javafx.scene.Node) event.getSource(), "Đổi Email");
+    @FXML void handleOpenChangePasswordDialog(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/change_password.fxml", (Node) event.getSource(), "Đổi mật khẩu");
+    }
+    @FXML void handleOpenChangeEmailDialog(ActionEvent event) {
+        SceneSwitcher.getInstance().switchTo("/fxml/change_email.fxml", (Node) event.getSource(), "Đổi Email");
     }
 
     @FXML
     void handleLogout(ActionEvent event) {
-        // 1. Tạo Popup xác nhận
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Xác nhận đăng xuất");
         alert.setHeaderText(null);
         alert.setContentText("Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?");
-
-        // 2. Tùy chỉnh chữ trên nút bấm cho chuyên nghiệp
         javafx.scene.control.ButtonType btnLogout = new javafx.scene.control.ButtonType("Đăng xuất", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
         javafx.scene.control.ButtonType btnCancel = new javafx.scene.control.ButtonType("Huỷ", javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
         alert.getButtonTypes().setAll(btnLogout, btnCancel);
-
-        // 3. Lắng nghe quyết định của người dùng
         java.util.Optional<javafx.scene.control.ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == btnLogout) {
-            // 1. Gửi lệnh LOGOUT để Server biết
             SocketService.getInstance().send("LOGOUT");
-
-            // 2. Đóng kết nối ngay lập tức ở phía Client
             SocketService.getInstance().shutdown();
-
-            // 3. Xóa dữ liệu Session để đảm bảo an toàn
             UserSession.getInstance().logout();
-
-            // 4. Chuyển về màn hình Login
             SceneSwitcher.getInstance().switchTo("/fxml/login.fxml", (Node) event.getSource(), "Đăng nhập");
         }
-    }
-    @FXML
-    void handleGoToProducts(ActionEvent event) {
-        // Chuyển sang màn hình Quản lý sản phẩm
-        com.auction.team3HxD.util.SceneSwitcher.getInstance().switchTo(
-                "/fxml/ProductManagementView.fxml", // Đường dẫn file FXML sản phẩm của Captain
-                (javafx.scene.Node) event.getSource(),
-                "Quản lý sản phẩm - BidVN"
-        );
-    }
-    @FXML
-    void handleGoToAuction(ActionEvent event) {
-        // Chuyển sang màn hình acc
-        com.auction.team3HxD.util.SceneSwitcher.getInstance().switchTo(
-                "/fxml/MainAuctionView.fxml",
-                (javafx.scene.Node) event.getSource(),
-                "Sàn đấu giá"
-        );
     }
 }

@@ -60,7 +60,7 @@ public class LoginController {
                         showMessage("Đăng nhập thành công!", true);
                         // Đã sửa đường dẫn chuyển sang AccountView
                         SceneSwitcher.getInstance().switchTo(
-                                "/fxml/AccountView.fxml",
+                                "/fxml/account.fxml",
                                 loginButton,
                                 "Tài khoản"
                         );
@@ -105,18 +105,18 @@ public class LoginController {
             stopLoading();
             if (response.startsWith("LOGIN_OK")) {
                 String[] parts = response.split("\\|");
-
-                // Cấu trúc parts: [0]: LOGIN_OK, [1]: ROLE, [2]: EMAIL
                 String role = (parts.length > 1) ? parts[1] : "USER";
-                String email = (parts.length > 2) ? parts[2] : ""; // Lấy email từ Server
-
+                String email = (parts.length > 2) ? parts[2] : "";
                 String username = usernameField.getText().trim();
-
-                // Lưu vào session - Hết báo đỏ vì đã đủ 3 tham số
                 UserSession.getInstance().login(username, email, role);
 
                 showMessage("Đăng nhập thành công!", true);
-                SceneSwitcher.getInstance().switchTo("/fxml/account_view.fxml", loginButton, "Tài khoản");
+
+                if ("ADMIN".equalsIgnoreCase(role)) {
+                    SceneSwitcher.getInstance().switchTo("/fxml/admin_dashboard.fxml", loginButton, "Admin Dashboard");
+                } else {
+                    SceneSwitcher.getInstance().switchTo("/fxml/account.fxml", loginButton, "Tài khoản");
+                }
             }
             else if(response.startsWith("LOGIN_ERR_USER_NOT_FOUND")) {
                 showMessage("Tài khoản không tồn tại.", false);

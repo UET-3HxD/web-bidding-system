@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+
+<BorderPane prefHeight="700.0" prefWidth="1100.0" stylesheets="@../styles/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.team3HxD.controller.AdminDashboardController">
+
+    <!-- ================= SIDEBAR TRÁI ================= -->
+    <left>
+        <VBox styleClass="sidebar" prefWidth="250.0">
+            <padding>
+                <Insets top="20" right="15" bottom="20" left="15"/>
+            </padding>
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <padding><Insets bottom="30" left="10"/></padding>
+                <Label text="⚖" styleClass="logo-icon"/>
+                <Label text="3HxD Admin" styleClass="logo-text"/>
+            </HBox>
+            <VBox spacing="5">
+                <Button text="👤   Tài khoản" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToAccount"/>
+                <Button text="🛡   Dashboard" styleClass="menu-btn, menu-btn-active" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
+                <Button text="📋   Duyệt sản phẩm" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToApprove"/>
+                <Button text="👥   Quản lý người dùng" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToUsers"/>
+                <Button text="⚙   Trợ giúp" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToAdminHelp"/>
+            </VBox>
+            <Region VBox.vgrow="ALWAYS" />
+            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="sidebar-profile">
+                <StackPane>
+                    <Circle radius="18" fill="#5A6C8A"/>
+                    <Label fx:id="lblSidebarAvatar" text="AD" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+                </StackPane>
+                <VBox alignment="CENTER_LEFT">
+                    <Label fx:id="lblSidebarName" text="Admin" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+                    <Label text="Quản trị viên" style="-fx-text-fill: #A0ABC0; -fx-font-size: 11px;"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </left>
+
+    <!-- ================= NỘI DUNG CHÍNH ================= -->
+    <center>
+        <VBox styleClass="main-content" spacing="25">
+            <padding>
+                <Insets top="30" right="40" bottom="30" left="40"/>
+            </padding>
+
+            <Label text="Dashboard" styleClass="page-title"/>
+            <Label text="Tổng quan hệ thống đấu giá BidVN" styleClass="page-subtitle"/>
+
+            <!-- Hàng 1: Thống kê -->
+            <HBox spacing="20">
+                <!-- Card: Sản phẩm chờ duyệt -->
+                <VBox styleClass="card" spacing="10" HBox.hgrow="ALWAYS">
+                    <Label text="📋" style="-fx-font-size: 32px;"/>
+                    <Label fx:id="lblPendingCount" text="0" style="-fx-font-size: 36px; -fx-text-fill: #F59E0B; -fx-font-weight: bold;"/>
+                    <Label text="Sản phẩm chờ duyệt" styleClass="card-subtitle"/>
+                </VBox>
+
+                <!-- Card: Sản phẩm đang đấu giá -->
+                <VBox styleClass="card" spacing="10" HBox.hgrow="ALWAYS">
+                    <Label text="⏱" style="-fx-font-size: 32px;"/>
+                    <Label fx:id="lblLiveCount" text="0" style="-fx-font-size: 36px; -fx-text-fill: #10B981; -fx-font-weight: bold;"/>
+                    <Label text="Đang đấu giá" styleClass="card-subtitle"/>
+                </VBox>
+
+                <!-- Card: Tổng người dùng -->
+                <VBox styleClass="card" spacing="10" HBox.hgrow="ALWAYS">
+                    <Label text="👥" style="-fx-font-size: 32px;"/>
+                    <Label fx:id="lblUserCount" text="0" style="-fx-font-size: 36px; -fx-text-fill: #3B82F6; -fx-font-weight: bold;"/>
+                    <Label text="Người dùng" styleClass="card-subtitle"/>
+                </VBox>
+            </HBox>
+
+            <!-- Hàng 2: Thông tin hệ thống -->
+            <VBox styleClass="card" spacing="15">
+                <Label text="THÔNG TIN HỆ THỐNG" styleClass="section-title"/>
+                <HBox spacing="40">
+                    <VBox spacing="5">
+                        <Label text="Phiên bản" styleClass="input-label"/>
+                        <Label text="1.0.0" styleClass="card-subtitle"/>
+                    </VBox>
+                    <VBox spacing="5">
+                        <Label text="Trạng thái máy chủ" styleClass="input-label"/>
+                        <Label fx:id="lblServerStatus" text="🟢 Đang hoạt động" styleClass="card-subtitle"/>
+                    </VBox>
+                    <VBox spacing="5">
+                        <Label text="Thời gian hoạt động" styleClass="input-label"/>
+                        <Label fx:id="lblUptime" text="--" styleClass="card-subtitle"/>
+                    </VBox>
+                </HBox>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

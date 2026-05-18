@@ -181,6 +181,29 @@ public class UserDAO {
 
         return null;
     }
+    /**
+     * Tìm user theo ID (dùng cho Admin và các chức năng khác).
+     */
+    public User getUserById(int id) {
+        String sql = "SELECT * FROM users WHERE id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToUser(rs);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Find user by id failed", e);
+        }
+
+        return null;
+    }
 
     // ================= HELPER =================
     private User mapResultSetToUser(ResultSet rs) throws SQLException {

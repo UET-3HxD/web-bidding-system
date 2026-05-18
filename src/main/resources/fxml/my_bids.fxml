@@ -5,17 +5,12 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
 
-<BorderPane fx:id="mainBorderPane" prefHeight="700.0" prefWidth="1000.0"
-            stylesheets="@../styles/styles.css, @../styles/auction.css"
-            xmlns="http://javafx.com/javafx/21"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.auction.team3HxD.controller.MainLayoutController">
+<BorderPane prefHeight="700.0" prefWidth="1000.0" stylesheets="@../styles/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.team3HxD.controller.MyBidsController">
 
     <left>
         <VBox styleClass="sidebar" prefWidth="250.0">
@@ -28,17 +23,17 @@
                 <Label text="3HxD" styleClass="logo-text"/>
             </HBox>
             <VBox spacing="5">
-                <Button fx:id="btnAccount" text="👤   Tài khoản" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleMenuAccount"/>
-                <Button fx:id="btnAuction" text="⏹   Sàn đấu giá" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleMenuAuction"/>
-                <Button fx:id="btnBids" text="⏱   Bid đang tham gia" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleMenuMyBids"/>
-                <Button fx:id="btnProducts" text="📦   Sản phẩm của bạn" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleMenuMyProducts"/>
-                <Button fx:id="btnHelp" text="⚙   Trợ giúp" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleMenuHelp"/>
+                <Button text="👤   Tài khoản" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToAccount"/>
+                <Button text="⏹   Sàn đấu giá" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToAuction"/>
+                <Button text="⏱   Bid đang tham gia" styleClass="menu-btn, menu-btn-active" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
+                <Button text="📦   Sản phẩm của bạn" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToProducts"/>
+                <Button text="⚙   Trợ giúp" styleClass="menu-btn" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleGoToHelp"/>
             </VBox>
             <Region VBox.vgrow="ALWAYS" />
             <HBox alignment="CENTER_LEFT" spacing="10" styleClass="sidebar-profile">
                 <StackPane>
                     <Circle radius="18" fill="#5A6C8A"/>
-                    <Label fx:id="lblAvatarShort" text="NV" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+                    <Label fx:id="lblSidebarAvatar" text="NV" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
                 </StackPane>
                 <VBox alignment="CENTER_LEFT">
                     <Label fx:id="lblSidebarName" text="User" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
@@ -49,6 +44,12 @@
     </left>
 
     <center>
-        <StackPane fx:id="contentPane" styleClass="main-content"/>
+        <VBox styleClass="main-content" spacing="20">
+            <padding>
+                <Insets top="30" right="40" bottom="30" left="40"/>
+            </padding>
+            <Label text="Bid đang tham gia" styleClass="page-title"/>
+            <Label text="Tính năng đang được phát triển" styleClass="page-subtitle"/>
+        </VBox>
     </center>
 </BorderPane>

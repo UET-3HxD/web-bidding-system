@@ -17,60 +17,51 @@ import java.util.List;
 public class AuctionDAO {
     private final UserDAO userDAO = new UserDAO();
     private final ItemDAO itemDAO = new ItemDAO();
+
     public boolean startAuction(int itemId, int durationMinutes) {
-        // Lệnh 1: Tạo phiên đấu giá, sử dụng DATE_ADD của MySQL để cộng phút vào giờ hiện tại
-        String insertSessionSql = "INSERT INTO auction_sessions (item_id, end_time, status) " +
-                "VALUES (?, DATE_ADD(NOW(), INTERVAL ? MINUTE), 'ACTIVE')";
-        // Lệnh 2: Cập nhật trạng thái sản phẩm
+        String insertSessionSql = "INSERT INTO auction_sessions (item_id, start_time, end_time, current_price, status) " +
+                "VALUES (?, NOW(), DATE_ADD(NOW(), INTERVAL ? MINUTE), 0, 'ACTIVE')";
         String updateItemSql = "UPDATE items SET status = 'LIVE' WHERE id = ?";
 
         Connection conn = null;
 
         try {
             conn = DBConnection.getConnection();
-            // TẮT AUTO-COMMIT để bắt đầu một Transaction
             conn.setAutoCommit(false);
 
-            // Bước 1: Thực thi tạo phiên
             try (PreparedStatement pstmt1 = conn.prepareStatement(insertSessionSql)) {
                 pstmt1.setInt(1, itemId);
                 pstmt1.setInt(2, durationMinutes);
                 pstmt1.executeUpdate();
             }
 
-            // Bước 2: Thực thi cập nhật item
             try (PreparedStatement pstmt2 = conn.prepareStatement(updateItemSql)) {
                 pstmt2.setInt(1, itemId);
                 pstmt2.executeUpdate();
             }
 
-            // Nếu cả 2 bước đều chạy mượt mà -> COMMIT lưu vào Database
             conn.commit();
             return true;
 
         } catch (SQLException e) {
-            System.err.println(">>> Lỗi khi tạo phiên đấu giá: " + e.getMessage());
-            // CÓ LỖI -> ROLLBACK để khôi phục lại trạng thái ban đầu
+            System.err.println(">>> startAuction ERROR: " + e.getMessage());
             if (conn != null) {
-                try { conn.rollback(); }
-                catch (SQLException ex) { ex.printStackTrace(); }
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
             }
             return false;
         } finally {
-            // Luôn nhớ trả lại trạng thái auto-commit cho Connection Pool
             if (conn != null) {
                 try {
                     conn.setAutoCommit(true);
                     conn.close();
-                }
-                catch (SQLException e) { e.printStackTrace(); }
+                } catch (SQLException e) { e.printStackTrace(); }
             }
         }
     }
+
     public List<Auction> findLiveAuctions() {
         List<Auction> list = new ArrayList<>();
 
-        // Câu truy vấn vẫn JOIN để lấy thông tin Item và đếm Bid cho tối ưu
         String sql = "SELECT a.*, (SELECT COUNT(*) FROM bids b WHERE b.auction_id = a.id) AS bid_count " +
                 "FROM auction_sessions a " +
                 "WHERE a.status = 'ACTIVE' AND a.end_time > NOW() " +
@@ -81,12 +72,8 @@ public class AuctionDAO {
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                // Sử dụng lại hàm map mà bạn DAO đã viết
                 Auction auction = mapResultSetToAuction(rs);
-
-                // Gán thêm số lượt bid vừa đếm được
                 auction.setBidCount(rs.getInt("bid_count"));
-
                 list.add(auction);
             }
 
@@ -95,18 +82,18 @@ public class AuctionDAO {
         }
         return list;
     }
+
     public String placeBidTransaction(int auctionId, int userId, double bidAmount) {
         Connection conn = null;
         try {
             conn = DBConnection.getConnection();
-            // 1. Tắt AutoCommit để bắt đầu một Transaction (Giao dịch)
             conn.setAutoCommit(false);
 
-            // 2. KHÓA DÒNG (Row Lock): Lấy thông tin phiên đấu giá và khóa nó lại
-            // Lệnh FOR UPDATE đảm bảo không luồng nào khác được sửa dòng này cho đến khi Transaction kết thúc
-            String checkSql = "SELECT current_price, status, end_time, " +
-                    "(SELECT bid_increment FROM items WHERE id = a.item_id) as bid_increment " +
-                    "FROM auction_sessions a WHERE id = ? FOR UPDATE";
+            // SỬA: Dùng JOIN thay vì subquery để tránh lỗi forward reference
+            String checkSql = "SELECT a.current_price, a.status, a.end_time, i.bid_increment " +
+                    "FROM auction_sessions a " +
+                    "JOIN items i ON a.item_id = i.id " +
+                    "WHERE a.id = ? FOR UPDATE";
 
             double currentPrice = 0;
             double increment = 0;
@@ -129,13 +116,11 @@ public class AuctionDAO {
                 }
             }
 
-            // 3. Kiểm tra logic giá (Bước nhảy)
             if (bidAmount < (currentPrice + increment)) {
                 conn.rollback();
                 return "ERROR|Giá đặt phải lớn hơn giá hiện tại cộng bước giá!";
             }
 
-            // 4. Ghi nhận lịch sử đặt giá vào bảng bids
             String insertBidSql = "INSERT INTO bids (auction_id, user_id, bid_amount, bid_time) VALUES (?, ?, ?, NOW())";
             try (PreparedStatement psInsert = conn.prepareStatement(insertBidSql)) {
                 psInsert.setInt(1, auctionId);
@@ -144,7 +129,6 @@ public class AuctionDAO {
                 psInsert.executeUpdate();
             }
 
-            // 5. Cập nhật giá mới nhất lên bảng auction_sessions
             String updateAuctionSql = "UPDATE auction_sessions SET current_price = ? WHERE id = ?";
             try (PreparedStatement psUpdate = conn.prepareStatement(updateAuctionSql)) {
                 psUpdate.setDouble(1, bidAmount);
@@ -152,17 +136,14 @@ public class AuctionDAO {
                 psUpdate.executeUpdate();
             }
 
-            // 6. Hoàn tất giao dịch (Lưu vào DB và mở khóa)
             conn.commit();
 
-            // Lấy tên người vừa bid để trả về (Dùng cho thông báo)
             User bidder = userDAO.findById(userId);
             String bidderName = (bidder != null) ? bidder.getUsername() : "Unknown";
 
             return "SUCCESS|" + bidAmount + "|" + bidderName;
 
         } catch (SQLException e) {
-            // Cấp cứu: Nếu có bất kỳ lỗi gì (mất mạng, lỗi SQL), hoàn tác toàn bộ!
             try {
                 if (conn != null) conn.rollback();
             } catch (SQLException ex) {
@@ -171,7 +152,6 @@ public class AuctionDAO {
             e.printStackTrace();
             return "ERROR|Lỗi hệ thống khi xử lý giao dịch!";
         } finally {
-            // Trả lại trạng thái mặc định cho Connection
             try {
                 if (conn != null) conn.setAutoCommit(true);
             } catch (SQLException e) {
@@ -179,6 +159,7 @@ public class AuctionDAO {
             }
         }
     }
+
     public Auction findById(int id) {
         String sql = "SELECT * FROM auction_sessions WHERE id = ?";
 
@@ -198,6 +179,7 @@ public class AuctionDAO {
         }
         return null;
     }
+
     public String getHighestBidderName(int auctionId) {
         String sql = "SELECT u.username FROM bids b " +
                 "JOIN users u ON b.user_id = u.id " +
@@ -210,6 +192,7 @@ public class AuctionDAO {
         } catch (Exception e) { e.printStackTrace(); }
         return null;
     }
+
     public double getUserLastBid(int auctionId, int userId) {
         String sql = "SELECT MAX(bid_amount) FROM bids WHERE auction_id = ? AND user_id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -222,47 +205,38 @@ public class AuctionDAO {
         } catch (SQLException e) { e.printStackTrace(); }
         return 0;
     }
+
     private Auction mapResultSetToAuction(ResultSet rs) throws SQLException {
-        // 1. Lấy thông tin cơ bản của Session
         int id = rs.getInt("id");
         int itemId = rs.getInt("item_id");
+
         double currentPrice = rs.getDouble("current_price");
-        double bidIncrement = rs.getDouble("bid_increment");
+        if (rs.wasNull()) currentPrice = 0;
 
-        // Ánh xạ Enum từ String trong DB
-        com.auction.team3HxD.model.enums.AuctionStatus status =
-                com.auction.team3HxD.model.enums.AuctionStatus.valueOf(rs.getString("status"));
+        AuctionStatus status = AuctionStatus.valueOf(rs.getString("status"));
 
-        // Chuyển đổi Timestamp sang LocalDateTime để khớp với Model
-        java.time.LocalDateTime startTime = rs.getTimestamp("start_time").toLocalDateTime();
-        java.time.LocalDateTime endTime = rs.getTimestamp("end_time").toLocalDateTime();
+        LocalDateTime startTime = rs.getTimestamp("start_time") != null ?
+                rs.getTimestamp("start_time").toLocalDateTime() : LocalDateTime.now();
+        LocalDateTime endTime = rs.getTimestamp("end_time") != null ?
+                rs.getTimestamp("end_time").toLocalDateTime() : LocalDateTime.now().plusHours(1);
 
-        // 2. Sử dụng ItemDAO để lấy đối tượng Item đầy đủ
-        // Điều này đảm bảo chúng ta có Item.getName(), Item.getPrice(),...
         Item item = itemDAO.findById(itemId);
 
-        // 3. Lấy thông tin Seller từ Item
-        // Vì bảng items đã lưu seller_id, chúng ta lấy ra để tạo đối tượng User (Seller)
         User seller = null;
+        double bidIncrement = 0;
         if (item != null) {
             seller = userDAO.findById(item.getSellerId());
+            // Tính bidIncrement = 2% giá khởi điểm (giống AuctionService)
+            bidIncrement = item.getPrice() * 0.02;
         }
 
-        // 4. Lấy giá khởi điểm từ Item
         double startPrice = (item != null) ? item.getPrice() : 0.0;
 
-        // 5. Khởi tạo đối tượng Auction bằng Constructor 2 mà Captain đã cung cấp
         Auction auction = new Auction(
-                id,
-                seller,
-                item,
-                startPrice,
-                currentPrice,
-                bidIncrement,
-                status,
-                startTime,
-                endTime
+                id, seller, item, startPrice, currentPrice, bidIncrement,
+                status, startTime, endTime
         );
+
         if (auction.getStatus() == AuctionStatus.ACTIVE && LocalDateTime.now().isAfter(auction.getEndTime())) {
             auction.endAuction();
         }
