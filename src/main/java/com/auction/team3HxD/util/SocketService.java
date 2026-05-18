@@ -13,7 +13,8 @@ public class SocketService {
     private Consumer<String> messageHandler;
     private Thread listenerThread;
 
-    private SocketService() {}
+    private SocketService() {
+    }
 
     public static synchronized SocketService getInstance() {
         if (instance == null) {
@@ -24,6 +25,7 @@ public class SocketService {
 
     /**
      * Kết nối đến server. Nếu đã kết nối rồi thì không làm gì.
+     * 
      * @param host địa chỉ server (localhost)
      * @param port cổng server (5000)
      */
@@ -44,6 +46,10 @@ public class SocketService {
                 try {
                     String msg = in.readLine();
                     System.out.println(">>> SocketService vừa đọc được: " + msg);
+                    if (msg == null) {
+                        System.out.println(">>> SocketService: Mất kết nối từ server (msg = null).");
+                        break; // Thoát vòng lặp khi server đóng kết nối
+                    }
                     if (msg != null && messageHandler != null) {
                         // Đảm bảo cập nhật giao diện trên JavaFX Thread
                         javafx.application.Platform.runLater(() -> messageHandler.accept(msg));
@@ -91,21 +97,23 @@ public class SocketService {
             if (socket != null && !socket.isClosed()) {
                 socket.close();
             }
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
     }
 
     public boolean isConnected() {
         return socket != null && !socket.isClosed();
     }
+
     private void handleForcedLogout(String reason) {
         javafx.application.Platform.runLater(() -> {
             com.auction.team3HxD.util.UserSession.getInstance().logout();
             com.auction.team3HxD.util.SceneSwitcher.getInstance().switchTo(
                     "/fxml/login.fxml",
                     com.auction.team3HxD.Main.globalStage,
-                    "Đăng nhập"
-            );
-            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+                    "Đăng nhập");
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.ERROR);
             alert.setTitle("Tài khoản bị khóa");
             alert.setHeaderText("Bắt buộc đăng xuất!");
             alert.setContentText(reason);

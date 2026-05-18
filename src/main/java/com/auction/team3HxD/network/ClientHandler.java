@@ -96,7 +96,6 @@ public class ClientHandler implements Runnable {
                         else if (cmd.equals("CHANGE_EMAIL")) {
                             String ceRes = userService.changeEmail(this.clientName, parts[1], parts[2]);
                             out.println(ceRes);
-                            break;
                         }
                         else if(cmd.equals("LOGOUT")) {
                             isAuthenticated = false;
@@ -169,7 +168,6 @@ public class ClientHandler implements Runnable {
                                 System.out.println(">>> DEBUG: Exception in START_AUCTION: " + e.getMessage());
                                 e.printStackTrace();
                                 out.println("START_AUCTION_ERR|Dữ liệu không hợp lệ");
-                                out.flush();
                             }
                         }
                         else if (cmd.equals("GET_LIVE_AUCTIONS")) {
@@ -186,7 +184,6 @@ public class ClientHandler implements Runnable {
                                     String payload = String.join("|", historyRecords);
                                     out.println("BID_HISTORY_SUCCESS|" + payload);
                                 }
-                                out.flush();
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -200,31 +197,21 @@ public class ClientHandler implements Runnable {
                                 int bidUserId = currentUserId;
                                 double bidAmount = Double.parseDouble(parts[3]);
 
-                                // Gọi hàm Transaction dưới DAO
                                 String result = auctionDAO.placeBidTransaction(bidAuctionId, bidUserId, bidAmount);
-
-                                if (result.startsWith("SUCCESS")) {
-                                    // 1. Phản hồi cho người vừa đặt giá: BẠN ĐÃ THÀNH CÔNG
-                                    out.println("BID_SUCCESS");
-                                    out.flush();
-
-                                    // 2. Tách dữ liệu từ chuỗi kết quả: SUCCESS|newPrice|bidderName
-                                    String[] resParts = result.split("\\|");
-                                    String newPrice = resParts[1];
-                                    String bidderName = resParts[2];
-
-                                    // 3. BROADCAST: Báo cáo biến động giá cho TOÀN BỘ Client đang kết nối
-                                    broadcast("BID_UPDATE|" + bidAuctionId + "#" + newPrice + "#" + bidderName);
-
-                                } else {
-                                    // Phản hồi lỗi: Trả lại đúng thông báo lỗi từ DAO
-                                    out.println("BID_ERROR|" + result.split("\\|")[1]);
-                                    out.flush();
+                                out.println(result);
+                                if (result.startsWith("BID_SUCCESS")) {
+                                    String broadcastMsg = "BID_UPDATE|" + bidAuctionId + "|" + bidAmount;
+                                    for (ClientHandler client : activeClients.values()) {
+                                        System.out.println(">>> [SERVER] Đang kiểm tra client của User ID: " + client.currentUserId);
+                                        if (client.currentUserId != this.currentUserId) {
+                                            client.out.println(broadcastMsg);
+                                            client.out.flush();
+                                        }
+                                    }
                                 }
-
                             } catch (Exception e) {
                                 out.println("BID_ERROR|Dữ liệu gửi lên không hợp lệ!");
-                                out.flush();
+                                e.printStackTrace();
                             }
                         }
                         else if (cmd.equals("GET_AUCTION_DETAIL")){
@@ -232,7 +219,6 @@ public class ClientHandler implements Runnable {
                                 int aId = Integer.parseInt(parts[1]);
                                 int uId = Integer.parseInt(parts[2]);
                                 String detailMessage = auctionService.getAuctionDetailMessage(aId, uId);
-                                out.println("AUCTION_DETAIL_SUCCESS|" + detailMessage);
 
                                 if (detailMessage != null) {
                                     out.println("AUCTION_DETAIL_SUCCESS|" + detailMessage);
@@ -303,7 +289,6 @@ public class ClientHandler implements Runnable {
                                 } else {
                                     out.println("ADMIN_BAN_ERROR|Lỗi khi khóa tài khoản.");
                                 }
-                                out.flush();
                             } catch (Exception e) { e.printStackTrace(); }
                         }
                         else if (cmd.equals("GET_ADMIN_DASHBOARD")) {
@@ -320,7 +305,6 @@ public class ClientHandler implements Runnable {
 
                                 // 3. Gửi trả kết quả về Client
                                 out.println("ADMIN_DASHBOARD_SUCCESS|" + pendingCount + "|" + liveCount + "|" + userCount + "|" + uptimeStr);
-                                out.flush();
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -332,7 +316,8 @@ public class ClientHandler implements Runnable {
             }
 
         } catch (IOException e) {
-            // Mất kết nối đột ngột
+            System.err.println(">>> [LỖI SERVER CRASH LUỒNG CỦA USER " + this.currentUserId + "]:");
+            e.printStackTrace();
         } finally {
             userService.logout(clientName);
             removeActiveClient(currentUserId);
