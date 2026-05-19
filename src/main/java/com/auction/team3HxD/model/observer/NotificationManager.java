@@ -59,4 +59,12 @@ public class NotificationManager implements NotificationSubject {
             }
         }
     }
+    public void notifySpecificGroup(String eventType, String payload, java.util.List<Integer> targetUserIds) {
+        String message = eventType + "|" + payload;
+        for (ClientObserver observer : observers) {
+            if (targetUserIds.contains(observer.getObserverUserId())) {
+                observer.onNotify(eventType, message);
+            }
+        }
+    }
 }

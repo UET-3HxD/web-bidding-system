@@ -16,6 +16,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -204,7 +207,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                                     String payload = bidAuctionId + "|" + bidAmount;
                                     com.auction.team3HxD.model.observer.NotificationManager.getInstance()
                                             .notifyOthers("BID_UPDATE", payload, this.currentUserId);
-                                    System.out.println(">>> [OBSERVER] Đã phát sóng giá mới " + bidAmount + " cho phòng " + bidAuctionId);
+                                    // chuc nang nang cao: anti-snipe
                                 }
                             } catch (Exception e) {
                                 out.println("BID_ERROR|Dữ liệu gửi lên không hợp lệ!");
@@ -225,6 +228,32 @@ public class ClientHandler implements Runnable, ClientObserver {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
+                        }
+                        else if (cmd.equals("CHECK_AUCTION_STATUS")) {
+                            try {
+                                int auctionId = Integer.parseInt(parts[1]);
+                                String sql = "SELECT a.status, a.end_time, i.product_name FROM auction_sessions a " +
+                                        "JOIN items i ON a.item_id = i.id WHERE a.id = ?";
+
+                                try (Connection conn = com.auction.team3HxD.util.DBConnection.getConnection();
+                                     PreparedStatement ps = conn.prepareStatement(sql)) {
+                                    ps.setInt(1, auctionId);
+                                    try (ResultSet rs = ps.executeQuery()) {
+                                        if (rs.next()) {
+                                            String status = rs.getString("status");
+                                            java.sql.Timestamp endTime = rs.getTimestamp("end_time");
+                                            String productName = rs.getString("product_name");
+                                            if (status.equals("ACTIVE") && endTime.after(new java.sql.Timestamp(System.currentTimeMillis()))) {
+
+                                                java.util.List<Integer> participantIds = auctionDAO.getParticipantsByAuctionId(auctionId);
+                                                String extendPayload = auctionId + "|" + productName;
+                                                com.auction.team3HxD.model.observer.NotificationManager.getInstance()
+                                                        .notifySpecificGroup("AUCTION_EXTENDED", extendPayload, participantIds);
+                                            }
+                                        }
+                                    }
+                                }
+                            } catch (Exception e) { e.printStackTrace(); }
                         }
                         // ===== ADMIN COMMANDS =====
                         else if (cmd.equals("GET_PENDING_ITEMS")) {
