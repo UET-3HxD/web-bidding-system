@@ -64,19 +64,22 @@ public class ClientHandler implements Runnable, ClientObserver {
                         out.println(res);
                         System.out.println("Sent response to client: " + res);
                         System.out.flush();
-                    } else if (cmd.equals("LOGIN")) {
+                    }
+                    else if (cmd.equals("LOGIN")) {
                         String res = userService.login(parts[1], parts[2]);
                         if (res.startsWith("LOGIN_OK")) {
                             this.clientName = parts[1];
                             this.currentUserId = userDAO.getUserByUsername(this.clientName).getId();
                             NotificationManager.getInstance().addObserver(this);
+                            ClientHandler.addActiveClient(this.currentUserId, this);   // 👈 THÊM DÒNG NÀY
                             isAuthenticated = true;
-                            out.println(res); // gửi LOGIN_OK|ROLE
+                            out.println(res);
                             broadcast("INFO|" + clientName + " đã tham gia phòng!");
                         } else {
-                            out.println(res); // gửi mã lỗi
+                            out.println(res);
                         }
-                    } else {}
+                    }
+                    else {}
                 } catch (Exception e) {
                     // Bắt mọi lỗi (SQL, logic...) để client không bị treo
                     out.println("ERR|Server error: " + e.getMessage());
@@ -284,6 +287,36 @@ public class ClientHandler implements Runnable, ClientObserver {
                                 }
                             } catch (Exception e) {
                                 out.println("REJECT_ERR|Dữ liệu không hợp lệ");
+                            }
+                        }
+                        // ===== USER MANAGEMENT (ADMIN) =====
+                        else if (cmd.equals("GET_ALL_USERS")) {
+                            try {
+                                if (!userService.isAdmin(currentUserId)) {
+                                    out.println("ERR|Bạn không có quyền!");
+                                    continue;
+                                }
+                                String response = userService.getAllUsersList();
+                                out.println(response);
+                            } catch (Exception e) {
+                                out.println("ALL_USERS_EMPTY");
+                            }
+                        }
+                        else if (cmd.equals("UNBAN_USER")) {
+                            try {
+                                if (!userService.isAdmin(currentUserId)) {
+                                    out.println("ERR|Bạn không có quyền!");
+                                    continue;
+                                }
+                                int targetUserId = Integer.parseInt(parts[1]);
+                                boolean success = userService.unbanUser(targetUserId);
+                                if (success) {
+                                    out.println("UNBAN_SUCCESS");
+                                } else {
+                                    out.println("UNBAN_ERR|Không thể mở khóa tài khoản");
+                                }
+                            } catch (Exception e) {
+                                out.println("UNBAN_ERR|Dữ liệu không hợp lệ");
                             }
                         }
                         else if (cmd.equals("BAN_USER")) {
