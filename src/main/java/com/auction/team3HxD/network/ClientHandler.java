@@ -64,19 +64,22 @@ public class ClientHandler implements Runnable, ClientObserver {
                         out.println(res);
                         System.out.println("Sent response to client: " + res);
                         System.out.flush();
-                    } else if (cmd.equals("LOGIN")) {
+                    }
+                    else if (cmd.equals("LOGIN")) {
                         String res = userService.login(parts[1], parts[2]);
                         if (res.startsWith("LOGIN_OK")) {
                             this.clientName = parts[1];
                             this.currentUserId = userDAO.getUserByUsername(this.clientName).getId();
                             NotificationManager.getInstance().addObserver(this);
+                            ClientHandler.addActiveClient(this.currentUserId, this);   // 👈 THÊM DÒNG NÀY
                             isAuthenticated = true;
-                            out.println(res); // gửi LOGIN_OK|ROLE
+                            out.println(res);
                             broadcast("INFO|" + clientName + " đã tham gia phòng!");
                         } else {
-                            out.println(res); // gửi mã lỗi
+                            out.println(res);
                         }
-                    } else {}
+                    }
+                    else {}
                 } catch (Exception e) {
                     // Bắt mọi lỗi (SQL, logic...) để client không bị treo
                     out.println("ERR|Server error: " + e.getMessage());
