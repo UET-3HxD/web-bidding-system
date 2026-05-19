@@ -286,6 +286,36 @@ public class ClientHandler implements Runnable, ClientObserver {
                                 out.println("REJECT_ERR|Dữ liệu không hợp lệ");
                             }
                         }
+                        // ===== USER MANAGEMENT (ADMIN) =====
+                        else if (cmd.equals("GET_ALL_USERS")) {
+                            try {
+                                if (!userService.isAdmin(currentUserId)) {
+                                    out.println("ERR|Bạn không có quyền!");
+                                    continue;
+                                }
+                                String response = userService.getAllUsersList();
+                                out.println(response);
+                            } catch (Exception e) {
+                                out.println("ALL_USERS_EMPTY");
+                            }
+                        }
+                        else if (cmd.equals("UNBAN_USER")) {
+                            try {
+                                if (!userService.isAdmin(currentUserId)) {
+                                    out.println("ERR|Bạn không có quyền!");
+                                    continue;
+                                }
+                                int targetUserId = Integer.parseInt(parts[1]);
+                                boolean success = userService.unbanUser(targetUserId);
+                                if (success) {
+                                    out.println("UNBAN_SUCCESS");
+                                } else {
+                                    out.println("UNBAN_ERR|Không thể mở khóa tài khoản");
+                                }
+                            } catch (Exception e) {
+                                out.println("UNBAN_ERR|Dữ liệu không hợp lệ");
+                            }
+                        }
                         else if (cmd.equals("BAN_USER")) {
                             try {
                                 int targetUserId = Integer.parseInt(parts[1]);
