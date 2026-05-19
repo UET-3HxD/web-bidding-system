@@ -242,4 +242,33 @@ public class UserService {
     public boolean rejectItem(int itemId) {
         return itemDAO.updateItemStatus(itemId, "REJECTED");
     }
+
+    // ==================== USER MANAGEMENT (ADMIN) ====================
+
+    /**
+     * Lấy danh sách tất cả người dùng (id, username, email, role).
+     * Trả về chuỗi ALL_USERS|id#username#email#role|...
+     */
+    public String getAllUsersList() {
+        List<User> users = userDAO.findAll();
+        if (users == null || users.isEmpty()) {
+            return "ALL_USERS_EMPTY";
+        }
+        StringBuilder sb = new StringBuilder("ALL_USERS");
+        for (User u : users) {
+            sb.append("|").append(u.getId())
+                    .append("#").append(u.getUsername())
+                    .append("#").append(u.getEmail() != null ? u.getEmail() : "")
+                    .append("#").append(u.getRole().name());
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Mở khóa tài khoản (chuyển role từ BANNED về USER).
+     */
+    public boolean unbanUser(int userId) {
+        return userDAO.updateRole(userId, "USER");
+    }
+
 }

@@ -117,9 +117,10 @@ public class UserDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, role);
+            pstmt.setInt(2, id);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new RuntimeException("Ban user failed", e);
+            throw new RuntimeException("Update role failed", e);
         }
     }
 

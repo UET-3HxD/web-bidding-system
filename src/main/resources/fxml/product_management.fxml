@@ -30,10 +30,8 @@
             <VBox spacing="5">
                 <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="menu-btn" text="👤   Tài khoản" onAction="#handleGoToAccount"/>
                 <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="menu-btn" text="⏹   Sàn đấu giá" onAction="#handleGoToAuction"/>
-                <!-- ĐÃ SỬA: Thêm onAction cho Bid đang tham gia -->
                 <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="menu-btn" text="⏱   Bid đang tham gia" onAction="#handleGoToMyBids"/>
                 <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="menu-btn, menu-btn-active" text="📦   Sản phẩm của bạn" />
-                <!-- ĐÃ SỬA: Thêm onAction cho Trợ giúp -->
                 <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="menu-btn" text="⚙   Trợ giúp" onAction="#handleGoToHelp"/>
             </VBox>
             <Region VBox.vgrow="ALWAYS" />
@@ -49,6 +47,7 @@
             </HBox>
         </VBox>
     </left>
+
     <center>
         <HBox spacing="20" styleClass="main-content">
             <padding>
@@ -74,6 +73,7 @@
             <VBox prefWidth="400.0" spacing="15">
                 <StackPane fx:id="stackActionPanel" styleClass="action-card">
 
+                    <!-- ===== FORM TẠO MỚI ===== -->
                     <VBox fx:id="paneCreate" spacing="20">
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <Label styleClass="icon-box" text="+" />
@@ -102,20 +102,16 @@
                                 <Label styleClass="input-label" text="Mô tả" />
                                 <TextArea fx:id="txtCreateDesc" prefHeight="100.0" promptText="Mô tả chi tiết sản phẩm..." styleClass="input-area" wrapText="true" />
                             </VBox>
-                            <HBox spacing="10">
-                                <VBox spacing="5" HBox.hgrow="ALWAYS">
-                                    <Label styleClass="input-label" text="Giá khởi điểm (đ)" />
-                                    <TextField fx:id="txtCreatePrice" prefHeight="55.0" prefWidth="188.0" promptText="500000" styleClass="input-field" />
-                                </VBox>
-                                <VBox spacing="5" HBox.hgrow="ALWAYS">
-                                    <Label styleClass="input-label" text="Thời gian" />
-                                    <ComboBox fx:id="cbCreateDuration" maxWidth="Infinity" prefWidth="150.0" promptText="15 phút" styleClass="input-field" />
-                                </VBox>
-                            </HBox>
+                            <!-- ĐÃ SỬA: Bỏ cột Thời gian, chỉ còn Giá khởi điểm chiếm toàn bộ chiều ngang -->
+                            <VBox spacing="5">
+                                <Label styleClass="input-label" text="Giá khởi điểm (đ)" />
+                                <TextField fx:id="txtCreatePrice" promptText="500000" styleClass="input-field" />
+                            </VBox>
                         </VBox>
                         <Button maxWidth="Infinity" onAction="#handleCreateProduct" styleClass="action-btn-primary" text="🚀 Đăng sản phẩm &amp; chờ xét duyệt" />
                     </VBox>
 
+                    <!-- ===== FORM CHỈNH SỬA ===== -->
                     <VBox fx:id="paneEdit" spacing="20" styleClass="edit-mode-panel" visible="false">
                         <HBox alignment="CENTER_LEFT">
                             <HBox alignment="CENTER_LEFT" spacing="10">

@@ -48,17 +48,27 @@ public class SocketService {
                     System.out.println(">>> SocketService vừa đọc được: " + msg);
                     if (msg == null) {
                         System.out.println(">>> SocketService: Mất kết nối từ server (msg = null).");
-                        break; // Thoát vòng lặp khi server đóng kết nối
+                        break;
                     }
-                    if (msg != null && messageHandler != null) {
-                        // Đảm bảo cập nhật giao diện trên JavaFX Thread
+
+                    // Xử lý message toàn cục (kick, ban...)
+                    if (msg.startsWith("YOU_ARE_BANNED")) {
+                        // Cắt lấy lý do từ message
+                        String reason = msg.contains("|") ? msg.split("\\|")[1] : "Tài khoản của bạn đã bị khóa.";
+                        handleForcedLogout(reason);
+                        break; // Thoát vòng lặp, không cần xử lý thêm
+                    }
+
+                    // Chuyển tiếp message cho controller hiện tại
+                    if (messageHandler != null) {
                         javafx.application.Platform.runLater(() -> messageHandler.accept(msg));
                     }
+
                 } catch (IOException e) {
                     if (running) {
                         e.printStackTrace();
                     }
-                    break; // Mất kết nối, thoát vòng lặp
+                    break;
                 }
             }
         });
@@ -107,6 +117,8 @@ public class SocketService {
 
     private void handleForcedLogout(String reason) {
         javafx.application.Platform.runLater(() -> {
+            // Đảm bảo đóng kết nối và xóa session
+            shutdown(); // Tự gọi shutdown để dừng listener và đóng socket
             com.auction.team3HxD.util.UserSession.getInstance().logout();
             com.auction.team3HxD.util.SceneSwitcher.getInstance().switchTo(
                     "/fxml/login.fxml",
