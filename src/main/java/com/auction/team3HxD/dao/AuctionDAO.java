@@ -147,9 +147,36 @@ public class AuctionDAO {
                 psInsert.executeUpdate();
             }
 
-            // thong bao bid thanh cong & mo khoa
+            // chuc nang nang cao: anti-snipe
+            boolean isExtended = false;
+            String productName = "";
+            String checkTimeSql = "SELECT TIMESTAMPDIFF(SECOND, NOW(), a.end_time) AS time_left, i.product_name " +
+                    "FROM auction_sessions a " +
+                    "JOIN items i ON a.item_id = i.id WHERE a.id = ?";
+            try (PreparedStatement psCheck = conn.prepareStatement(checkTimeSql)) {
+                psCheck.setInt(1, auctionId);
+                try (ResultSet rs = psCheck.executeQuery()) {
+                    if (rs.next()) {
+                        int timeLeft = rs.getInt("time_left");
+                        productName = rs.getString("product_name");
+                        if (timeLeft > 0 && timeLeft <= 30) {
+                            String extendSql = "UPDATE auction_sessions SET end_time = DATE_ADD(end_time, INTERVAL 5 MINUTE) WHERE id = ?";
+                            try (PreparedStatement psExtend = conn.prepareStatement(extendSql)) {
+                                psExtend.setInt(1, auctionId);
+                                psExtend.executeUpdate();
+                                isExtended = true;
+                            }
+                        }
+                    }
+                }
+            }
             conn.commit();
-            return "BID_SUCCESS|" + bidAmount;
+            if (isExtended) {
+                // Phải return đúng chuỗi này, có cả tên sản phẩm
+                return "BID_SUCCESS_EXTENDED|" + bidAmount + "|" + productName;
+            } else {
+                return "BID_SUCCESS|" + bidAmount;
+            }
 
         } catch (SQLException e) {
             if (conn != null) {
@@ -172,7 +199,23 @@ public class AuctionDAO {
             }
         }
     }
+    public java.util.List<Integer> getParticipantsByAuctionId(int auctionId) {
+        java.util.List<Integer> userIds = new java.util.ArrayList<>();
+        String sql = "SELECT DISTINCT user_id FROM bids WHERE auction_id = ?";
 
+        try (Connection conn = com.auction.team3HxD.util.DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, auctionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    userIds.add(rs.getInt("user_id"));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return userIds;
+    }
     public Auction findById(int id) {
         String sql = "SELECT * FROM auction_sessions WHERE id = ?";
 

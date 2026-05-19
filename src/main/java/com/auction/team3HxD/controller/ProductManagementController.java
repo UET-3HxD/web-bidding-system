@@ -43,7 +43,7 @@ public class ProductManagementController {
     @FXML private ComboBox<String> cbCreateCategory;
     @FXML private TextArea txtCreateDesc;
     @FXML private TextField txtCreatePrice;
-//    @FXML private ComboBox<String> cbCreateDuration;
+    @FXML private ComboBox<String> cbCreateDuration;
 
     // Form Chỉnh sửa
     @FXML private TextField txtEditName;
@@ -66,12 +66,12 @@ public class ProductManagementController {
 
         // 2. Khởi tạo dữ liệu mẫu cho ComboBox
         cbCreateCategory.getItems().addAll("Điện tử", "Phương tiện", "Nghệ thuật", "Khác");
-//        cbCreateDuration.getItems().addAll("15 phút", "30 phút", "1 giờ", "24 giờ");
+        cbCreateDuration.getItems().addAll("5 phút", "15 phút", "30 phút", "1 giờ", "24 giờ");
 
         paneCreate.setVisible(true);
         paneEdit.setVisible(false);
         if (cbAuctionDuration != null) {
-            cbAuctionDuration.getItems().addAll("15 phút", "30 phút", "1 giờ", "12 giờ", "24 giờ");
+            cbAuctionDuration.getItems().addAll("5 phút", "15 phút", "30 phút", "1 giờ", "12 giờ", "24 giờ");
         }
         // 3. ĐĂNG KÝ NGƯỜI NGHE VÀ LẤY DỮ LIỆU THẬT
         com.auction.team3HxD.util.SocketService.getInstance().setMessageHandler(this::handleServerResponse);
@@ -503,6 +503,7 @@ public class ProductManagementController {
     // Hàm phụ trợ chuyển chuỗi "15 phút" thành số int 15
     private int parseDurationToMinutes(String durationStr) {
         switch (durationStr) {
+            case "5 phút": return 5;
             case "15 phút": return 15;
             case "30 phút": return 30;
             case "1 giờ": return 60;

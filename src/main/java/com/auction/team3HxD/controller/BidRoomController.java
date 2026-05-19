@@ -39,16 +39,9 @@ public class BidRoomController {
 
     @FXML
     public void initialize() {
-        // 1. Lấy ID phiên đấu giá từ "Bộ nhớ tạm" (Giả sử Captain lưu trong UserSession)
-        // currentAuctionId = com.auction.team3HxD.util.UserSession.getInstance().getSelectedAuctionId();
-
-        // Demo ID nếu chưa có logic truyền (Captain nhớ thay bằng logic thật)
         this.currentAuctionId = String.valueOf(com.auction.team3HxD.util.UserSession.getInstance().getSelectedAuctionId());
         int myId = com.auction.team3HxD.util.UserSession.getInstance().getId();
-        // 2. Đăng ký nhận tin nhắn Real-time từ Server
         com.auction.team3HxD.util.SocketService.getInstance().setMessageHandler(this::handleServerResponse);
-
-        // 3. Gửi yêu cầu lấy chi tiết phiên đấu giá
         System.out.println(">>> Đang lấy dữ liệu chi tiết cho Auction ID: " + currentAuctionId);
         com.auction.team3HxD.util.SocketService.getInstance().send("GET_AUCTION_DETAIL|" + currentAuctionId + "|" + myId);
     }
@@ -67,17 +60,16 @@ public class BidRoomController {
                     break;
 
                 case "BID_SUCCESS":
-                    double confirmedPrice = Double.parseDouble(parts[1]);
-                    // Cập nhật dòng chữ màu đỏ bằng số tiền vừa nhập
-                    if (txtBidInput.getText() != null && !txtBidInput.getText().isEmpty()) {
-                        myLastBid = confirmedPrice;
-                        currentHighestPrice = myLastBid;
-                        lblHighestBid.setText(df.format(currentHighestPrice) + " VNĐ");
-                        lblYourLastBid.setText(df.format(Double.parseDouble(txtBidInput.getText())) + " VNĐ");
-                        updateYourLastBidDisplay();
-                    }
-                    txtBidInput.clear();
-                    showAlert("Thành công", "Bạn đã đặt giá thành công!", Alert.AlertType.INFORMATION);
+                case "BID_SUCCESS_EXTENDED":
+                    Platform.runLater(() -> {
+                        try {
+                            double newPrice = Double.parseDouble(parts[1]);
+                            lblHighestBid.setText(df.format(newPrice) + " VNĐ");
+                            this.currentHighestPrice = newPrice;
+                            updateYourLastBidDisplay();
+                            System.out.println(">>> [UI REAL-TIME] Đã cập nhật giá mới: " + newPrice);
+                        } catch (Exception e) { e.printStackTrace(); }
+                    });
                     break;
 
                 case "BID_ERROR":
@@ -104,44 +96,56 @@ public class BidRoomController {
                         }
                     });
                     break;
-
-                case "AUCTION_ENDED":
-                    javafx.application.Platform.runLater(() -> {
+                case "AUCTION_EXTENDED":
+                    Platform.runLater(() -> {
                         try {
                             if (parts.length >= 3) {
-                                int endedAuctionId = Integer.parseInt(parts[1]);
-                                int winnerId = Integer.parseInt(parts[2]);
+                                int extendedAuctionId = Integer.parseInt(parts[1]);
+                                String productName = parts[2];
 
-                                if (this.currentAuctionId.equals(String.valueOf(endedAuctionId))) {
+                                if (this.currentAuctionId.equals(String.valueOf(extendedAuctionId))) {
+                                    txtBidInput.setDisable(false);
+                                    btnPlaceBid.setDisable(false);
+                                    lblTimeLeft.setStyle("-fx-text-fill: #000000;");
 
-                                    txtBidInput.setDisable(true);
-                                    btnPlaceBid.setDisable(true);
-
-                                    int myUserId = com.auction.team3HxD.util.UserSession.getInstance().getId();
-
-                                    if (myUserId == winnerId) {
-                                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-                                        alert.setTitle("Chúc mừng!");
-                                        alert.setHeaderText(null);
-                                        alert.setContentText("bạn đã thắng sản phẩm này! vào mục \"bid đang tham gia\" để xem sản phẩm vừa thắng.");
-
-                                        alert.showAndWait();
-                                        navigateToMainArea();
-
-                                    } else {
-                                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-                                        alert.setTitle("Phiên đấu giá kết thúc");
-                                        alert.setHeaderText(null);
-                                        alert.setContentText("phiên đấu giá đã kết thúc. nhấn \"Ok\" để quay trở về khu vực chính.");
-
-                                        alert.showAndWait();
-                                        navigateToMainArea();
-                                    }
+                                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                                    alert.setTitle("Thông báo gia hạn");
+                                    alert.setHeaderText(null);
+                                    alert.setContentText("sản phẩm " + productName + " đã được gia hạn thời gian đấu giá!");
+                                    alert.show();
+                                    com.auction.team3HxD.util.SocketService.getInstance().send("GET_AUCTION_DETAIL|" + this.currentAuctionId);
                                 }
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        } catch (Exception e) { e.printStackTrace(); }
+                    });
+                    break;
+
+                case "AUCTION_ENDED":
+                    Platform.runLater(() -> {
+                        try {
+                            int endedAuctionId = Integer.parseInt(parts[1]);
+                            int winnerId = Integer.parseInt(parts[2]);
+
+                            if (this.currentAuctionId.equals(String.valueOf(endedAuctionId))) {
+                                int myUserId = com.auction.team3HxD.util.UserSession.getInstance().getId();
+
+                                if (myUserId == winnerId) {
+                                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                                    alert.setTitle("Chúc mừng!");
+                                    alert.setHeaderText(null);
+                                    alert.setContentText("bạn đã thắng sản phẩm này! vào mục \"bid đang tham gia\" để xem sản phẩm vừa thắng.");
+                                    alert.showAndWait();
+                                    navigateToMainArea();
+                                } else {
+                                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                                    alert.setTitle("Phiên đấu giá kết thúc");
+                                    alert.setHeaderText(null);
+                                    alert.setContentText("phiên đấu giá đã kết thúc. nhấn \"Ok\" để quay trở về khu vực chính.");
+                                    alert.showAndWait();
+                                    navigateToMainArea();
+                                }
+                            }
+                        } catch (Exception e) { e.printStackTrace(); }
                     });
                     break;
             }
@@ -309,25 +313,11 @@ public class BidRoomController {
             txtBidInput.setDisable(true);
             btnPlaceBid.setDisable(true);
 
-            if (myLastBid > 0 && myLastBid >= currentHighestPrice) {
+            lblTimeLeft.setText("Đang tính kết quả...");
+            lblTimeLeft.setStyle("-fx-text-fill: #ff9800;");
 
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Chúc mừng!");
-                alert.setHeaderText(null);
-                alert.setContentText("bạn đã thắng sản phẩm này! vào mục \"bid đang tham gia\" để xem sản phẩm vừa thắng.");
-
-                alert.showAndWait();
-                navigateToMainArea();
-
-            } else {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Phiên đấu giá kết thúc");
-                alert.setHeaderText(null);
-                alert.setContentText("phiên đấu giá đã kết thúc. nhấn \"Ok\" để quay trở về khu vực chính.");
-
-                alert.showAndWait();
-                navigateToMainArea();
-            }
+            com.auction.team3HxD.util.SocketService.getInstance().send("CHECK_AUCTION_STATUS|" + this.currentAuctionId);
+            System.out.println(">>> [UI] Đã chạm mốc 0s, đang gửi lệnh kiểm tra gia hạn lên Server...");
         });
     }
     private void startCountdown() {
@@ -375,6 +365,15 @@ public class BidRoomController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    private void showExtensionPopupAndRefresh(String productName) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+        alert.setTitle("Thông báo gia hạn");
+        alert.setHeaderText(null);
+        alert.setContentText("sản phẩm " + productName + " đã được gia hạn thời gian đấu giá!");
+        alert.show();
+        com.auction.team3HxD.util.SocketService.getInstance().send("GET_AUCTION_DETAIL|" + this.currentAuctionId);
+        System.out.println(">>> [UI] Đã yêu cầu Server gửi lại thời gian gia hạn!");
     }
     private void navigateToMainArea() {
         try {
