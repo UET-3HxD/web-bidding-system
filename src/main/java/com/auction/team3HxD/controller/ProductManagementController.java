@@ -42,7 +42,7 @@ public class ProductManagementController {
     @FXML private ComboBox<String> cbCreateCategory;
     @FXML private TextArea txtCreateDesc;
     @FXML private TextField txtCreatePrice;
-    @FXML private ComboBox<String> cbCreateDuration;
+//    @FXML private ComboBox<String> cbCreateDuration;
 
     // Form Chỉnh sửa
     @FXML private TextField txtEditName;
@@ -65,7 +65,7 @@ public class ProductManagementController {
 
         // 2. Khởi tạo dữ liệu mẫu cho ComboBox
         cbCreateCategory.getItems().addAll("Điện tử", "Phương tiện", "Nghệ thuật", "Khác");
-        cbCreateDuration.getItems().addAll("15 phút", "30 phút", "1 giờ", "24 giờ");
+//        cbCreateDuration.getItems().addAll("15 phút", "30 phút", "1 giờ", "24 giờ");
 
         paneCreate.setVisible(true);
         paneEdit.setVisible(false);
