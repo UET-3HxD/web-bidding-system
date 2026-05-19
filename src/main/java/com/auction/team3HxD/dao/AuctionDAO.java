@@ -6,10 +6,7 @@ import com.auction.team3HxD.model.User;
 import com.auction.team3HxD.model.enums.AuctionStatus;
 import com.auction.team3HxD.util.DBConnection;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,37 +15,43 @@ public class AuctionDAO {
     private final UserDAO userDAO = new UserDAO();
     private final ItemDAO itemDAO = new ItemDAO();
 
-    public boolean startAuction(int itemId, int durationMinutes) {
+    public int startAuction(int itemId, int durationMinutes) {
         String insertSessionSql = "INSERT INTO auction_sessions (item_id, start_time, end_time, current_price, status) " +
                 "VALUES (?, NOW(), DATE_ADD(NOW(), INTERVAL ? MINUTE), 0, 'ACTIVE')";
         String updateItemSql = "UPDATE items SET status = 'LIVE' WHERE id = ?";
 
         Connection conn = null;
+        int generatedAuctionId = -1;
 
         try {
-            conn = DBConnection.getConnection();
+            conn = com.auction.team3HxD.util.DBConnection.getConnection();
             conn.setAutoCommit(false);
 
-            try (PreparedStatement pstmt1 = conn.prepareStatement(insertSessionSql)) {
+            try (PreparedStatement pstmt1 = conn.prepareStatement(insertSessionSql, Statement.RETURN_GENERATED_KEYS)) {
                 pstmt1.setInt(1, itemId);
                 pstmt1.setInt(2, durationMinutes);
                 pstmt1.executeUpdate();
-            }
 
+                try (ResultSet rs = pstmt1.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        generatedAuctionId = rs.getInt(1);
+                    }
+                }
+            }
             try (PreparedStatement pstmt2 = conn.prepareStatement(updateItemSql)) {
                 pstmt2.setInt(1, itemId);
                 pstmt2.executeUpdate();
             }
 
             conn.commit();
-            return true;
+            return generatedAuctionId;
 
         } catch (SQLException e) {
             System.err.println(">>> startAuction ERROR: " + e.getMessage());
             if (conn != null) {
                 try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
             }
-            return false;
+            return -1;
         } finally {
             if (conn != null) {
                 try {

@@ -85,6 +85,8 @@ MainAuctionController {
                 Label lblEmpty = new Label("Hiện không có phiên đấu giá nào đang diễn ra.");
                 lblEmpty.getStyleClass().add("text-muted");
                 vboxAuctionList.getChildren().add(lblEmpty);
+            } else if (message.startsWith("NEW_AUCTION_ARRIVED")) {
+                com.auction.team3HxD.util.SocketService.getInstance().send("GET_LIVE_AUCTIONS");
             }
         });
     }

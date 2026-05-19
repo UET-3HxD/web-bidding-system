@@ -5,6 +5,8 @@ import com.auction.team3HxD.dao.ItemDAO;
 import com.auction.team3HxD.dao.UserDAO;
 import com.auction.team3HxD.model.Electronic;
 import com.auction.team3HxD.model.Item;
+import com.auction.team3HxD.model.observer.ClientObserver;
+import com.auction.team3HxD.model.observer.NotificationManager;
 import com.auction.team3HxD.services.AuctionService;
 import com.auction.team3HxD.services.UserService;
 import com.auction.team3HxD.util.AppConfig;
@@ -20,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static com.auction.team3HxD.network.AuctionServer.broadcast;
 
-public class ClientHandler implements Runnable {
+public class ClientHandler implements Runnable, ClientObserver {
     private Socket socket;
     private PrintWriter out;
     private BufferedReader in;
@@ -67,6 +69,7 @@ public class ClientHandler implements Runnable {
                         if (res.startsWith("LOGIN_OK")) {
                             this.clientName = parts[1];
                             this.currentUserId = userDAO.getUserByUsername(this.clientName).getId();
+                            NotificationManager.getInstance().addObserver(this);
                             isAuthenticated = true;
                             out.println(res); // gửi LOGIN_OK|ROLE
                             broadcast("INFO|" + clientName + " đã tham gia phòng!");
@@ -110,11 +113,13 @@ public class ClientHandler implements Runnable {
                                 String desc = parts[4];
                                 String path = parts[5];
 
-                                // Gọi Service để xử lý (Service sẽ gọi DAO)
-                                boolean success = userService.createItem(currentUserId, name, price, type, desc, path);
+                                int newGeneratedId = userService.createItem(currentUserId, name, price, type, desc, path);
 
-                                if (success) {
+                                if (newGeneratedId > 0) {
                                     out.println("CREATE_ITEM_SUCCESS");
+                                    String payload = newGeneratedId + "|" + name;
+                                    com.auction.team3HxD.model.observer.NotificationManager.getInstance()
+                                            .notifyAllObservers("PRODUCT_SUBMITTED", payload);
                                 } else {
                                     out.println("CREATE_ITEM_ERR|Lỗi khi lưu vào Database");
                                 }
@@ -132,8 +137,8 @@ public class ClientHandler implements Runnable {
                             double price = Double.parseDouble(parts[3]);
                             String desc = parts[4];
 
-                            boolean success = userService.updateItem(itemId, name, price, desc);
-                            out.println(success ? "UPDATE_ITEM_SUCCESS" : "UPDATE_ITEM_ERR|Không thể cập nhật sản phẩm này");
+                            int success = userService.updateItem(itemId, name, price, desc);
+                            out.println(success > 0 ? "UPDATE_ITEM_SUCCESS" : "UPDATE_ITEM_ERR|Không thể cập nhật sản phẩm này");
                         }
                         else if (cmd.equals("DELETE_ITEM")) {
                             int itemId = Integer.parseInt(parts[1]);
@@ -150,16 +155,12 @@ public class ClientHandler implements Runnable {
                                 int auctionItemId = Integer.parseInt(parts[1]);
                                 int minutes = Integer.parseInt(parts[2]);
 
-                                System.out.println(">>> DEBUG: START_AUCTION received, itemId=" + auctionItemId + ", minutes=" + minutes);
-                                System.out.flush();
+                                int newAuctionId = userService.startAuction(auctionItemId, minutes);
 
-                                boolean isStarted = userService.startAuction(auctionItemId, minutes);
-
-                                System.out.println(">>> DEBUG: startAuction result=" + isStarted);
-                                System.out.flush();
-
-                                if (isStarted) {
+                                if (newAuctionId > 0) {
                                     out.println("START_AUCTION_SUCCESS");
+                                    com.auction.team3HxD.model.observer.NotificationManager.getInstance()
+                                            .notifyOthers("NEW_AUCTION_ARRIVED", String.valueOf(newAuctionId), this.currentUserId);
                                 } else {
                                     out.println("START_AUCTION_ERR|Lỗi hệ thống khi khởi tạo phiên đấu giá");
                                 }
@@ -200,14 +201,10 @@ public class ClientHandler implements Runnable {
                                 String result = auctionDAO.placeBidTransaction(bidAuctionId, bidUserId, bidAmount);
                                 out.println(result);
                                 if (result.startsWith("BID_SUCCESS")) {
-                                    String broadcastMsg = "BID_UPDATE|" + bidAuctionId + "|" + bidAmount;
-                                    for (ClientHandler client : activeClients.values()) {
-                                        System.out.println(">>> [SERVER] Đang kiểm tra client của User ID: " + client.currentUserId);
-                                        if (client.currentUserId != this.currentUserId) {
-                                            client.out.println(broadcastMsg);
-                                            client.out.flush();
-                                        }
-                                    }
+                                    String payload = bidAuctionId + "|" + bidAmount;
+                                    com.auction.team3HxD.model.observer.NotificationManager.getInstance()
+                                            .notifyOthers("BID_UPDATE", payload, this.currentUserId);
+                                    System.out.println(">>> [OBSERVER] Đã phát sóng giá mới " + bidAmount + " cho phòng " + bidAuctionId);
                                 }
                             } catch (Exception e) {
                                 out.println("BID_ERROR|Dữ liệu gửi lên không hợp lệ!");
@@ -249,9 +246,15 @@ public class ClientHandler implements Runnable {
                                     continue;
                                 }
                                 int itemId = Integer.parseInt(parts[1]);
+                                int ownerId = itemDAO.getOwnerIdByItemId(itemId);
                                 boolean success = userService.approveItem(itemId);
                                 if (success) {
                                     out.println("APPROVE_SUCCESS");
+                                    if (ownerId != -1) {
+                                        String payload = itemId + "|APPROVED";
+                                        com.auction.team3HxD.model.observer.NotificationManager.getInstance()
+                                                .notifySingleUser("MY_PRODUCT_STATUS_CHANGED", payload, ownerId);
+                                    }
                                 } else {
                                     out.println("APPROVE_ERR|Không thể duyệt sản phẩm này");
                                 }
@@ -266,9 +269,16 @@ public class ClientHandler implements Runnable {
                                     continue;
                                 }
                                 int itemId = Integer.parseInt(parts[1]);
+                                int ownerId = itemDAO.getOwnerIdByItemId(itemId);
                                 boolean success = userService.rejectItem(itemId);
                                 if (success) {
                                     out.println("REJECT_SUCCESS");
+                                    if (ownerId != -1) {
+                                        String payload = itemId + "|REJECTED";
+                                        com.auction.team3HxD.model.observer.NotificationManager.getInstance()
+                                                .notifySingleUser("MY_PRODUCT_STATUS_CHANGED", payload, ownerId);
+                                    }
+
                                 } else {
                                     out.println("REJECT_ERR|Không thể từ chối sản phẩm này");
                                 }
@@ -320,11 +330,28 @@ public class ClientHandler implements Runnable {
             e.printStackTrace();
         } finally {
             userService.logout(clientName);
+            NotificationManager.getInstance().removeObserver(this);
             removeActiveClient(currentUserId);
             closeConnection();
         }
     }
+    @Override
+    public void onNotify(String eventType, String fullMessage) {
+        // Mỗi khi NotificationManager gọi hàm này, đẩy tin nhắn qua Socket về cho Client
+        try {
+            if (out != null) {
+                out.println(fullMessage);
+                out.flush();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
+    @Override
+    public int getObserverUserId() {
+        return this.currentUserId;
+    }
     private void handleAuctionCommands(String message) {
         AuctionService auctionService = new AuctionService();
         String[] parts = message.split("\\|");

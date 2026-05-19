@@ -43,7 +43,7 @@ public class AuctionServer {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("Auction Server is running on port " + PORT);
             System.out.flush(); // đảm bảo hiện ngay
-
+            new com.auction.team3HxD.network.AuctionTimeoutTask().startChecking();
             while (true) {
                 System.out.println("Waiting for connection..."); // debug
                 System.out.flush();

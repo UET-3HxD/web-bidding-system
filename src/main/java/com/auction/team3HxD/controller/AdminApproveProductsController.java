@@ -55,6 +55,9 @@ public class AdminApproveProductsController {
             } else if (message.startsWith("APPROVE_ERR") || message.startsWith("REJECT_ERR")) {
                 String err = message.contains("|") ? message.split("\\|")[1] : "Lỗi không xác định";
                 showAlert("Lỗi", err, Alert.AlertType.ERROR);
+            } else if (message.startsWith("PRODUCT_SUBMITTED")) {
+                System.out.println(">>> [REAL-TIME ADMIN] Có user vừa đăng");
+                SocketService.getInstance().send("GET_PENDING_ITEMS");
             }
         });
     }
