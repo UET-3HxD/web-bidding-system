@@ -1,5 +1,6 @@
 package com.auction.team3HxD.controller;
 
+import com.auction.team3HxD.util.SocketService;
 import com.auction.team3HxD.util.UserSession;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -90,6 +91,7 @@ public class ProductManagementController {
 
                 // Tải lại danh sách
                 com.auction.team3HxD.util.SocketService.getInstance().send("GET_MY_ITEMS");
+                showAlert("Thành công", "Đăng kí thành công! Sản phẩm đang chờ quản trị viên phê duyệt.", Alert.AlertType.INFORMATION);
                 resetUploadUI();
 
             } else if (message.startsWith("CREATE_ITEM_ERR")) {
@@ -117,15 +119,34 @@ public class ProductManagementController {
             } else if (message.equals("START_AUCTION_SUCCESS")) {
                 showAlert("Lên sàn thành công!", "Phiên đấu giá đã chính thức bắt đầu và được hiển thị ở Khu vực chính.", Alert.AlertType.INFORMATION);
 
-                // Đóng panel chỉnh sửa
                 handleCloseEdit(null);
 
-                // Tải lại danh sách sản phẩm để thấy trạng thái chuyển sang LIVE (Màu xanh)
                 com.auction.team3HxD.util.SocketService.getInstance().send("GET_MY_ITEMS");
 
             } else if (message.startsWith("START_AUCTION_ERR")) {
                 String errorMsg = message.contains("|") ? message.split("\\|")[1] : "Lỗi không xác định";
                 showAlert("Không thể tạo phiên đấu giá", errorMsg, Alert.AlertType.ERROR);
+            } else if (message.startsWith("MY_PRODUCT_STATUS_CHANGED")) {
+                javafx.application.Platform.runLater(() -> {
+                    String[] parts = message.split("\\|");
+                    if (parts.length >= 3) {
+                        String status = parts[2];
+                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                                status.equals("APPROVED") ? javafx.scene.control.Alert.AlertType.INFORMATION : javafx.scene.control.Alert.AlertType.WARNING
+                        );
+                        alert.setTitle("Cập nhật trạng thái");
+                        alert.setHeaderText(null);
+
+                        if (status.equals("APPROVED")) {
+                            alert.setContentText("Sản phẩm của bạn đã được Admin duyệt thành công!");
+                        } else {
+                            alert.setContentText("Sản phẩm của bạn đã bị từ chối.");
+                        }
+                        alert.show();
+                        SocketService.getInstance().send("GET_MY_ITEMS");
+                        System.out.println(">>> [REAL-TIME USER] Đã cập nhật lại bảng vì Admin vừa thao tác.");
+                    }
+                });
             }
         });
     }

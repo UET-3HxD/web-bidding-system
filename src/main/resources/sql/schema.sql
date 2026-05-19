@@ -52,7 +52,7 @@ CREATE TABLE auction_sessions (
                                   item_id INT NOT NULL,
                                   start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                   end_time TIMESTAMP NOT NULL,
-                                  status ENUM('ACTIVE', 'ENDED', 'CANCELLED') DEFAULT 'ACTIVE',
+                                  status ENUM('ACTIVE', 'FINISHED') DEFAULT 'ACTIVE',
                                   FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
 );
 DROP TABLE IF EXISTS `bids`;

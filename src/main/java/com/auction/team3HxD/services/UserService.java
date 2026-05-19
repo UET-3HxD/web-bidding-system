@@ -93,13 +93,13 @@ public class UserService {
             onlineUsers.remove(username);
         }
     }
-    public boolean updateItem(int itemId, String name, double price, String desc) {
+    public int updateItem(int itemId, String name, double price, String desc) {
         // 1. (Tùy chọn) Kiểm tra trạng thái hiện tại trong DB một lần nữa để đảm bảo an toàn
         // 2. Gọi DAO để cập nhật và reset trạng thái về WAITING
         return itemDAO.updateItemInfo(itemId, name, price, desc);
     }
     // Xử lý tạo sản phẩm dựa trên loại (Polymorphism)
-    public boolean createItem(int sellerId, String name, double price, String type, String desc, String path) {
+    public int createItem(int sellerId, String name, double price, String type, String desc, String path) {
         Item newItem;
         switch (type.toUpperCase()) {
             case "ELECTRONIC":
@@ -112,7 +112,7 @@ public class UserService {
                 newItem = new Vehicle(sellerId, name, desc, price, path);
                 break;
             default:
-                return false;
+                return -1;
         }
         return itemDAO.saveItem(newItem, type);
     }
@@ -132,7 +132,7 @@ public class UserService {
         }
         return sb.toString();
     }
-    public boolean startAuction(int itemId, int durationMinutes) {
+    public int startAuction(int itemId, int durationMinutes) {
         return auctionDAO.startAuction(itemId, durationMinutes);
     }
     public boolean deleteItem(int itemId) {

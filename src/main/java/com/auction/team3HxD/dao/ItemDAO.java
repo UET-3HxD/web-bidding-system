@@ -26,12 +26,12 @@ public class ItemDAO {
         return null;
     }
 
-    public boolean saveItem(Item item, String type) {
+    public int saveItem(Item item, String type) {
         String sql = "INSERT INTO items (seller_id, product_name, starting_price, description, image_path, item_type) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setInt(1, item.getSellerId());
             pstmt.setString(2, item.getName());
@@ -40,17 +40,19 @@ public class ItemDAO {
             pstmt.setString(5, item.getImagePath());
             pstmt.setString(6, type.toUpperCase());
 
-            System.out.println(">>> saveItem: sellerId=" + item.getSellerId() +
-                    ", name=" + item.getName() +
-                    ", price=" + item.getPrice() +
-                    ", type=" + type.toUpperCase());
-
-            return pstmt.executeUpdate() > 0;
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows > 0) {
+                try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                }
+            }
         } catch (SQLException e) {
             System.err.println(">>> Lỗi SQL khi lưu Item: " + e.getMessage());
             e.printStackTrace();
-            return false;
         }
+        return -1;
     }
 
     public List<Item> getAllItemsBySeller(int sellerId) {
@@ -92,25 +94,44 @@ public class ItemDAO {
         return itemList;
     }
 
-    public boolean updateItemInfo(int itemId, String name, double price, String desc) {
+    public int updateItemInfo(int itemId, String name, double price, String desc) {
         String sql = "UPDATE items SET product_name = ?, starting_price = ?, description = ?, status = 'WAITING' " +
                 "WHERE id = ? AND status NOT IN ('LIVE', 'SOLD')";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setString(1, name);
             pstmt.setDouble(2, price);
             pstmt.setString(3, desc);
             pstmt.setInt(4, itemId);
 
-            return pstmt.executeUpdate() > 0;
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows > 0) {
+                try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
+        return -1;
     }
-
+    public int getOwnerIdByItemId(int itemId) {
+        String sql = "SELECT seller_id FROM items WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, itemId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("seller_id");
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return -1;
+    }
     public boolean deleteItem(int itemId) {
         String sql = "DELETE FROM items WHERE id = ? AND status NOT IN ('LIVE', 'SOLD')";
 
