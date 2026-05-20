@@ -94,8 +94,6 @@ public class UserService {
         }
     }
     public int updateItem(int itemId, String name, double price, String desc) {
-        // 1. (Tùy chọn) Kiểm tra trạng thái hiện tại trong DB một lần nữa để đảm bảo an toàn
-        // 2. Gọi DAO để cập nhật và reset trạng thái về WAITING
         return itemDAO.updateItemInfo(itemId, name, price, desc);
     }
     // Xử lý tạo sản phẩm dựa trên loại (Polymorphism)

@@ -111,22 +111,56 @@ public class AuctionDAO {
             }
 
             // kiem tra logic nghiep vu
-            double minIncrement = startPrice * 0.02;
+            String checkValidSql =
+                    "SELECT a.status, " +
+                            "       TIMESTAMPDIFF(SECOND, NOW(), a.end_time) AS time_left, " +
+                            "       i.product_name, " +
+                            "       i.starting_price, " +
+                            "       COALESCE(MAX(b.bid_amount), 0) AS current_highest_price " +
+                            "FROM auction_sessions a " +
+                            "JOIN items i ON a.item_id = i.id " +
+                            "LEFT JOIN bids b ON a.id = b.auction_id " +
+                            "WHERE a.id = ? " +
+                            "GROUP BY a.id, a.status, a.end_time, i.product_name, i.starting_price";
 
-            if (currentPrice == 0) {
-                if (bidAmount < startPrice) {
-                    conn.rollback();
-                    return "BID_ERROR|Lượt ra giá đầu tiên phải lớn hơn hoặc bằng giá khởi điểm (" + String.format("%.0f", startPrice) + " VNĐ)!";
-                }
-            }
-            else {
-                if (bidAmount <= currentPrice) {
-                    conn.rollback();
-                    return "BID_ERROR|Mức giá phải lớn hơn giá hiện tại!";
-                }
-                if (bidAmount < (currentPrice + minIncrement)) {
-                    conn.rollback();
-                    return "BID_ERROR|Mức giá phải cộng thêm ít nhất bước giá tối thiểu!";
+            try (PreparedStatement psCheck = conn.prepareStatement(checkValidSql)) {
+                psCheck.setInt(1, auctionId);
+
+                try (ResultSet rs = psCheck.executeQuery()) {
+                    if (rs.next()) {
+                        String status = rs.getString("status");
+                        int timeLeft = rs.getInt("time_left");
+                        String productName = rs.getString("product_name");
+
+                        // Hứng 2 biến giá tiền để truyền vào logic của Captain
+                        startPrice = rs.getDouble("starting_price");
+                        currentPrice = rs.getDouble("current_highest_price");
+
+                        if (!status.equals("ACTIVE") || timeLeft <= 0) {
+                            conn.rollback();
+                            return "BID_ERROR|Phiên đấu giá đã kết thúc!";
+                        }
+                        double minIncrement = startPrice * 0.02;
+
+                        if (currentPrice == 0) {
+                            if (bidAmount < startPrice) {
+                                conn.rollback();
+                                return "BID_ERROR|Lượt ra giá đầu tiên phải lớn hơn hoặc bằng giá khởi điểm (" + String.format("%,.0f", startPrice) + " VNĐ)!";
+                            }
+                        } else {
+                            if (bidAmount <= currentPrice) {
+                                conn.rollback();
+                                return "BID_ERROR|Mức giá phải lớn hơn giá hiện tại!";
+                            }
+                            if (bidAmount < (currentPrice + minIncrement)) {
+                                conn.rollback();
+                                return "BID_ERROR|Mức giá phải cộng thêm ít nhất bước giá tối thiểu (" + String.format("%,.0f", minIncrement) + " VNĐ)!";
+                            }
+                        }
+                    } else {
+                        conn.rollback();
+                        return "BID_ERROR|Phòng đấu giá không tồn tại hoặc đã bị gỡ.";
+                    }
                 }
             }
 

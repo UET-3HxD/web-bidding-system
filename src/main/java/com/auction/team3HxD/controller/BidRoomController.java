@@ -269,7 +269,7 @@ public class BidRoomController {
 
             // Validate sơ bộ tại Client (Tránh gửi rác lên Server)
             if (bidAmount < currentHighestPrice + minIncrement) {
-                showAlert("Giá quá thấp", "Bạn phải đặt tối thiểu: " + df.format(currentHighestPrice + minIncrement) + " VNĐ", Alert.AlertType.WARNING);
+                showAlert("Giá quá thấp", "Đặt giá không hợp lệ!", Alert.AlertType.WARNING);
                 return;
             }
 

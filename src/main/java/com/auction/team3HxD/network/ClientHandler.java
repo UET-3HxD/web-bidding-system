@@ -138,12 +138,19 @@ public class ClientHandler implements Runnable, ClientObserver {
                             out.println(response);
                         }
                         else if (cmd.equals("UPDATE_ITEM")) {
+                            System.out.println(">>> [SERVER DEBUG] Đã nhận được lệnh UPDATE_ITEM từ Client!");
                             int itemId = Integer.parseInt(parts[1]);
                             String name = parts[2];
                             double price = Double.parseDouble(parts[3]);
                             String desc = parts[4];
 
                             int success = userService.updateItem(itemId, name, price, desc);
+                            System.out.println(">>> [SERVER DEBUG] trạng thái update: " + success);
+                            if (success > 0) {
+                                System.out.println(">>> [SERVER DEBUG] Đã kích hoạt lệnh notifyAllObservers sang Admin.");
+                                com.auction.team3HxD.model.observer.NotificationManager.getInstance()
+                                        .notifyAllObservers("PRODUCT_SUBMITTED", "");
+                            }
                             out.println(success > 0 ? "UPDATE_ITEM_SUCCESS" : "UPDATE_ITEM_ERR|Không thể cập nhật sản phẩm này");
                         }
                         else if (cmd.equals("DELETE_ITEM")) {
@@ -151,6 +158,8 @@ public class ClientHandler implements Runnable, ClientObserver {
                             boolean success = userService.deleteItem(itemId);
 
                             if (success) {
+                                com.auction.team3HxD.model.observer.NotificationManager.getInstance()
+                                        .notifyAllObservers("PRODUCT_SUBMITTED", "");
                                 out.println("DELETE_ITEM_SUCCESS");
                             } else {
                                 out.println("DELETE_ITEM_ERR|Sản phẩm không tồn tại hoặc không thể xóa");

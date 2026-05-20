@@ -43,7 +43,6 @@ public class ProductManagementController {
     @FXML private ComboBox<String> cbCreateCategory;
     @FXML private TextArea txtCreateDesc;
     @FXML private TextField txtCreatePrice;
-    @FXML private ComboBox<String> cbCreateDuration;
 
     // Form Chỉnh sửa
     @FXML private TextField txtEditName;
@@ -66,7 +65,6 @@ public class ProductManagementController {
 
         // 2. Khởi tạo dữ liệu mẫu cho ComboBox
         cbCreateCategory.getItems().addAll("Điện tử", "Phương tiện", "Nghệ thuật", "Khác");
-        cbCreateDuration.getItems().addAll("5 phút", "15 phút", "30 phút", "1 giờ", "24 giờ");
 
         paneCreate.setVisible(true);
         paneEdit.setVisible(false);
@@ -107,9 +105,10 @@ public class ProductManagementController {
                 vboxProductList.getChildren().clear();
                 lblProductCount.setText("0 sản phẩm");
             } else if (message.equals("UPDATE_ITEM_SUCCESS")) {
-                showAlert("Thành công", "Sản phẩm đã được cập nhật và đang chờ duyệt lại!", Alert.AlertType.INFORMATION);
-                handleCloseEdit(null); // Quay lại Form tạo mới
-                com.auction.team3HxD.util.SocketService.getInstance().send("GET_MY_ITEMS"); // Load lại danh sách
+                showAlert("Thành công", "Đã cập nhật sản phẩm thành công! Sản phẩm đang chờ admin duyệt lại.", Alert.AlertType.INFORMATION);
+                handleCloseEdit(null);
+                System.out.println(">>> [UI] Đang tải lại danh sách sản phẩm của tôi để cập nhật tag 'Chờ duyệt'...");
+                com.auction.team3HxD.util.SocketService.getInstance().send("GET_MY_ITEMS");
             } else if (message.equals("DELETE_ITEM_SUCCESS")) {
                 showAlert("Thành công", "Đã xóa sản phẩm khỏi hệ thống!", Alert.AlertType.INFORMATION);
                 handleCloseEdit(null); // Đóng panel chỉnh sửa và reset form
@@ -147,6 +146,9 @@ public class ProductManagementController {
                         System.out.println(">>> [REAL-TIME USER] Đã cập nhật lại bảng vì Admin vừa thao tác.");
                     }
                 });
+            } else if (message.startsWith("AUCTION_ENDED")){
+                SocketService.getInstance().send("GET_MY_ITEMS");
+                System.out.println(">>> [REAL-TIME] Phiên đấu giá kết thúc. cập nhật lại danh sách...");
             }
         });
     }
@@ -259,22 +261,17 @@ public class ProductManagementController {
                 lblStatusTag.setStyle("-fx-background-color: #6366F1; -fx-text-fill: white; -fx-background-radius: 12; -fx-padding: 4 12;"); // Màu Indigo
                 break;
 
-            case "ACTIVE":
+            case "LIVE":
                 lblStatusTag.setText("Đang sàn");
                 lblStatusTag.setStyle("-fx-background-color: #10B981; -fx-text-fill: white; -fx-background-radius: 12; -fx-padding: 4 12;"); // Màu xanh lá
                 break;
-            case "CLOSED":
+            case "SOLD":
                 lblStatusTag.setText("Đã đóng");
                 lblStatusTag.setStyle("-fx-background-color: #64748B; -fx-text-fill: white; -fx-background-radius: 12; -fx-padding: 4 12;"); // Màu xám tro
                 break;
             case "REJECTED":
                 lblStatusTag.setText("Bị từ chối");
                 lblStatusTag.setStyle("-fx-background-color: #64748B; -fx-text-fill: #ff0000; -fx-background-radius: 12; -fx-padding: 4 12;"); // Màu xám tro
-                break;
-            case "WON":
-                lblStatusTag.setText("Đã thắng");
-                // Màu Vàng Gold sang trọng cho người chiến thắng
-                lblStatusTag.setStyle("-fx-background-color: #EAB308; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 12; -fx-padding: 4 12;");
                 break;
             default:
                 lblStatusTag.setText(product.getStatus());
