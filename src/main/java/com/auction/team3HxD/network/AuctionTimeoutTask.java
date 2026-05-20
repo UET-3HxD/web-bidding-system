@@ -56,8 +56,15 @@ public class AuctionTimeoutTask {
             psUpdate.setInt(1, auctionId);
             psUpdate.executeUpdate();
         }
-
-        // 3. 🌟 SỬ DỤNG OBSERVER ĐỂ PHÁT SÓNG TOÀN HỆ THỐNG
+        // 3. update item status
+        String updateItemSql = "UPDATE items SET status = 'SOLD' " +
+                "WHERE id = (SELECT item_id FROM auction_sessions WHERE id = ?)";
+        try (PreparedStatement psItem = conn.prepareStatement(updateItemSql)) {
+            psItem.setInt(1, auctionId);
+            psItem.executeUpdate();
+            System.out.println(">>> [SERVER LOG] Sản phẩm của phiên " + auctionId + " đã tự động chuyển sang trạng thái SOLD.");
+        }
+        // 4. SỬ DỤNG OBSERVER ĐỂ PHÁT SÓNG TOÀN HỆ THỐNG
         // Gói tin: AUCTION_ENDED | ID phiên | ID người thắng
         String payload = auctionId + "|" + winnerId;
         NotificationManager.getInstance().notifyAllObservers("AUCTION_ENDED", payload);

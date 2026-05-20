@@ -50,6 +50,8 @@ public class AdminDashboardController {
                     lblUptime.setText(parts[4]);
                     lblServerStatus.setText("🟢 Đang hoạt động");
                 }
+            } else if (message.startsWith("PRODUCT_SUBMITTED")) {
+                SocketService.getInstance().send("GET_ADMIN_DASHBOARD");
             }
         });
     }
