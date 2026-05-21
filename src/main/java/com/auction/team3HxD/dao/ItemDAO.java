@@ -57,7 +57,17 @@ public class ItemDAO {
 
     public List<Item> getAllItemsBySeller(int sellerId) {
         List<Item> itemList = new ArrayList<>();
-        String sql = "SELECT * FROM items WHERE seller_id = ?";
+
+        // 🌟 ĐÃ CẬP NHẬT: Thêm bộ lọc IN và cấu trúc ORDER BY CASE để sắp xếp đúng thứ tự ưu tiên
+        String sql = "SELECT * FROM items WHERE seller_id = ? " +
+                "AND status IN ('APPROVED', 'WAITING', 'REJECTED', 'LIVE', 'SOLD') " +
+                "ORDER BY CASE status " +
+                "  WHEN 'APPROVED' THEN 1 " +
+                "  WHEN 'WAITING' THEN 2 " +
+                "  WHEN 'REJECTED' THEN 3 " +
+                "  WHEN 'LIVE' THEN 4 " +
+                "  WHEN 'SOLD' THEN 5 " +
+                "  ELSE 6 END, id DESC";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -69,6 +79,7 @@ public class ItemDAO {
                 String type = rs.getString("item_type");
                 Item item = null;
 
+                // Bóc tách dữ liệu gốc của bạn (Giữ nguyên 100%)
                 int id = rs.getInt("id");
                 String name = rs.getString("product_name");
                 String desc = rs.getString("description");
@@ -77,6 +88,7 @@ public class ItemDAO {
                 String status = rs.getString("status");
                 LocalDateTime createdAt = rs.getObject("created_at", LocalDateTime.class);
 
+                // Khởi tạo các Sub-class tương ứng dựa trên item_type
                 switch (type) {
                     case "ELECTRONIC":
                         item = new Electronic(id, sellerId, name, desc, price, path, status, createdAt);
@@ -90,7 +102,9 @@ public class ItemDAO {
                 }
                 if (item != null) itemList.add(item);
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return itemList;
     }
 
@@ -108,11 +122,7 @@ public class ItemDAO {
 
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
-                try (ResultSet rs = pstmt.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        return rs.getInt(1);
-                    }
-                }
+                return itemId;
             }
         } catch (SQLException e) {
             e.printStackTrace();
