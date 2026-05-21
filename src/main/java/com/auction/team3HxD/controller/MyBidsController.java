@@ -1,6 +1,5 @@
 package com.auction.team3HxD.controller;
 
-import com.auction.team3HxD.dao.AuctionDAO;
 import com.auction.team3HxD.util.SceneSwitcher;
 import com.auction.team3HxD.util.SocketService;
 import com.auction.team3HxD.util.UserSession;
@@ -71,15 +70,12 @@ public class MyBidsController {
     private void loadBidList(String message) {
         vboxBidList.getChildren().clear();
         String[] parts = message.split("\\|");
-        // parts[0] = "BID_HISTORY_SUCCESS"
-        // từ parts[1] trở đi là các record bid history
-
         for (int i = 1; i < parts.length; i++) {
             String record = parts[i];
             if (record.isEmpty() || record.equals("EMPTY")) continue;
             String[] data = record.split("#");
-            // id # name # type # image # startingPrice # currentPrice # myLastBid # status
-            if (data.length >= 6) {
+            // data: id, name, type, image, startPrice, currentPrice, userBid, status
+            if (data.length >= 8) {
                 HBox card = createBidCard(data);
                 vboxBidList.getChildren().add(card);
                 if (data[0].equals(this.selectedAuctionId)) {
@@ -90,19 +86,20 @@ public class MyBidsController {
     }
 
     private HBox createBidCard(String[] data) {
-        //0 id #1 name #2 type #3 image #4 startingPrice #5 currentPrice #6 myLastBid #7 status
         String auctionId = data[0];
         String productName = data[1];
         String itemType = data[2];
         String imagePath = data[3];
+        String startPrice = data[4];
         String currentPrice = data[5];
+        String userBid = data[6];
         String status = data[7];
 
         HBox card = new HBox(15);
         card.getStyleClass().add("auction-card");
         card.setAlignment(Pos.CENTER_LEFT);
 
-        // Ảnh thumbnail
+        // Ảnh thumbnail (giữ nguyên)
         StackPane imageBox = new StackPane();
         imageBox.setPrefSize(70, 70);
         imageBox.setStyle("-fx-background-color: #1a1a1a; -fx-background-radius: 8;");
@@ -111,15 +108,11 @@ public class MyBidsController {
                 File file = new File(imagePath);
                 if (file.exists()) {
                     ImageView iv = new ImageView(new Image(file.toURI().toString()));
-                    iv.setFitWidth(70);
-                    iv.setFitHeight(70);
-                    iv.setPreserveRatio(true);
+                    iv.setFitWidth(70); iv.setFitHeight(70); iv.setPreserveRatio(true);
                     imageBox.getChildren().add(iv);
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { }
         if (imageBox.getChildren().isEmpty()) {
             Label noImg = new Label("📷");
             noImg.setStyle("-fx-font-size: 24px; -fx-text-fill: #6B7280;");
@@ -156,27 +149,28 @@ public class MyBidsController {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // Giá hiện tại
-        Label lblPrice = new Label(currentPrice + " đ");
-        lblPrice.setStyle("-fx-text-fill: #3B82F6; -fx-font-weight: bold; -fx-font-size: 18px;");
+        // Cột giá (hiển thị giá hiện tại và giá của bạn nhỏ bên dưới)
+        VBox priceCol = new VBox(3);
+        priceCol.setAlignment(Pos.CENTER_RIGHT);
+        Label lblCurrent = new Label(currentPrice + " đ");
+        lblCurrent.setStyle("-fx-text-fill: #3B82F6; -fx-font-weight: bold; -fx-font-size: 18px;");
+        Label lblYourBidSmall = new Label("Bạn: " + userBid + " đ");
+        lblYourBidSmall.setStyle("-fx-text-fill: #9CA3AF; -fx-font-size: 12px;");
+        priceCol.getChildren().addAll(lblCurrent, lblYourBidSmall);
 
-        card.getChildren().addAll(imageBox, info, spacer, lblPrice);
-
-        // Sự kiện click
+        card.getChildren().addAll(imageBox, info, spacer, priceCol);
         card.setOnMouseClicked(e -> showBidDetail(data));
-
         return card;
     }
 
     private void showBidDetail(String[] data) {
-        //0 id #1 name #2 type #3 image #4 startingPrice #5 currentPrice #6 myLastBid #7 status
         String auctionId = data[0];
         String productName = data[1];
         String itemType = data[2];
         String imagePath = data[3];
-        String startingPrice = data[4];
+        String startPrice = data[4];
         String currentPrice = data[5];
-        String myLastBid =  data[6];
+        String userBid = data[6];
         String status = data[7];
 
         this.selectedAuctionId = auctionId;
@@ -184,11 +178,11 @@ public class MyBidsController {
 
         lblDetailName.setText(productName);
         lblDetailCategory.setText(itemType);
-        lblDetailStartPrice.setText(startingPrice);
+        lblDetailStartPrice.setText(startPrice + " đ");
         lblDetailCurrentPrice.setText(currentPrice + " đ");
-        lblDetailYourBid.setText(myLastBid + " đ");
+        lblDetailYourBid.setText(userBid.equals("0") ? "---" : userBid + " đ");
 
-        // Ảnh chi tiết
+        // Ảnh chi tiết (giữ nguyên)
         imgDetailImage.setVisible(false);
         try {
             if (imagePath != null && !imagePath.isEmpty() && !imagePath.equals("null")) {
@@ -198,9 +192,7 @@ public class MyBidsController {
                     imgDetailImage.setVisible(true);
                 }
             }
-        } catch (Exception e) {
-            // ignore
-        }
+        } catch (Exception e) { }
 
         // Badge trạng thái
         switch (status) {

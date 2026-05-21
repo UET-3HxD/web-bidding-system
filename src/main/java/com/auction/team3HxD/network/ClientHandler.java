@@ -241,6 +241,21 @@ public class ClientHandler implements Runnable, ClientObserver {
                                 e.printStackTrace();
                             }
                         }
+                        // ===== LỊCH SỬ BID CHO BIỂU ĐỒ =====
+                        else if (cmd.equals("GET_AUCTION_BID_HISTORY")) {
+                            try {
+                                int auctionId = Integer.parseInt(parts[1]);
+                                List<String> history = auctionDAO.getAuctionBidHistory(auctionId);
+                                if (history.isEmpty()) {
+                                    out.println("AUCTION_BID_HISTORY|EMPTY");
+                                } else {
+                                    String payload = String.join("|", history);
+                                    out.println("AUCTION_BID_HISTORY|" + payload);
+                                }
+                            } catch (Exception e) {
+                                out.println("AUCTION_BID_HISTORY|EMPTY");
+                            }
+                        }
                         else if (cmd.equals("CHECK_AUCTION_STATUS")) {
                             try {
                                 int auctionId = Integer.parseInt(parts[1]);
