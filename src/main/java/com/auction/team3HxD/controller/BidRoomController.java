@@ -16,6 +16,7 @@ import java.text.DecimalFormat;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
+import javafx.scene.chart.NumberAxis;
 
 import com.auction.team3HxD.util.SceneSwitcher;
 import javafx.scene.Node;
