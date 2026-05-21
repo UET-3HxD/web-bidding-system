@@ -61,6 +61,8 @@ public class MyBidsController {
             } else if (response.equals("BID_HISTORY_SUCCESS|EMPTY")) {
                 vboxBidList.getChildren().clear();
                 vboxBidList.getChildren().add(new Label("Bạn chưa tham gia phiên đấu giá nào."));
+            } else {
+                SocketService.getInstance().send("GET_BID_HISTORY");
             }
         });
     }
@@ -76,6 +78,9 @@ public class MyBidsController {
             if (data.length >= 8) {
                 HBox card = createBidCard(data);
                 vboxBidList.getChildren().add(card);
+                if (data[0].equals(this.selectedAuctionId)) {
+                    showBidDetail(data);
+                }
             }
         }
     }
