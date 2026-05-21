@@ -8,6 +8,7 @@ import com.auction.team3HxD.util.DBConnection;
 
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -386,5 +387,32 @@ public class AuctionDAO {
             e.printStackTrace();
         }
         return count;
+    }
+
+    /**
+     * Lấy lịch sử đấu giá của một phiên (tất cả các lần đặt giá).
+     * Trả về danh sách chuỗi: "HH:mm:ss#price"
+     */
+    public List<String> getAuctionBidHistory(int auctionId) {
+        List<String> history = new ArrayList<>();
+        String sql = "SELECT bid_amount, bid_time FROM bids WHERE auction_id = ? ORDER BY bid_time ASC";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, auctionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    double price = rs.getDouble("bid_amount");
+                    Timestamp ts = rs.getTimestamp("bid_time");
+                    String timeStr = ts.toLocalDateTime()
+                            .toLocalTime()
+                            .format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+                    history.add(timeStr + "#" + String.format("%.0f", price));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return history;
     }
 }
