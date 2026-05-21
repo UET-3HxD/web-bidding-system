@@ -6,6 +6,10 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Circle?>
 
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+
 <BorderPane prefHeight="700.0" prefWidth="1000.0" stylesheets="@../styles/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.team3HxD.controller.BidRoomController">
 
     <!-- ================= SIDEBAR TRÁI ================= -->
@@ -91,11 +95,19 @@
                         <Button text="✖ Đóng phòng" styleClass="action-btn-secondary" onAction="#handleExitRoom"/>
                     </HBox>
 
-                    <VBox spacing="10" styleClass="card" minHeight="200">
-                        <Label text="DIỄN BIẾN GIÁ" styleClass="section-title"/>
-                        <StackPane VBox.vgrow="ALWAYS">
-                            <Label text="Biểu đồ đang được phát triển..." styleClass="card-subtitle"/>
-                        </StackPane>
+                    <VBox spacing="10" styleClass="card" minHeight="220" VBox.vgrow="ALWAYS">
+                        <Label text="BIỂU ĐỒ GIÁ" styleClass="section-title"/>
+                        <LineChart fx:id="lineChartPrice" createSymbols="true" animated="false" VBox.vgrow="ALWAYS"
+                                   style="-fx-background-color: #1a1a1a; -fx-legend-visible: false;">
+                            <xAxis>
+                                <CategoryAxis label="Thời gian" side="BOTTOM" tickLabelFill="#9CA3AF"
+                                              style="-fx-border-color: #333333;"/>
+                            </xAxis>
+                            <yAxis>
+                                <NumberAxis label="Giá (VNĐ)" side="LEFT" tickLabelFill="#9CA3AF"
+                                            style="-fx-border-color: #333333;"/>
+                            </yAxis>
+                        </LineChart>
                     </VBox>
 
                     <VBox spacing="15" styleClass="card">
