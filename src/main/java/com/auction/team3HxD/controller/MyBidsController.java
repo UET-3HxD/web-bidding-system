@@ -1,5 +1,6 @@
 package com.auction.team3HxD.controller;
 
+import com.auction.team3HxD.dao.AuctionDAO;
 import com.auction.team3HxD.util.SceneSwitcher;
 import com.auction.team3HxD.util.SocketService;
 import com.auction.team3HxD.util.UserSession;
@@ -61,6 +62,8 @@ public class MyBidsController {
             } else if (response.equals("BID_HISTORY_SUCCESS|EMPTY")) {
                 vboxBidList.getChildren().clear();
                 vboxBidList.getChildren().add(new Label("Bạn chưa tham gia phiên đấu giá nào."));
+            } else {
+                SocketService.getInstance().send("GET_BID_HISTORY");
             }
         });
     }
@@ -75,21 +78,25 @@ public class MyBidsController {
             String record = parts[i];
             if (record.isEmpty() || record.equals("EMPTY")) continue;
             String[] data = record.split("#");
-            // data: id, product_name, item_type, image_path, current_price, status
+            // id # name # type # image # startingPrice # currentPrice # myLastBid # status
             if (data.length >= 6) {
                 HBox card = createBidCard(data);
                 vboxBidList.getChildren().add(card);
+                if (data[0].equals(this.selectedAuctionId)) {
+                    showBidDetail(data);
+                }
             }
         }
     }
 
     private HBox createBidCard(String[] data) {
+        //0 id #1 name #2 type #3 image #4 startingPrice #5 currentPrice #6 myLastBid #7 status
         String auctionId = data[0];
         String productName = data[1];
         String itemType = data[2];
         String imagePath = data[3];
-        String currentPrice = data[4];
-        String status = data[5];
+        String currentPrice = data[5];
+        String status = data[7];
 
         HBox card = new HBox(15);
         card.getStyleClass().add("auction-card");
@@ -111,7 +118,7 @@ public class MyBidsController {
                 }
             }
         } catch (Exception e) {
-            // ignore
+            e.printStackTrace();
         }
         if (imageBox.getChildren().isEmpty()) {
             Label noImg = new Label("📷");
@@ -162,23 +169,24 @@ public class MyBidsController {
     }
 
     private void showBidDetail(String[] data) {
+        //0 id #1 name #2 type #3 image #4 startingPrice #5 currentPrice #6 myLastBid #7 status
         String auctionId = data[0];
         String productName = data[1];
         String itemType = data[2];
         String imagePath = data[3];
-        String currentPrice = data[4];
-        String status = data[5];
+        String startingPrice = data[4];
+        String currentPrice = data[5];
+        String myLastBid =  data[6];
+        String status = data[7];
 
         this.selectedAuctionId = auctionId;
         this.selectedStatus = status;
 
         lblDetailName.setText(productName);
         lblDetailCategory.setText(itemType);
-        lblDetailStartPrice.setText("..."); // cần thêm dữ liệu từ server nếu muốn
+        lblDetailStartPrice.setText(startingPrice);
         lblDetailCurrentPrice.setText(currentPrice + " đ");
-
-        // Giá của bạn (tạm thời hiển thị như giá hiện tại, có thể lấy từ server sau)
-        lblDetailYourBid.setText(currentPrice + " đ");
+        lblDetailYourBid.setText(myLastBid + " đ");
 
         // Ảnh chi tiết
         imgDetailImage.setVisible(false);

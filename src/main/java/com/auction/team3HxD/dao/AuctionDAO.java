@@ -297,20 +297,22 @@ public class AuctionDAO {
     }
     public List<String> getBidHistory(int userId) {
         List<String> historyList = new ArrayList<>();
-
-        // sử dụng GROUP BY để không bị lặp lại nếu user đặt giá nhiều lần trong cùng 1 phiên
         String sql =
-                "SELECT a.id, i.product_name, i.item_type, i.image_path, a.current_price, " +
-                        "   CASE " +
-                        "       WHEN a.end_time > NOW() THEN 'ACTIVE' " +
-                        "       WHEN (SELECT user_id FROM bids b2 WHERE b2.auction_id = a.id ORDER BY b2.bid_amount DESC LIMIT 1) = ? THEN 'WON' " +
-                        "       ELSE 'LOST' " +
-                        "   END AS bid_status " +
-                        "FROM auction_sessions a " +
-                        "JOIN items i ON a.item_id = i.id " +
-                        "JOIN bids b ON a.id = b.auction_id " +
-                        "WHERE b.user_id = ? " +
-                        "GROUP BY a.id, i.product_name, i.item_type, i.image_path, a.current_price, a.end_time";
+        "SELECT a.id, i.product_name, i.item_type, i.image_path, i.starting_price, a.current_price, " +
+                "   MAX(b.bid_amount) AS my_last_bid, " +
+                "   CASE " +
+                "       WHEN a.end_time > NOW() THEN 'ACTIVE' " +
+                "       WHEN (SELECT user_id FROM bids b2 WHERE b2.auction_id = a.id ORDER BY b2.bid_amount DESC LIMIT 1) = ? THEN 'WON' " +
+                "       ELSE 'LOST' " +
+                "   END AS bid_status " +
+                "FROM auction_sessions a " +
+                "JOIN items i ON a.item_id = i.id " +
+                "JOIN bids b ON a.id = b.auction_id " +
+                "WHERE b.user_id = ? " +
+                "GROUP BY a.id, i.product_name, i.item_type, i.image_path, i.starting_price, a.current_price, a.end_time " +
+                "ORDER BY " +
+                "   CASE WHEN a.end_time > NOW() THEN 1 ELSE 2 END, " +
+                "   a.end_time DESC";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -320,18 +322,22 @@ public class AuctionDAO {
 
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                // Định dạng chuỗi: id#name#type#image#currentPrice#status
-                String record = String.format("%d#%s#%s#%s#%.0f#%s",
+                // id # name # type # image # startingPrice # currentPrice # myLastBid # status
+                String record = String.format("%d#%s#%s#%s#%.0f#%.0f#%.0f#%s",
                         rs.getInt("id"),
                         rs.getString("product_name"),
                         rs.getString("item_type"),
                         rs.getString("image_path") != null ? rs.getString("image_path") : "",
+                        rs.getDouble("starting_price"), // Thêm mới 1
                         rs.getDouble("current_price"),
+                        rs.getDouble("my_last_bid"),      // Thêm mới 2
                         rs.getString("bid_status")
                 );
                 historyList.add(record);
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return historyList;
     }
