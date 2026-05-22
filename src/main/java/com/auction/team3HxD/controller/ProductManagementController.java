@@ -182,21 +182,35 @@ public class ProductManagementController {
     void handleUpdateProduct(ActionEvent event) {
         if (currentEditingProduct == null) return;
 
-        // 1. Kiểm tra trạng thái (Chỉ cho phép sửa nếu là WAITING hoặc đã duyệt nhưng chưa LIVE)
         String status = currentEditingProduct.getStatus();
         if (status.equals("LIVE") || status.equals("SOLD")) {
             showAlert("Thông báo", "Sản phẩm đang trong phiên đấu giá hoặc đã kết thúc, không thể chỉnh sửa!", Alert.AlertType.WARNING);
             return;
         }
 
-        // 2. Lấy dữ liệu mới từ Form
         String newName = txtEditName.getText().trim();
-        String newPrice = txtEditPrice.getText().trim();
+        String newPriceStr = txtEditPrice.getText().trim();
         String newDesc = txtEditDesc.getText().trim();
 
-        // 3. So sánh với thông tin cũ
+        if (newName.isEmpty() || newPriceStr.isEmpty()) {
+            showAlert("Lỗi", "Vui lòng điền đầy đủ thông tin!", Alert.AlertType.WARNING);
+            return;
+        }
+
+        double newPrice;
+        try {
+            newPrice = Double.parseDouble(newPriceStr);
+            if (newPrice <= 0) {
+                showAlert("Lỗi", "Giá khởi điểm phải lớn hơn 0!", Alert.AlertType.WARNING);
+                return;
+            }
+        } catch (NumberFormatException e) {
+            showAlert("Lỗi", "Giá khởi điểm phải là số hợp lệ!", Alert.AlertType.ERROR);
+            return;
+        }
+
         boolean isChanged = !newName.equals(currentEditingProduct.getName()) ||
-                !newPrice.equals(currentEditingProduct.getPrice()) ||
+                !newPriceStr.equals(currentEditingProduct.getPrice()) ||
                 !newDesc.equals(currentEditingProduct.getDescription());
 
         if (!isChanged) {
@@ -204,12 +218,10 @@ public class ProductManagementController {
             return;
         }
 
-        // 4. Gửi lệnh cập nhật kèm ID sản phẩm
-        // Cấu trúc: UPDATE_ITEM|id|name|price|desc
         String message = String.format("UPDATE_ITEM|%s|%s|%s|%s",
-                currentEditingProduct.getId(), newName, newPrice, newDesc);
+                currentEditingProduct.getId(), newName, newPriceStr, newDesc);
         currentEditingProduct.setStatus("WAITING");
-        com.auction.team3HxD.util.SocketService.getInstance().send(message);
+        SocketService.getInstance().send(message);
         System.out.println(">>> Đã gửi yêu cầu cập nhật Item ID: " + currentEditingProduct.getId());
     }
     // --- CẬP NHẬT GIAO DIỆN CARD ---
@@ -329,42 +341,43 @@ public class ProductManagementController {
     }
 
     // --- CÁC HÀM XỬ LÝ CHÍNH (GỬI LÊN SERVER SAU NÀY) ---
-
     @FXML
     void handleCreateProduct(ActionEvent event) {
-        // 1. Lấy dữ liệu từ UI
         String name = txtCreateName.getText().trim();
         String priceStr = txtCreatePrice.getText().trim();
         String desc = txtCreateDesc.getText().trim();
-        String category = cbCreateCategory.getValue(); // Ví dụ: "Điện tử", "Xe cộ", "Nghệ thuật"
+        String category = cbCreateCategory.getValue();
 
-        // 2. Kiểm tra dữ liệu (Validation) sơ bộ
         if (name.isEmpty() || priceStr.isEmpty() || category == null) {
-            System.out.println("Vui lòng điền đầy đủ thông tin!");
+            showAlert("Lỗi", "Vui lòng điền đầy đủ thông tin!", Alert.AlertType.WARNING);
             return;
         }
 
-        // 3. Chuyển đổi tên danh mục sang ENUM String mà Server hiểu
-        String type;
-        switch (category) {
-            case "Điện tử":
-                type = "ELECTRONIC"; break;
-            case "Phương tiện":
-                type = "VEHICLE"; break;
-            case "Nghệ thuật":
-                type = "ART"; break;
-            case "Khác":
-                type = "OTHER"; break;
-            default:
-                type = "ELECTRONIC";
+        double price;
+        try {
+            price = Double.parseDouble(priceStr);
+            if (price <= 0) {
+                showAlert("Lỗi", "Giá khởi điểm phải lớn hơn 0!", Alert.AlertType.WARNING);
+                return;
+            }
+        } catch (NumberFormatException e) {
+            showAlert("Lỗi", "Giá khởi điểm phải là số hợp lệ!", Alert.AlertType.ERROR);
+            return;
         }
 
-        // 4. Gửi lệnh qua Socket (Sử dụng đường dẫn ảnh đã lưu từ handleUploadImage)
-        // Cấu trúc: CREATE_ITEM|tên|giá|loại|mô tả|đường dẫn ảnh
+        // Chuyển đổi danh mục sang ENUM
+        String type;
+        switch (category) {
+            case "Điện tử": type = "ELECTRONIC"; break;
+            case "Phương tiện": type = "VEHICLE"; break;
+            case "Nghệ thuật": type = "ART"; break;
+            case "Khác": type = "OTHER"; break;
+            default: type = "ELECTRONIC";
+        }
+
         String message = String.format("CREATE_ITEM|%s|%s|%s|%s|%s",
                 name, priceStr, type, desc, currentImagePath);
-
-        com.auction.team3HxD.util.SocketService.getInstance().send(message);
+        SocketService.getInstance().send(message);
         System.out.println(">>> Đã gửi yêu cầu tạo sản phẩm: " + name);
     }
     private void resetUploadUI() {
