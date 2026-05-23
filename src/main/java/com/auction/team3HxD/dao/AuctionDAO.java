@@ -8,6 +8,7 @@ import com.auction.team3HxD.util.DBConnection;
 
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -298,41 +299,59 @@ public class AuctionDAO {
     public List<String> getBidHistory(int userId) {
         List<String> historyList = new ArrayList<>();
 
-        // sử dụng GROUP BY để không bị lặp lại nếu user đặt giá nhiều lần trong cùng 1 phiên
+        // Giữ nguyên toàn bộ cấu trúc LEFT JOIN và bóc tách dữ liệu của bạn UI
+        // Chỉ bổ sung thêm cụm ORDER BY ở cuối cùng
         String sql =
-                "SELECT a.id, i.product_name, i.item_type, i.image_path, a.current_price, " +
-                        "   CASE " +
-                        "       WHEN a.end_time > NOW() THEN 'ACTIVE' " +
-                        "       WHEN (SELECT user_id FROM bids b2 WHERE b2.auction_id = a.id ORDER BY b2.bid_amount DESC LIMIT 1) = ? THEN 'WON' " +
-                        "       ELSE 'LOST' " +
-                        "   END AS bid_status " +
+                "SELECT a.id, i.product_name, i.item_type, i.image_path, " +
+                        "       i.starting_price, a.current_price, " +
+                        "       COALESCE(ub.max_bid, 0) AS user_bid, " +
+                        "       CASE " +
+                        "           WHEN a.end_time > NOW() THEN 'ACTIVE' " +
+                        "           WHEN (SELECT user_id FROM bids b2 WHERE b2.auction_id = a.id ORDER BY b2.bid_amount DESC LIMIT 1) = ? THEN 'WON' " +
+                        "           ELSE 'LOST' " +
+                        "       END AS bid_status " +
                         "FROM auction_sessions a " +
                         "JOIN items i ON a.item_id = i.id " +
-                        "JOIN bids b ON a.id = b.auction_id " +
-                        "WHERE b.user_id = ? " +
-                        "GROUP BY a.id, i.product_name, i.item_type, i.image_path, a.current_price, a.end_time";
+                        "LEFT JOIN ( " +
+                        "    SELECT auction_id, MAX(bid_amount) AS max_bid " +
+                        "    FROM bids " +
+                        "    WHERE user_id = ? " +
+                        "    GROUP BY auction_id " +
+                        ") ub ON a.id = ub.auction_id " +
+                        "WHERE EXISTS ( " +
+                        "    SELECT 1 FROM bids b WHERE b.auction_id = a.id AND b.user_id = ? " +
+                        ") " +
+                        "GROUP BY a.id, i.product_name, i.item_type, i.image_path, i.starting_price, a.current_price, a.end_time, ub.max_bid " +
+                        "ORDER BY " +
+                        "    CASE WHEN a.end_time > NOW() THEN 1 ELSE 2 END, " + // Đẩy phòng Đang diễn ra lên đầu
+                        "    a.end_time DESC"; // Sắp xếp theo thời gian mới nhất
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, userId);
-            ps.setInt(2, userId);
+            // Tham số truyền vào giữ nguyên
+            ps.setInt(1, userId);   // cho subquery thắng/thua
+            ps.setInt(2, userId);   // cho subquery lấy giá cao nhất của user
+            ps.setInt(3, userId);   // cho EXISTS
 
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                // Định dạng chuỗi: id#name#type#image#currentPrice#status
-                String record = String.format("%d#%s#%s#%s#%.0f#%s",
+                // Định dạng chuỗi giữ nguyên để không làm vỡ giao diện
+                String record = String.format("%d#%s#%s#%s#%.0f#%.0f#%.0f#%s",
                         rs.getInt("id"),
                         rs.getString("product_name"),
                         rs.getString("item_type"),
                         rs.getString("image_path") != null ? rs.getString("image_path") : "",
+                        rs.getDouble("starting_price"),
                         rs.getDouble("current_price"),
+                        rs.getDouble("user_bid"),
                         rs.getString("bid_status")
                 );
                 historyList.add(record);
             }
-        } catch (Exception e) { e.printStackTrace(); }
-
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return historyList;
     }
     private Auction mapResultSetToAuction(ResultSet rs) throws SQLException {
@@ -386,5 +405,32 @@ public class AuctionDAO {
             e.printStackTrace();
         }
         return count;
+    }
+
+    /**
+     * Lấy lịch sử đấu giá của một phiên (tất cả các lần đặt giá).
+     * Trả về danh sách chuỗi: "HH:mm:ss#price"
+     */
+    public List<String> getAuctionBidHistory(int auctionId) {
+        List<String> history = new ArrayList<>();
+        String sql = "SELECT bid_amount, bid_time FROM bids WHERE auction_id = ? ORDER BY bid_time ASC";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, auctionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    double price = rs.getDouble("bid_amount");
+                    Timestamp ts = rs.getTimestamp("bid_time");
+                    String timeStr = ts.toLocalDateTime()
+                            .toLocalTime()
+                            .format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+                    history.add(timeStr + "#" + String.format("%.0f", price));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return history;
     }
 }
