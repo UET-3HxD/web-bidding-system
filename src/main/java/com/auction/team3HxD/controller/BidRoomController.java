@@ -11,8 +11,10 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
+
 import java.io.File;
 import java.text.DecimalFormat;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
@@ -205,13 +207,11 @@ public class BidRoomController {
         }
         lineChartPrice.getData().add(priceSeries);
 
-        // Style đường và điểm
-        String color = "#10B981"; // xanh lá
-        for (XYChart.Data<String, Number> data : priceSeries.getData()) {
-            data.getNode().setStyle("-fx-background-color: " + color + ", white; -fx-background-radius: 3px;");
-        }
-        priceSeries.getNode().setStyle("-fx-stroke: " + color + "; -fx-stroke-width: 2px;");
-    }
+        case "BID_ERROR":
+          if (parts.length > 1) {
+            showAlert("Lỗi đặt giá", parts[1], Alert.AlertType.ERROR);
+          }
+          break;
 
     private void displayAuctionInfo(String data) {
         String[] info = data.split("#");
@@ -333,6 +333,8 @@ public class BidRoomController {
                 showAlert("Giá quá thấp", "Đặt giá không hợp lệ!", Alert.AlertType.WARNING);
                 return;
             }
+          });
+          break;
 
             // Gửi lệnh đặt giá lên Server: PLACE_BID|auctionId|userId|amount
             // String userId = com.auction.team3HxD.util.UserSession.getInstance().getUserId();
@@ -357,6 +359,9 @@ public class BidRoomController {
             lblYourLastBid.setStyle("-fx-text-fill: #94A3B8;"); // Màu xám nhạt nếu chưa bid
             return;
         }
+      }
+    }
+    lineChartPrice.getData().add(priceSeries);
 
         lblYourLastBid.setText(df.format(myLastBid) + " VNĐ");
 

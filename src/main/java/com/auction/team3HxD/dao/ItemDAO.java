@@ -57,8 +57,6 @@ public class ItemDAO {
 
     public List<Item> getAllItemsBySeller(int sellerId) {
         List<Item> itemList = new ArrayList<>();
-
-        // 🌟 ĐÃ CẬP NHẬT: Thêm bộ lọc IN và cấu trúc ORDER BY CASE để sắp xếp đúng thứ tự ưu tiên
         String sql = "SELECT * FROM items WHERE seller_id = ? " +
                 "AND status IN ('APPROVED', 'WAITING', 'REJECTED', 'LIVE', 'SOLD') " +
                 "ORDER BY CASE status " +
@@ -104,6 +102,7 @@ public class ItemDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            System.out.println(">>> [LỖI TRUY VẤN] Lỗi khi lấy danh sách sản phẩm:");
         }
         return itemList;
     }

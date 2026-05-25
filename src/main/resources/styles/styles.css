@@ -339,3 +339,297 @@
     -fx-text-fill: #FBBF24;
     /* ... các thuộc tính padding/radius tương tự ... */
 }
+
+/*admin*/
+/* --- Cấu hình cho ảnh (Image Box) --- */
+.pending-image-box {
+    -fx-background-color: #1F2937;
+    -fx-background-radius: 8;
+}
+
+.no-image-icon {
+    -fx-font-size: 28px;
+    -fx-text-fill: #6B7280;
+}
+
+/* --- Cấu hình cho Thông tin chữ (Text Info) --- */
+.pending-product-name {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+}
+
+.pending-seller-name {
+    -fx-text-fill: #9CA3AF;
+    -fx-font-size: 13px;
+}
+
+.pending-price {
+    -fx-text-fill: #10B981;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.pending-desc {
+    -fx-text-fill: #9CA3AF;
+    -fx-font-size: 12px;
+}
+
+/* --- Cấu hình cho Nút bấm (Buttons) --- */
+.btn-approve {
+    -fx-background-color: #10B981;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+.btn-approve:hover {
+    -fx-background-color: #059669; /* Đậm hơn khi đưa chuột vào */
+}
+
+.btn-reject {
+    -fx-background-color: #EF4444;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+.btn-reject:hover {
+    -fx-background-color: #DC2626;
+}
+/* --- Cấu hình Avatar User --- */
+.user-avatar-circle {
+    -fx-fill: #3B82F6; /* Màu nền hình tròn avatar */
+}
+
+.user-avatar-text {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+/* --- Cấu hình Text Info --- */
+.user-name-text {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+}
+
+.user-email-text {
+    -fx-text-fill: #9CA3AF;
+    -fx-font-size: 13px;
+}
+
+.user-role-text {
+    -fx-text-fill: #F59E0B;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.admin-badge-text {
+    -fx-text-fill: #3B82F6;
+    -fx-font-weight: bold;
+}
+
+/* --- Cấu hình Buttons Quản lý User --- */
+.btn-ban-user {
+    -fx-background-color: #EF4444;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 6 16;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+.btn-ban-user:hover {
+    -fx-background-color: #DC2626;
+}
+
+.btn-unban-user {
+    -fx-background-color: #10B981;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 6 16;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+.btn-unban-user:hover {
+    -fx-background-color: #059669;
+}
+/* --- Cấu hình Thời gian đếm ngược --- */
+.time-left-normal {
+    -fx-text-fill: #000000; /* Hoặc màu trắng tùy theme tổng thể */
+}
+
+.time-left-ended {
+    -fx-text-fill: #F43F5E; /* Đỏ hồng khi hết giờ */
+}
+
+.time-left-calculating {
+    -fx-text-fill: #ff9800; /* Cam khi đang tính toán */
+}
+
+/* --- Cấu hình Badge Trạng thái --- */
+.badge-ready {
+    -fx-background-color: #3B82F6;
+    -fx-text-fill: white;
+}
+
+/* --- Cấu hình Giá của bạn (Your Last Bid) --- */
+.last-bid-empty {
+    -fx-text-fill: #94A3B8; /* Xám nhạt khi chưa đặt */
+}
+
+.last-bid-winning {
+    -fx-text-fill: #10B981;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.last-bid-losing {
+    -fx-text-fill: #F43F5E;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+/* --- Cấu hình Biểu đồ Line Chart --- */
+/* (Màu sắc cho các điểm dữ liệu Node) */
+.chart-line-symbol {
+    -fx-background-color: #10B981, white;
+    -fx-background-radius: 3px;
+}
+
+/* (Màu sắc cho đường nối Line) */
+.chart-series-line {
+    -fx-stroke: #10B981;
+    -fx-stroke-width: 2px;
+}
+/* --- Cấu hình Ảnh (Image Box) --- */
+.bid-image-box {
+    -fx-background-color: #1a1a1a;
+    -fx-background-radius: 8;
+}
+.bid-no-image {
+    -fx-font-size: 24px;
+    -fx-text-fill: #6B7280;
+}
+
+/* --- Cấu hình Text Info (Tên & Phân loại) --- */
+.bid-product-name {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+}
+.bid-product-type {
+    -fx-text-fill: #9CA3AF;
+    -fx-font-size: 13px;
+}
+
+/* --- Cấu hình Giá tiền --- */
+.bid-current-price {
+    -fx-text-fill: #3B82F6;
+    -fx-font-weight: bold;
+    -fx-font-size: 18px;
+}
+.bid-your-price {
+    -fx-text-fill: #9CA3AF;
+    -fx-font-size: 12px;
+}
+
+/* --- Cấu hình Badge Trạng Thái (Kế thừa nếu đã có) --- */
+.status-badge {
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-padding: 2 10;
+}
+.status-active {
+    -fx-background-color: #10B981;
+}
+.status-won {
+    -fx-background-color: #EAB308;
+    -fx-font-weight: bold;
+}
+.status-lost {
+    -fx-background-color: #EF4444;
+}
+.status-default {
+    -fx-background-color: #6B7280;
+}
+
+/* --- Badge Chi tiết (Bỏ padding vì đã cấu hình trong file FXML) --- */
+.detail-status-active {
+    -fx-background-color: #10B981;
+    -fx-text-fill: white;
+}
+.detail-status-won {
+    -fx-background-color: #EAB308;
+    -fx-text-fill: white;
+}
+.detail-status-lost {
+    -fx-background-color: #EF4444;
+    -fx-text-fill: white;
+}
+.detail-status-default {
+    -fx-background-color: #6B7280;
+    -fx-text-fill: white;
+}
+/* --- Cấu hình Khung Upload Ảnh --- */
+.upload-icon-label {
+    -fx-font-size: 30px;
+    -fx-text-fill: #3B82F6;
+}
+
+.upload-main-text {
+    -fx-text-fill: #F8FAFC;
+    -fx-font-weight: bold;
+}
+
+.upload-sub-text {
+    -fx-text-fill: #94A3B8;
+    -fx-font-size: 11px;
+}
+
+/* --- Cấu hình Card Sản Phẩm --- */
+.product-image-box {
+    -fx-background-color: #334155;
+    -fx-background-radius: 8;
+}
+
+.product-name-text {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+}
+
+.product-price-text {
+    -fx-text-fill: #3B82F6;
+    -fx-font-weight: bold;
+    -fx-font-size: 18px;
+}
+
+/* --- Cấu hình Badge Trạng Thái (Kế thừa các tag có sẵn) --- */
+/* (Nếu file CSS của bạn đã có các tag .status-badge, .status-active,
+   .status-won, .status-lost thì có thể dùng lại. Dưới đây bổ sung
+   các trạng thái quản lý kho) */
+
+.badge-waiting {
+    -fx-background-color: #F59E0B; /* Cam */
+}
+
+.badge-approved {
+    -fx-background-color: #6366F1; /* Indigo */
+}
+
+.badge-live {
+    -fx-background-color: #10B981; /* Xanh lá */
+}
+
+.badge-sold {
+    -fx-background-color: #64748B; /* Xám */
+}
+
+.badge-rejected {
+    -fx-background-color: #64748B;
+    -fx-text-fill: #ff0000; /* Xám nền, đỏ chữ */
+}

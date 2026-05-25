@@ -298,6 +298,9 @@ public class AuctionDAO {
     }
     public List<String> getBidHistory(int userId) {
         List<String> historyList = new ArrayList<>();
+
+        // Giữ nguyên toàn bộ cấu trúc LEFT JOIN và bóc tách dữ liệu của bạn UI
+        // Chỉ bổ sung thêm cụm ORDER BY ở cuối cùng
         String sql =
                 "SELECT a.id, i.product_name, i.item_type, i.image_path, " +
                         "       i.starting_price, a.current_price, " +
@@ -318,17 +321,22 @@ public class AuctionDAO {
                         "WHERE EXISTS ( " +
                         "    SELECT 1 FROM bids b WHERE b.auction_id = a.id AND b.user_id = ? " +
                         ") " +
-                        "GROUP BY a.id, i.product_name, i.item_type, i.image_path, i.starting_price, a.current_price, a.end_time";
+                        "GROUP BY a.id, i.product_name, i.item_type, i.image_path, i.starting_price, a.current_price, a.end_time, ub.max_bid " +
+                        "ORDER BY " +
+                        "    CASE WHEN a.end_time > NOW() THEN 1 ELSE 2 END, " + // Đẩy phòng Đang diễn ra lên đầu
+                        "    a.end_time DESC"; // Sắp xếp theo thời gian mới nhất
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
+            // Tham số truyền vào giữ nguyên
             ps.setInt(1, userId);   // cho subquery thắng/thua
             ps.setInt(2, userId);   // cho subquery lấy giá cao nhất của user
             ps.setInt(3, userId);   // cho EXISTS
 
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
+                // Định dạng chuỗi giữ nguyên để không làm vỡ giao diện
                 String record = String.format("%d#%s#%s#%s#%.0f#%.0f#%.0f#%s",
                         rs.getInt("id"),
                         rs.getString("product_name"),
@@ -341,7 +349,9 @@ public class AuctionDAO {
                 );
                 historyList.add(record);
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return historyList;
     }
     private Auction mapResultSetToAuction(ResultSet rs) throws SQLException {
