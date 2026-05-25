@@ -78,14 +78,153 @@ public class ProductManagementController {
       lblSidebarAvatar.setText(username.substring(0, Math.min(username.length(), 2)).toUpperCase());
     }
 
-    // 2. Khởi tạo dữ liệu mẫu cho ComboBox
-    cbCreateCategory.getItems().addAll("Điện tử", "Phương tiện", "Nghệ thuật", "Khác");
+    private void handleServerResponse(String message) {
+        Platform.runLater(() -> {
+            System.out.println(">>> Controller nhận được: " + message);
+            if (message.equals("CREATE_ITEM_SUCCESS")) {
+                System.out.println("Tạo sản phẩm thành công!");
+                txtCreateName.clear();
+                txtCreatePrice.clear();
+                txtCreateDesc.clear();
+                currentImagePath = "";
+                uploadBox.getChildren().clear(); // Xóa ảnh preview
 
-    paneCreate.setVisible(true);
-    paneEdit.setVisible(false);
-    if (cbAuctionDuration != null) {
-      cbAuctionDuration.getItems()
-          .addAll("5 phút", "15 phút", "30 phút", "1 giờ", "12 giờ", "24 giờ");
+                // Tải lại danh sách
+                com.auction.team3HxD.util.SocketService.getInstance().send("GET_MY_ITEMS");
+                showAlert("Thành công", "Đăng kí thành công! Sản phẩm đang chờ quản trị viên phê duyệt.", Alert.AlertType.INFORMATION);
+                resetUploadUI();
+
+            } else if (message.startsWith("CREATE_ITEM_ERR")) {
+                String reason = message.contains("|") ? message.split("\\|")[1] : "Lỗi không xác định";
+                System.err.println("Thất bại: " + reason);
+
+            } else if (message.startsWith("LIST_ITEMS_SUCCESS")) {
+                // XỬ LÝ CHUỖI DỮ LIỆU TỪ SERVER VÀ VẼ UI
+                loadRealProducts(message);
+
+            } else if (message.equals("LIST_ITEMS_EMPTY")) {
+                System.out.println(">>> Thông báo: Bạn chưa có sản phẩm nào trong DB.");
+                vboxProductList.getChildren().clear();
+                lblProductCount.setText("0 sản phẩm");
+            } else if (message.equals("UPDATE_ITEM_SUCCESS")) {
+                showAlert("Thành công", "Đã cập nhật sản phẩm thành công! Sản phẩm đang chờ admin duyệt lại.", Alert.AlertType.INFORMATION);
+                handleCloseEdit(null);
+                System.out.println(">>> [UI] Đang tải lại danh sách sản phẩm của tôi để cập nhật tag 'Chờ duyệt'...");
+                com.auction.team3HxD.util.SocketService.getInstance().send("GET_MY_ITEMS");
+            } else if (message.equals("DELETE_ITEM_SUCCESS")) {
+                showAlert("Thành công", "Đã xóa sản phẩm khỏi hệ thống!", Alert.AlertType.INFORMATION);
+                handleCloseEdit(null); // Đóng panel chỉnh sửa và reset form
+                com.auction.team3HxD.util.SocketService.getInstance().send("GET_MY_ITEMS"); // Tải lại danh sách
+            } else if (message.startsWith("DELETE_ITEM_ERR")) {
+                showAlert("Lỗi", "Không thể xóa sản phẩm lúc này.", Alert.AlertType.ERROR);
+            } else if (message.equals("START_AUCTION_SUCCESS")) {
+                showAlert("Lên sàn thành công!", "Phiên đấu giá đã chính thức bắt đầu và được hiển thị ở Khu vực chính.", Alert.AlertType.INFORMATION);
+
+                handleCloseEdit(null);
+
+                com.auction.team3HxD.util.SocketService.getInstance().send("GET_MY_ITEMS");
+
+            } else if (message.startsWith("START_AUCTION_ERR")) {
+                String errorMsg = message.contains("|") ? message.split("\\|")[1] : "Lỗi không xác định";
+                showAlert("Không thể tạo phiên đấu giá", errorMsg, Alert.AlertType.ERROR);
+            } else if (message.startsWith("MY_PRODUCT_STATUS_CHANGED")) {
+                javafx.application.Platform.runLater(() -> {
+                    String[] parts = message.split("\\|");
+                    if (parts.length >= 3) {
+                        String status = parts[2];
+                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                                status.equals("APPROVED") ? javafx.scene.control.Alert.AlertType.INFORMATION : javafx.scene.control.Alert.AlertType.WARNING
+                        );
+                        alert.setTitle("Cập nhật trạng thái");
+                        alert.setHeaderText(null);
+
+                        if (status.equals("APPROVED")) {
+                            alert.setContentText("Sản phẩm của bạn đã được Admin duyệt thành công!");
+                        } else {
+                            alert.setContentText("Sản phẩm của bạn đã bị từ chối.");
+                        }
+                        alert.show();
+                        SocketService.getInstance().send("GET_MY_ITEMS");
+                        System.out.println(">>> [REAL-TIME USER] Đã cập nhật lại bảng vì Admin vừa thao tác.");
+                    }
+                });
+            } else if (message.startsWith("AUCTION_ENDED")){
+                SocketService.getInstance().send("GET_MY_ITEMS");
+                System.out.println(">>> [REAL-TIME] Phiên đấu giá kết thúc. cập nhật lại danh sách...");
+            }
+        });
+    }
+    private void loadRealProducts(String message) {
+        vboxProductList.getChildren().clear();
+        String[] parts = message.split("\\|");
+        int count = 0;
+
+        // Bắt đầu từ 1 vì parts[0] là "LIST_ITEMS_SUCCESS"
+        for (int i = 1; i < parts.length; i++) {
+            String[] itemData = parts[i].split("#");
+
+            // Đảm bảo server gửi đủ 6 trường: id#name#price#status#path#desc
+            if (itemData.length >= 6) {
+                String id = itemData[0];
+                String name = itemData[1];
+                String price = itemData[2];
+                String status = itemData[3];
+                String path = itemData[4];
+                String desc = itemData[5];
+
+                Product p = new Product(id, name, price, desc, status, path);
+                HBox card = createProductCardUI(p);
+                vboxProductList.getChildren().add(card);
+                count++;
+            }
+        }
+        lblProductCount.setText(count + " sản phẩm");
+    }
+    @FXML
+    void handleUpdateProduct(ActionEvent event) {
+        if (currentEditingProduct == null) return;
+
+        String status = currentEditingProduct.getStatus();
+        if (status.equals("LIVE") || status.equals("SOLD")) {
+            showAlert("Thông báo", "Sản phẩm đang trong phiên đấu giá hoặc đã kết thúc, không thể chỉnh sửa!", Alert.AlertType.WARNING);
+            return;
+        }
+
+        String newName = txtEditName.getText().trim();
+        String newPriceStr = txtEditPrice.getText().trim();
+        String newDesc = txtEditDesc.getText().trim();
+
+        if (newName.isEmpty() || newPriceStr.isEmpty()) {
+            showAlert("Lỗi", "Vui lòng điền đầy đủ thông tin!", Alert.AlertType.WARNING);
+            return;
+        }
+
+        double newPrice;
+        try {
+            newPrice = Double.parseDouble(newPriceStr);
+            if (newPrice <= 0) {
+                showAlert("Lỗi", "Giá khởi điểm phải lớn hơn 0!", Alert.AlertType.WARNING);
+                return;
+            }
+        } catch (NumberFormatException e) {
+            showAlert("Lỗi", "Giá khởi điểm phải là số hợp lệ!", Alert.AlertType.ERROR);
+            return;
+        }
+
+        boolean isChanged = !newName.equals(currentEditingProduct.getName()) ||
+                !newPriceStr.equals(currentEditingProduct.getPrice()) ||
+                !newDesc.equals(currentEditingProduct.getDescription());
+
+        if (!isChanged) {
+            showAlert("Thông báo", "Thông tin không có gì thay đổi!", Alert.AlertType.INFORMATION);
+            return;
+        }
+
+        String message = String.format("UPDATE_ITEM|%s|%s|%s|%s",
+                currentEditingProduct.getId(), newName, newPriceStr, newDesc);
+        currentEditingProduct.setStatus("WAITING");
+        SocketService.getInstance().send(message);
+        System.out.println(">>> Đã gửi yêu cầu cập nhật Item ID: " + currentEditingProduct.getId());
     }
     // 3. ĐĂNG KÝ NGƯỜI NGHE VÀ LẤY DỮ LIỆU THẬT
     com.auction.team3HxD.util.SocketService.getInstance()
@@ -220,52 +359,45 @@ public class ProductManagementController {
       return;
     }
 
-    // 2. Lấy dữ liệu mới từ Form
-    String newName = txtEditName.getText().trim();
-    String newPrice = txtEditPrice.getText().trim();
-    String newDesc = txtEditDesc.getText().trim();
+    // --- CÁC HÀM XỬ LÝ CHÍNH (GỬI LÊN SERVER SAU NÀY) ---
+    @FXML
+    void handleCreateProduct(ActionEvent event) {
+        String name = txtCreateName.getText().trim();
+        String priceStr = txtCreatePrice.getText().trim();
+        String desc = txtCreateDesc.getText().trim();
+        String category = cbCreateCategory.getValue();
 
-    // 3. So sánh với thông tin cũ
-    boolean isChanged = !newName.equals(currentEditingProduct.getName()) ||
-        !newPrice.equals(currentEditingProduct.getPrice()) ||
-        !newDesc.equals(currentEditingProduct.getDescription());
-
-    if (!isChanged) {
-      showAlert("Thông báo", "Thông tin không có gì thay đổi!", Alert.AlertType.INFORMATION);
-      return;
-    }
-
-    // 4. Gửi lệnh cập nhật kèm ID sản phẩm
-    // Cấu trúc: UPDATE_ITEM|id|name|price|desc
-    String message = String.format("UPDATE_ITEM|%s|%s|%s|%s",
-        currentEditingProduct.getId(), newName, newPrice, newDesc);
-    currentEditingProduct.setStatus("WAITING");
-    com.auction.team3HxD.util.SocketService.getInstance().send(message);
-    System.out.println(">>> Đã gửi yêu cầu cập nhật Item ID: " + currentEditingProduct.getId());
-  }
-
-  // --- CẬP NHẬT GIAO DIỆN CARD ---
-  private HBox createProductCardUI(Product product) {
-    HBox card = new HBox(15);
-    card.getStyleClass().add("product-card-item");
-    card.setAlignment(Pos.CENTER_LEFT);
-
-    // Hiển thị ảnh thật từ đường dẫn (Path)
-    ImageView imageView = new ImageView();
-    imageView.setFitWidth(60);
-    imageView.setFitHeight(60);
-    imageView.setPreserveRatio(true);
-
-    try {
-      if (product.getImagePath() != null && !product.getImagePath().equals("null")
-          && !product.getImagePath().isEmpty()) {
-        File file = new File(product.getImagePath());
-        if (file.exists()) {
-          imageView.setImage(new Image(file.toURI().toString()));
+        if (name.isEmpty() || priceStr.isEmpty() || category == null) {
+            showAlert("Lỗi", "Vui lòng điền đầy đủ thông tin!", Alert.AlertType.WARNING);
+            return;
         }
-      }
-    } catch (Exception e) {
-      System.err.println("Không thể tải ảnh cho sản phẩm: " + product.getName());
+
+        double price;
+        try {
+            price = Double.parseDouble(priceStr);
+            if (price <= 0) {
+                showAlert("Lỗi", "Giá khởi điểm phải lớn hơn 0!", Alert.AlertType.WARNING);
+                return;
+            }
+        } catch (NumberFormatException e) {
+            showAlert("Lỗi", "Giá khởi điểm phải là số hợp lệ!", Alert.AlertType.ERROR);
+            return;
+        }
+
+        // Chuyển đổi danh mục sang ENUM
+        String type;
+        switch (category) {
+            case "Điện tử": type = "ELECTRONIC"; break;
+            case "Phương tiện": type = "VEHICLE"; break;
+            case "Nghệ thuật": type = "ART"; break;
+            case "Khác": type = "OTHER"; break;
+            default: type = "ELECTRONIC";
+        }
+
+        String message = String.format("CREATE_ITEM|%s|%s|%s|%s|%s",
+                name, priceStr, type, desc, currentImagePath);
+        SocketService.getInstance().send(message);
+        System.out.println(">>> Đã gửi yêu cầu tạo sản phẩm: " + name);
     }
 
     // Bọc ảnh vào một StackPane để tạo khung vuông vức
