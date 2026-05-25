@@ -1,10 +1,14 @@
 package com.auction.team3HxD.services;
 
 import com.auction.team3HxD.dao.AuctionDAO;
+import com.auction.team3HxD.dto.AuctionContextDTO;
 import com.auction.team3HxD.model.Auction;
 import com.auction.team3HxD.model.Item;
 import com.auction.team3HxD.model.User;
 import com.auction.team3HxD.network.AuctionServer;
+import com.auction.team3HxD.util.DBConnection;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class AuctionService { // triển khai singleton
 
@@ -13,25 +17,60 @@ public class AuctionService { // triển khai singleton
     private String highestBidder;
     private boolean isAuctionActive;
     private AuctionDAO auctionDAO = new AuctionDAO();
-    // LOGIC XỬ LÝ TRANH CHẤP GIÁ (Cực kỳ quan trọng)
-    // Dùng synchronized để đảm bảo tại 1 thời điểm chỉ 1 người được trả giá
-    public synchronized String placeBid(String username, double amount) {
-        if (!isAuctionActive) {
-            return "BID_ERR_CLOSED";
+    private final BidValidator bidValidator = new BidValidator();
+    private final AntiSnipingService antiSnipingService = new AntiSnipingService();
+
+
+    public String placeBid(int auctionId, int userId, double bidAmount) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
+
+            if (!auctionDAO.lockAuctionSession(conn, auctionId)) {
+                conn.rollback();
+                return "BID_ERROR|Không tìm thấy phiên đấu giá!";
+            }
+
+            AuctionContextDTO context = auctionDAO.getAuctionContext(conn, auctionId);
+            if (context == null) {
+                conn.rollback();
+                return "BID_ERROR|Phòng đấu giá không tồn tại hoặc đã bị gỡ.";
+            }
+
+            String validationError = bidValidator.validate(context, bidAmount);
+            if (validationError != null) {
+                conn.rollback();
+                return validationError;
+            }
+
+            auctionDAO.updateAuctionPrice(conn, auctionId, bidAmount);
+            auctionDAO.insertBidHistory(conn, auctionId, userId, bidAmount);
+
+            boolean isExtended = antiSnipingService.processAntiSnipe(conn, auctionDAO, auctionId, context.getTimeLeft());
+
+            conn.commit();
+
+            if (isExtended) {
+                return "BID_SUCCESS_EXTENDED|" + bidAmount + "|" + context.getProductName();
+            } else {
+                return "BID_SUCCESS|" + bidAmount;
+            }
+
+        } catch (SQLException e) {
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+            e.printStackTrace();
+            return "BID_ERROR|Lỗi hệ thống khi đặt giá!";
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException ex) { ex.printStackTrace(); }
+            }
         }
-
-        if (amount <= currentMaxBid) {
-            return "BID_ERR_LOW";
-        }
-
-        // nếu không lỗi & bid hợp lệ
-        this.currentMaxBid = amount;
-        this.highestBidder = username;
-
-        // thông báo nếu có bid cao nhất mới
-        AuctionServer.broadcast("BID_UPDATE|" + username + "|" + amount);
-
-        return "BID_SUCCESS";
     }
     public String getAuctionDetailMessage(int auctionId, int userId) {
         Auction auction = auctionDAO.findById(auctionId);
