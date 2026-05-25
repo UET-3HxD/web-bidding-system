@@ -204,7 +204,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                                 e.printStackTrace();
                             }
                         }
-                        else if (cmd.equals("BID") || cmd.equals("CHAT")) {
+                        else if (cmd.equals("CHAT")) {
                             handleAuctionCommands(message);
                         }
                         else if (cmd.equals("PLACE_BID")) {
@@ -213,7 +213,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                                 int bidUserId = currentUserId;
                                 double bidAmount = Double.parseDouble(parts[3]);
 
-                                String result = auctionDAO.placeBidTransaction(bidAuctionId, bidUserId, bidAmount);
+                                String result = auctionService.placeBid(bidAuctionId, bidUserId, bidAmount);
                                 out.println(result);
                                 if (result.startsWith("BID_SUCCESS")) {
                                     String payload = bidAuctionId + "|" + bidAmount;
@@ -444,14 +444,6 @@ public class ClientHandler implements Runnable, ClientObserver {
         String cmd = parts[0];
 
         switch (cmd) {
-            case "BID":
-                double amount = Double.parseDouble(parts[1]);
-                String result = auctionService.placeBid(this.clientName, amount);
-                if (!result.equals("BID_SUCCESS")) {
-                    out.println(result); // gửi lỗi riêng cho người bid
-                }
-                break;
-
             case "CHAT":
                 String content = parts[1];
                 broadcast("CHAT|" + this.clientName + ": " + content);

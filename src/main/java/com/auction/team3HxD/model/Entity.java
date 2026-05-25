@@ -4,29 +4,30 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public abstract class Entity {
-    protected int id;
-    protected LocalDateTime createdAt;
 
-    // Constructor
-    public Entity() {
-        this.id = 0;
-        this.createdAt = LocalDateTime.now();
-    }
+  protected int id;
+  protected LocalDateTime createdAt;
 
-    // Getters and setters
-    public int getId() {
-        return id;
-    }
+  // Constructor
+  public Entity() {
+    this.id = 0;
+    this.createdAt = LocalDateTime.now();
+  }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+  // Getters and setters
+  public int getId() {
+    return id;
+  }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+  public void setId(int id) {
+    this.id = id;
+  }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
+  }
 }
