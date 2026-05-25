@@ -260,7 +260,8 @@ public class RegisterController {
 
     private void showMessage(String text, boolean isSuccess) {
         messageLabel.setText(text);
-        messageLabel.setStyle(isSuccess ? "-fx-text-fill: #2ecc71;" : "-fx-text-fill: #e74c3c;");
+        messageLabel.getStyleClass().removeAll("msg-success", "msg-error");
+        messageLabel.getStyleClass().add(isSuccess ? "msg-success" : "msg-error");
         messageLabel.setVisible(true);
         messageLabel.setManaged(true);
         if (!isSuccess) {
