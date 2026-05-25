@@ -66,3 +66,51 @@
 .stat-highlight-pink { -fx-text-fill: #F43F5E; -fx-font-size: 22px; -fx-font-weight: bold; }
 .stat-large-time { -fx-text-fill: #F8FAFC; -fx-font-size: 24px; -fx-font-family: 'Monospace'; -fx-font-weight: bold; }
 .bid-stats-box { -fx-background-color: #1E293B; -fx-background-radius: 12px; -fx-border-color: #334155; -fx-border-radius: 12px; }
+/* --- Cấu hình Thời gian đếm ngược --- */
+.time-left-normal {
+    -fx-text-fill: #000000; /* Hoặc màu trắng tùy theme tổng thể */
+}
+
+.time-left-ended {
+    -fx-text-fill: #F43F5E; /* Đỏ hồng khi hết giờ */
+}
+
+.time-left-calculating {
+    -fx-text-fill: #ff9800; /* Cam khi đang tính toán */
+}
+
+/* --- Cấu hình Badge Trạng thái --- */
+.badge-ready {
+    -fx-background-color: #3B82F6;
+    -fx-text-fill: white;
+}
+
+/* --- Cấu hình Giá của bạn (Your Last Bid) --- */
+.last-bid-empty {
+    -fx-text-fill: #94A3B8; /* Xám nhạt khi chưa đặt */
+}
+
+.last-bid-winning {
+    -fx-text-fill: #10B981;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.last-bid-losing {
+    -fx-text-fill: #F43F5E;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+/* --- Cấu hình Biểu đồ Line Chart --- */
+/* (Màu sắc cho các điểm dữ liệu Node) */
+.chart-line-symbol {
+    -fx-background-color: #10B981, white;
+    -fx-background-radius: 3px;
+}
+
+/* (Màu sắc cho đường nối Line) */
+.chart-series-line {
+    -fx-stroke: #10B981;
+    -fx-stroke-width: 2px;
+}
