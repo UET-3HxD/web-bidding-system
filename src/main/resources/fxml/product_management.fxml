@@ -15,7 +15,7 @@
 <?import javafx.scene.shape.Circle?>
 
 <?import javafx.scene.control.Separator?>
-<BorderPane prefHeight="700.0" prefWidth="1000.0" styleClass="root-container" stylesheets="@../styles/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.team3HxD.controller.ProductManagementController">
+<BorderPane prefHeight="700.0" prefWidth="1000.0" styleClass="root-container" stylesheets="@../styles/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.team3hxd.controller.ProductManagementController">
 
     <left>
         <VBox prefWidth="250.0" styleClass="sidebar">
