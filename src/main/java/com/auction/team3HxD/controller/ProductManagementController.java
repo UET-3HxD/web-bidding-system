@@ -1,5 +1,7 @@
 package com.auction.team3HxD.controller;
 
+import com.auction.team3HxD.dto.ProductDTO;
+import com.auction.team3HxD.services.ItemService;
 import com.auction.team3HxD.util.SocketService;
 import com.auction.team3HxD.util.UserSession;
 import javafx.application.Platform;
@@ -66,8 +68,9 @@ public class ProductManagementController {
   @FXML
   private ComboBox<String> cbAuctionDuration;
   // Biến lưu trữ sản phẩm đang được chọn để chỉnh sửa
-  private Product currentEditingProduct = null;
+  private ProductDTO currentEditingProduct = null;
   private String currentImagePath = "";
+  private final ItemService itemService = new ItemService();
 
   @FXML
   public void initialize() {
@@ -114,7 +117,8 @@ public class ProductManagementController {
         String reason = message.contains("|") ? message.split("\\|")[1] : "Lỗi không xác định";
         System.err.println("Thất bại: " + reason);
 
-      } else if (message.startsWith("LIST_ITEMS_SUCCESS")) {
+      }
+      else if (message.startsWith("LIST_ITEMS_SUCCESS")) {
         // XỬ LÝ CHUỖI DỮ LIỆU TỪ SERVER VÀ VẼ UI
         loadRealProducts(message);
 
@@ -196,7 +200,7 @@ public class ProductManagementController {
         String path = itemData[4];
         String desc = itemData[5];
 
-        Product p = new Product(id, name, price, desc, status, path);
+        ProductDTO p = new ProductDTO(id, name, price, desc, status, path);
         HBox card = createProductCardUI(p);
         vboxProductList.getChildren().add(card);
         count++;
@@ -225,6 +229,10 @@ public class ProductManagementController {
     String newPrice = txtEditPrice.getText().trim();
     String newDesc = txtEditDesc.getText().trim();
 
+    if (!itemService.itemValidator(newName, newPrice, newDesc, "UNCHANGED")){
+      showAlert("Thông báo", "Thông tin chỉnh sửa không hợp lệ", Alert.AlertType.INFORMATION);
+      return;
+    }
     // 3. So sánh với thông tin cũ
     boolean isChanged = !newName.equals(currentEditingProduct.getName()) ||
         !newPrice.equals(currentEditingProduct.getPrice()) ||
@@ -245,7 +253,7 @@ public class ProductManagementController {
   }
 
   // --- CẬP NHẬT GIAO DIỆN CARD ---
-  private HBox createProductCardUI(Product product) {
+  private HBox createProductCardUI(ProductDTO product) {
     HBox card = new HBox(15);
     card.getStyleClass().add("product-card-item");
     card.setAlignment(Pos.CENTER_LEFT);
@@ -349,7 +357,7 @@ public class ProductManagementController {
   /**
    * Hàm này được gọi khi Click vào một Card Sản phẩm ở danh sách bên trái
    */
-  private void handleProductSelect(Product product) {
+  private void handleProductSelect(ProductDTO product) {
     // 1. Lưu lại sản phẩm đang thao tác
     currentEditingProduct = product;
 
@@ -373,13 +381,11 @@ public class ProductManagementController {
     String desc = txtCreateDesc.getText().trim();
     String category = cbCreateCategory.getValue(); // Ví dụ: "Điện tử", "Xe cộ", "Nghệ thuật"
 
-    // 2. Kiểm tra dữ liệu (Validation) sơ bộ
-    if (name.isEmpty() || priceStr.isEmpty() || category == null) {
-      System.out.println("Vui lòng điền đầy đủ thông tin!");
+    if (!itemService.itemValidator(name, priceStr, desc, category)) {
+      showAlert("Thông báo", "Thông tin sản phẩm không hợp lệ!", Alert.AlertType.INFORMATION);
       return;
     }
 
-    // 3. Chuyển đổi tên danh mục sang ENUM String mà Server hiểu
     String type;
     switch (category) {
       case "Điện tử":
@@ -590,49 +596,5 @@ public class ProductManagementController {
   @FXML
   void handleGoToHelp(ActionEvent event) {
     SceneSwitcher.getInstance().switchTo("/fxml/help.fxml", (Node) event.getSource(), "Trợ giúp");
-  }
-
-  // --- CLASS ĐỐI TƯỢNG MẪU (Thực tế lấy từ Model của Captain) ---
-  class Product {
-
-    String id, name, price, description, status, imagePath;
-
-    public Product(String id, String name, String price, String desc, String status,
-        String imagePath) {
-      this.id = id;
-      this.name = name;
-      this.price = price;
-      this.description = desc;
-      this.status = status;
-      this.imagePath = imagePath;
-    }
-
-    public String getId() {
-      return id;
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    public String getPrice() {
-      return price;
-    }
-
-    public String getDescription() {
-      return description;
-    }
-
-    public String getStatus() {
-      return status;
-    }
-
-    public String getImagePath() {
-      return imagePath;
-    }
-
-    public void setStatus(String status) {
-      this.status = status;
-    }
   }
 }
