@@ -9,6 +9,7 @@ import com.auction.team3HxD.model.observer.ClientObserver;
 import com.auction.team3HxD.model.observer.NotificationManager;
 import com.auction.team3HxD.services.AuctionService;
 import com.auction.team3HxD.services.UserService;
+import com.auction.team3HxD.services.ItemService;
 import com.auction.team3HxD.util.AppConfig;
 
 import java.io.BufferedReader;
@@ -31,6 +32,7 @@ public class ClientHandler implements Runnable, ClientObserver {
     private BufferedReader in;
     private String clientName;
     private final UserService userService = new UserService();
+    private final ItemService itemService = new ItemService();
     private ItemDAO itemDAO = new ItemDAO();
     private UserDAO userDAO = new UserDAO(); // Để dùng cho login
     private AuctionDAO auctionDAO = new AuctionDAO();
@@ -119,7 +121,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                                 String desc = parts[4];
                                 String path = parts[5];
 
-                                int newGeneratedId = userService.createItem(currentUserId, name, price, type, desc, path);
+                                int newGeneratedId = itemService.createItem(currentUserId, name, price, type, desc, path);
 
                                 if (newGeneratedId > 0) {
                                     out.println("CREATE_ITEM_SUCCESS");
@@ -134,7 +136,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                             }
                         }
                         else if (cmd.equals("GET_MY_ITEMS")) {
-                            String response = userService.getMyItemsList(currentUserId);
+                            String response = itemService.getMyItemsList(currentUserId);
                             out.println(response);
                         }
                         else if (cmd.equals("UPDATE_ITEM")) {
@@ -144,7 +146,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                             double price = Double.parseDouble(parts[3]);
                             String desc = parts[4];
 
-                            int success = userService.updateItem(itemId, name, price, desc);
+                            int success = itemService.updateItem(itemId, name, price, desc);
                             System.out.println(">>> [SERVER DEBUG] trạng thái update: " + success);
                             if (success > 0) {
                                 System.out.println(">>> [SERVER DEBUG] Đã kích hoạt lệnh notifyAllObservers sang Admin.");
@@ -155,7 +157,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                         }
                         else if (cmd.equals("DELETE_ITEM")) {
                             int itemId = Integer.parseInt(parts[1]);
-                            boolean success = userService.deleteItem(itemId);
+                            boolean success = itemService.deleteItem(itemId);
 
                             if (success) {
                                 com.auction.team3HxD.model.observer.NotificationManager.getInstance()
@@ -289,7 +291,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                                     out.println("ERR|Bạn không có quyền thực hiện thao tác này!");
                                     continue;
                                 }
-                                String response = userService.getPendingItemsList();
+                                String response = itemService.getPendingItemsList();
                                 out.println(response);
                             } catch (Exception e) {
                                 out.println("PENDING_ITEMS_EMPTY");
@@ -303,7 +305,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                                 }
                                 int itemId = Integer.parseInt(parts[1]);
                                 int ownerId = itemDAO.getOwnerIdByItemId(itemId);
-                                boolean success = userService.approveItem(itemId);
+                                boolean success = itemService.approveItem(itemId);
                                 if (success) {
                                     out.println("APPROVE_SUCCESS");
                                     if (ownerId != -1) {
@@ -326,7 +328,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                                 }
                                 int itemId = Integer.parseInt(parts[1]);
                                 int ownerId = itemDAO.getOwnerIdByItemId(itemId);
-                                boolean success = userService.rejectItem(itemId);
+                                boolean success = itemService.rejectItem(itemId);
                                 if (success) {
                                     out.println("REJECT_SUCCESS");
                                     if (ownerId != -1) {

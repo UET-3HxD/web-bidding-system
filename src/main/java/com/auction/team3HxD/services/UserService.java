@@ -12,7 +12,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class UserService {
     private final UserDAO userDAO = new UserDAO();
-    private final ItemDAO itemDAO = new ItemDAO();
     private static final Set<String> onlineUsers = ConcurrentHashMap.newKeySet();
     private AuctionDAO auctionDAO = new AuctionDAO();
 
@@ -24,15 +23,15 @@ public class UserService {
             return "REG_ERR_INVALID_EMAIL";
         }
         if (userDAO.getUserByUsername(username) != null) {
-            return "REGISTER_ERR_USERNAME_EXISTS";   // đúng như client mong đợi
+            return "REGISTER_ERR_USERNAME_EXISTS";
         }
         if (userDAO.getUserByEmail(email) != null) {
-            return "REGISTER_ERR_EMAIL_EXISTS";      // đúng như client mong đợi
+            return "REGISTER_ERR_EMAIL_EXISTS";
         }
 
         User newUser = new NormalUser(username, password, email, Role.USER);
         if (userDAO.insertUser(newUser) > 0) {
-            return "REGISTER_OK";                    // thành công
+            return "REGISTER_OK";
         }
         return "REG_ERR_DATABASE";
     }
@@ -46,11 +45,11 @@ public class UserService {
             return "LOGIN_ERR_BANNED";
         }
         if (!user.getPassword().equals(password)) {
-            return "LOGIN_ERR_INVALID"; // Sai user hoặc pass
+            return "LOGIN_ERR_INVALID";
 
         }
         if (onlineUsers.contains(username)) {
-            return "LOGIN_ERR_ALREADY_ONLINE";       // đúng như client mong đợi
+            return "LOGIN_ERR_ALREADY_ONLINE";
         }
 
         onlineUsers.add(username);
@@ -61,12 +60,10 @@ public class UserService {
         User user = userDAO.getUserByUsername(username);
         if (user == null) return "CP_ERR|USER_NOT_FOUND";
 
-        // Kiểm tra mật khẩu cũ có khớp không
         if (!user.getPassword().equals(oldPass)) {
             return "CP_ERR|WRONG_PASSWORD";
         }
 
-        // Cập nhật mật khẩu mới
         boolean success = userDAO.updatePassword(username, newPass);
         return success ? "CP_SUCCESS" : "CP_ERR|DB_ERROR";
     }
@@ -75,12 +72,10 @@ public class UserService {
         User user = userDAO.getUserByUsername(username);
         if (user == null) return "CE_ERR|USER_NOT_FOUND";
 
-        // Phải đúng mật khẩu mới cho đổi Email
         if (!user.getPassword().equals(password)) {
             return "CE_ERR|WRONG_PASSWORD";
         }
 
-        // Kiểm tra email mới đã có ai dùng chưa
         if (userDAO.getUserByEmail(newEmail) != null) {
             return "CE_ERR|EMAIL_TAKEN";
         }
@@ -93,49 +88,11 @@ public class UserService {
             onlineUsers.remove(username);
         }
     }
-    public int updateItem(int itemId, String name, double price, String desc) {
-        return itemDAO.updateItemInfo(itemId, name, price, desc);
-    }
-    // Xử lý tạo sản phẩm dựa trên loại (Polymorphism)
-    public int createItem(int sellerId, String name, double price, String type, String desc, String path) {
-        Item newItem;
-        switch (type.toUpperCase()) {
-            case "ELECTRONIC":
-                newItem = new Electronic(sellerId, name, desc, price, path);
-                break;
-            case "ART":
-                newItem = new Art(sellerId, name, desc, price, path);
-                break;
-            case "VEHICLE":
-                newItem = new Vehicle(sellerId, name, desc, price, path);
-                break;
-            default:
-                return -1;
-        }
-        return itemDAO.saveItem(newItem, type);
-    }
-    // Lấy danh sách sản phẩm và định dạng thành chuỗi phản hồi cho Socket
-    public String getMyItemsList(int sellerId) {
-        List<Item> items = itemDAO.getAllItemsBySeller(sellerId);
-        if (items.isEmpty()) return "LIST_ITEMS_EMPTY";
 
-        StringBuilder sb = new StringBuilder("LIST_ITEMS_SUCCESS");
-        for (Item item : items) {
-            sb.append("|").append(item.getId())
-                    .append("#").append(item.getName())
-                    .append("#").append(item.getPrice())
-                    .append("#").append(item.getStatus())
-                    .append("#").append(item.getImagePath())
-                    .append("#").append(item.getDescription());
-        }
-        return sb.toString();
-    }
     public int startAuction(int itemId, int durationMinutes) {
         return auctionDAO.startAuction(itemId, durationMinutes);
     }
-    public boolean deleteItem(int itemId) {
-        return itemDAO.deleteItem(itemId);
-    }
+
     public String getLiveAuctionsMessage() {
         try {
             // 1. Lấy danh sách Object Auction
@@ -207,39 +164,6 @@ public class UserService {
         return user != null && user.getRole() == Role.ADMIN;
     }
 
-    /**
-     * Lấy danh sách sản phẩm đang chờ duyệt (status = WAITING).
-     * Trả về chuỗi PENDING_ITEMS_SUCCESS|id#name#price#seller#desc#path|...
-     * hoặc PENDING_ITEMS_EMPTY nếu không có sản phẩm nào.
-     */
-    public String getPendingItemsList() {
-        List<Item> items = itemDAO.getItemsByStatus("WAITING");
-        if (items == null || items.isEmpty()) {
-            return "PENDING_ITEMS_EMPTY";
-        }
-        StringBuilder sb = new StringBuilder("PENDING_ITEMS_SUCCESS");
-        for (Item item : items) {
-            // Lấy tên người bán từ UserDAO
-            User seller = userDAO.getUserById(item.getSellerId());
-            String sellerName = seller != null ? seller.getUsername() : "Unknown";
-
-            sb.append("|").append(item.getId()).append("#")
-                    .append(item.getName()).append("#")
-                    .append(item.getPrice()).append("#")
-                    .append(sellerName).append("#")
-                    .append(item.getDescription() != null ? item.getDescription() : "").append("#")
-                    .append(item.getImagePath() != null ? item.getImagePath() : "");
-        }
-        return sb.toString();
-    }
-
-    public boolean approveItem(int itemId) {
-        return itemDAO.updateItemStatus(itemId, "APPROVED");
-    }
-
-    public boolean rejectItem(int itemId) {
-        return itemDAO.updateItemStatus(itemId, "REJECTED");
-    }
 
     // ==================== USER MANAGEMENT (ADMIN) ====================
 
@@ -262,9 +186,6 @@ public class UserService {
         return sb.toString();
     }
 
-    /**
-     * Mở khóa tài khoản (chuyển role từ BANNED về USER).
-     */
     public boolean unbanUser(int userId) {
         return userDAO.updateRole(userId, "USER");
     }
