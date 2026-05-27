@@ -593,7 +593,7 @@
 /* --- Cấu hình Card Sản Phẩm --- */
 .product-image-box {
     -fx-background-color: #334155;
-    -fx-background-radius: 8;
+    -fx-background-radius: 10;
 }
 
 .product-name-text {
@@ -609,9 +609,6 @@
 }
 
 /* --- Cấu hình Badge Trạng Thái (Kế thừa các tag có sẵn) --- */
-/* (Nếu file CSS của bạn đã có các tag .status-badge, .status-active,
-   .status-won, .status-lost thì có thể dùng lại. Dưới đây bổ sung
-   các trạng thái quản lý kho) */
 
 .badge-waiting {
     -fx-background-color: #F59E0B; /* Cam */
@@ -632,4 +629,32 @@
 .badge-rejected {
     -fx-background-color: #64748B;
     -fx-text-fill: #ff0000; /* Xám nền, đỏ chữ */
+}
+
+/* --- My Bids Card Highlight (không thay đổi kích thước) --- */
+.card-selected {
+    -fx-background-color: #2a2a2a;
+    -fx-border-color: #3B82F6;
+    -fx-border-width: 1.5;
+    -fx-effect: dropshadow(gaussian, white, 8, 0.5, 0, 0); /* Phát sáng trắng nhẹ */
+}
+
+/* Đảm bảo các card có khoảng cách rõ ràng */
+.auction-card {
+    -fx-background-color: #1e1e1e;
+    -fx-border-color: #4a4a4a;
+    -fx-border-width: 1.8;
+    -fx-margin: 5 0 5 0;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}
+
+.bid-list-container {
+    -fx-padding: 5 10 5 10;   /* Khoảng cách trái/phải cho các card bên trong */
+}
+
+/* Tắt viền focus của ScrollPane khi được chọn */
+.scroll-pane:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
 }
