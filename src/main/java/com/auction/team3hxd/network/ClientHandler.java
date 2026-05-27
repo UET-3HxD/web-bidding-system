@@ -66,8 +66,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                         out.println(res);
                         System.out.println("Sent response to client: " + res);
                         System.out.flush();
-                    }
-                    else if (cmd.equals("LOGIN")) {
+                    } else if (cmd.equals("LOGIN")) {
                         String res = userService.login(parts[1], parts[2]);
                         if (res.startsWith("LOGIN_OK")) {
                             this.clientName = parts[1];
@@ -80,8 +79,8 @@ public class ClientHandler implements Runnable, ClientObserver {
                         } else {
                             out.println(res);
                         }
+                    } else {
                     }
-                    else {}
                 } catch (Exception e) {
                     // Bắt mọi lỗi (SQL, logic...) để client không bị treo
                     out.println("ERR|Server error: " + e.getMessage());
@@ -100,16 +99,13 @@ public class ClientHandler implements Runnable, ClientObserver {
                         if (cmd.equals("CHANGE_PASSWORD")) {
                             String cpRes = userService.changePassword(this.clientName, parts[1], parts[2]);
                             out.println(cpRes);
-                        }
-                        else if (cmd.equals("CHANGE_EMAIL")) {
+                        } else if (cmd.equals("CHANGE_EMAIL")) {
                             String ceRes = userService.changeEmail(this.clientName, parts[1], parts[2]);
                             out.println(ceRes);
-                        }
-                        else if(cmd.equals("LOGOUT")) {
+                        } else if (cmd.equals("LOGOUT")) {
                             isAuthenticated = false;
                             break;
-                        }
-                        else if(cmd.equals("CREATE_ITEM")) {
+                        } else if (cmd.equals("CREATE_ITEM")) {
                             try {
                                 // bóc tách: [1]name, [2]price, [3]type, [4]desc, [5]path
                                 String name = parts[1];
@@ -131,12 +127,10 @@ public class ClientHandler implements Runnable, ClientObserver {
                             } catch (Exception e) {
                                 out.println("CREATE_ITEM_ERR|Dữ liệu không hợp lệ");
                             }
-                        }
-                        else if (cmd.equals("GET_MY_ITEMS")) {
+                        } else if (cmd.equals("GET_MY_ITEMS")) {
                             String response = itemService.getMyItemsList(currentUserId);
                             out.println(response);
-                        }
-                        else if (cmd.equals("UPDATE_ITEM")) {
+                        } else if (cmd.equals("UPDATE_ITEM")) {
                             System.out.println(">>> [SERVER DEBUG] Đã nhận được lệnh UPDATE_ITEM từ Client!");
                             int itemId = Integer.parseInt(parts[1]);
                             String name = parts[2];
@@ -151,8 +145,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                                         .notifyAllObservers("PRODUCT_SUBMITTED", "");
                             }
                             out.println(success > 0 ? "UPDATE_ITEM_SUCCESS" : "UPDATE_ITEM_ERR|Không thể cập nhật sản phẩm này");
-                        }
-                        else if (cmd.equals("DELETE_ITEM")) {
+                        } else if (cmd.equals("DELETE_ITEM")) {
                             int itemId = Integer.parseInt(parts[1]);
                             boolean success = itemService.deleteItem(itemId);
 
@@ -163,8 +156,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                             } else {
                                 out.println("DELETE_ITEM_ERR|Sản phẩm không tồn tại hoặc không thể xóa");
                             }
-                        }
-                        else if(cmd.equals("START_AUCTION")) {
+                        } else if (cmd.equals("START_AUCTION")) {
                             try {
                                 int auctionItemId = Integer.parseInt(parts[1]);
                                 int minutes = Integer.parseInt(parts[2]);
@@ -184,12 +176,10 @@ public class ClientHandler implements Runnable, ClientObserver {
                                 e.printStackTrace();
                                 out.println("START_AUCTION_ERR|Dữ liệu không hợp lệ");
                             }
-                        }
-                        else if (cmd.equals("GET_LIVE_AUCTIONS")) {
+                        } else if (cmd.equals("GET_LIVE_AUCTIONS")) {
                             String response = userService.getLiveAuctionsMessage();
                             out.println(response);
-                        }
-                        else if (cmd.equals("GET_BID_HISTORY")) {
+                        } else if (cmd.equals("GET_BID_HISTORY")) {
                             try {
                                 int historyUserId = this.currentUserId;
                                 List<String> historyRecords = auctionDAO.getBidHistory(historyUserId);
@@ -202,11 +192,9 @@ public class ClientHandler implements Runnable, ClientObserver {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                        }
-                        else if (cmd.equals("CHAT")) {
+                        } else if (cmd.equals("CHAT")) {
                             handleAuctionCommands(message);
-                        }
-                        else if (cmd.equals("PLACE_BID")) {
+                        } else if (cmd.equals("PLACE_BID")) {
                             try {
                                 int bidAuctionId = Integer.parseInt(parts[1]);
                                 int bidUserId = currentUserId;
@@ -224,8 +212,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                                 out.println("BID_ERROR|Dữ liệu gửi lên không hợp lệ!");
                                 e.printStackTrace();
                             }
-                        }
-                        else if (cmd.equals("GET_AUCTION_DETAIL")){
+                        } else if (cmd.equals("GET_AUCTION_DETAIL")) {
                             try {
                                 int aId = Integer.parseInt(parts[1]);
                                 int uId = Integer.parseInt(parts[2]);
@@ -254,15 +241,14 @@ public class ClientHandler implements Runnable, ClientObserver {
                             } catch (Exception e) {
                                 out.println("AUCTION_BID_HISTORY|EMPTY");
                             }
-                        }
-                        else if (cmd.equals("CHECK_AUCTION_STATUS")) {
+                        } else if (cmd.equals("CHECK_AUCTION_STATUS")) {
                             try {
                                 int auctionId = Integer.parseInt(parts[1]);
                                 String sql = "SELECT a.status, a.end_time, i.product_name FROM auction_sessions a " +
                                         "JOIN items i ON a.item_id = i.id WHERE a.id = ?";
 
                                 try (Connection conn = com.auction.team3hxd.util.DBConnection.getConnection();
-                                     PreparedStatement ps = conn.prepareStatement(sql)) {
+                                        PreparedStatement ps = conn.prepareStatement(sql)) {
                                     ps.setInt(1, auctionId);
                                     try (ResultSet rs = ps.executeQuery()) {
                                         if (rs.next()) {
@@ -279,7 +265,9 @@ public class ClientHandler implements Runnable, ClientObserver {
                                         }
                                     }
                                 }
-                            } catch (Exception e) { e.printStackTrace(); }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
                         // ===== ADMIN COMMANDS =====
                         else if (cmd.equals("GET_PENDING_ITEMS")) {
@@ -293,8 +281,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                             } catch (Exception e) {
                                 out.println("PENDING_ITEMS_EMPTY");
                             }
-                        }
-                        else if (cmd.equals("APPROVE_ITEM")) {
+                        } else if (cmd.equals("APPROVE_ITEM")) {
                             try {
                                 if (!userService.isAdmin(currentUserId)) {
                                     out.println("ERR|Bạn không có quyền!");
@@ -316,8 +303,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                             } catch (Exception e) {
                                 out.println("APPROVE_ERR|Dữ liệu không hợp lệ");
                             }
-                        }
-                        else if (cmd.equals("REJECT_ITEM")) {
+                        } else if (cmd.equals("REJECT_ITEM")) {
                             try {
                                 if (!userService.isAdmin(currentUserId)) {
                                     out.println("ERR|Bạn không có quyền!");
@@ -353,8 +339,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                             } catch (Exception e) {
                                 out.println("ALL_USERS_EMPTY");
                             }
-                        }
-                        else if (cmd.equals("UNBAN_USER")) {
+                        } else if (cmd.equals("UNBAN_USER")) {
                             try {
                                 if (!userService.isAdmin(currentUserId)) {
                                     out.println("ERR|Bạn không có quyền!");
@@ -370,8 +355,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                             } catch (Exception e) {
                                 out.println("UNBAN_ERR|Dữ liệu không hợp lệ");
                             }
-                        }
-                        else if (cmd.equals("BAN_USER")) {
+                        } else if (cmd.equals("BAN_USER")) {
                             try {
                                 int targetUserId = Integer.parseInt(parts[1]);
                                 boolean success = userDAO.updateRole(targetUserId, "BANNED");
@@ -384,9 +368,10 @@ public class ClientHandler implements Runnable, ClientObserver {
                                 } else {
                                     out.println("ADMIN_BAN_ERROR|Lỗi khi khóa tài khoản.");
                                 }
-                            } catch (Exception e) { e.printStackTrace(); }
-                        }
-                        else if (cmd.equals("GET_ADMIN_DASHBOARD")) {
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        } else if (cmd.equals("GET_ADMIN_DASHBOARD")) {
                             try {
                                 int pendingCount = itemDAO.countPendingItems();
                                 int liveCount = auctionDAO.countLiveAuctions();
@@ -420,6 +405,7 @@ public class ClientHandler implements Runnable, ClientObserver {
             closeConnection();
         }
     }
+
     @Override
     public void onNotify(String eventType, String fullMessage) {
         // Mỗi khi NotificationManager gọi hàm này, đẩy tin nhắn qua Socket về cho Client
@@ -437,6 +423,7 @@ public class ClientHandler implements Runnable, ClientObserver {
     public int getObserverUserId() {
         return this.currentUserId;
     }
+
     private void handleAuctionCommands(String message) {
         AuctionService auctionService = new AuctionService();
         String[] parts = message.split("\\|");
@@ -452,6 +439,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                 out.println("ERR|Lệnh không hợp lệ");
         }
     }
+
     public static void addActiveClient(int userId, ClientHandler handler) {
         activeClients.put(userId, handler);
     }
@@ -459,10 +447,12 @@ public class ClientHandler implements Runnable, ClientObserver {
     public static void removeActiveClient(int userId) {
         activeClients.remove(userId);
     }
+
     public void sendKickMessage() {
         out.println("YOU_ARE_BANNED|Tài khoản của bạn vừa bị khóa!");
         out.flush();
     }
+
     public void sendMessage(String msg) {
         if (out != null) {
             out.println(msg);

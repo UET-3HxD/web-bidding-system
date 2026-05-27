@@ -5,7 +5,7 @@ package com.auction.team3hxd.exception;
  */
 public class IllegalItemChangeException extends Exception {
 
-  public IllegalItemChangeException(String message) {
-    super(message);
-  }
+    public IllegalItemChangeException(String message) {
+        super(message);
+    }
 }

@@ -21,8 +21,8 @@ public class AuctionTimeoutTask {
         String selectSql = "SELECT id FROM auction_sessions WHERE end_time <= NOW() AND status = 'ACTIVE'";
 
         try (Connection conn = com.auction.team3hxd.util.DBConnection.getConnection();
-             PreparedStatement psSelect = conn.prepareStatement(selectSql);
-             ResultSet rs = psSelect.executeQuery()) {
+                PreparedStatement psSelect = conn.prepareStatement(selectSql);
+                ResultSet rs = psSelect.executeQuery()) {
 
             while (rs.next()) {
                 int auctionId = rs.getInt("id");

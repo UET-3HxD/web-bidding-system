@@ -7,7 +7,7 @@ public class DBConnection {
 
     private static final String URL = "jdbc:mysql://localhost:3306/auction_db";
     private static final String USER = "root";
-    private static final String PASS = "admin";
+    private static final String PASS = "Quangloc@123";
 
     public static Connection getConnection() {
         try {

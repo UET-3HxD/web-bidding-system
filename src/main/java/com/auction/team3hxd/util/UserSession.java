@@ -26,6 +26,7 @@ public class UserSession {
 
     /**
      * Gọi khi đăng nhập thành công.
+     *
      * @param username tên đăng nhập
      * @param role vai trò (BIDDER/SELLER/ADMIN)
      */
