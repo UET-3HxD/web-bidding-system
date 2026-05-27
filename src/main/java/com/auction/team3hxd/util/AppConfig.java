@@ -8,7 +8,7 @@ import java.util.Properties;
  * Cung cấp các hằng số cấu hình cho toàn bộ client.
  */
 public class AppConfig {
-    private static final Properties PROPS = new Properties();
+    private static final Properties props = new Properties();
     private static boolean mockEnabled = true;
     private static String serverHost = "localhost";
     private static int serverPort = 12345;
@@ -16,10 +16,10 @@ public class AppConfig {
     static {
         try (InputStream input = AppConfig.class.getClassLoader().getResourceAsStream("application.properties")) {
             if (input != null) {
-                PROPS.load(input);
-                mockEnabled = Boolean.parseBoolean(PROPS.getProperty("app.mock.enabled", "true"));
-                serverHost = PROPS.getProperty("server.host", "localhost");
-                serverPort = Integer.parseInt(PROPS.getProperty("server.port", "12345"));
+                props.load(input);
+                mockEnabled = Boolean.parseBoolean(props.getProperty("app.mock.enabled", "true"));
+                serverHost = props.getProperty("server.host", "localhost");
+                serverPort = Integer.parseInt(props.getProperty("server.port", "12345"));
             } else {
                 System.err.println("File application.properties not found, using default values.");
             }
