@@ -9,31 +9,31 @@ import java.time.LocalDateTime;
  **/
 public abstract class Entity {
 
-  protected int id;
-  protected LocalDateTime createdAt;
+    protected int id;
+    protected LocalDateTime createdAt;
 
-  /**
-   * Phương thức khởi tạo.
-   */
-  public Entity() {
-    this.id = 0;
-    this.createdAt = LocalDateTime.now();
-  }
+    /**
+     * Phương thức khởi tạo.
+     */
+    public Entity() {
+        this.id = 0;
+        this.createdAt = LocalDateTime.now();
+    }
 
-  // Getters and setters
-  public int getId() {
-    return id;
-  }
+    // Getters and setters
+    public int getId() {
+        return id;
+    }
 
-  public void setId(int id) {
-    this.id = id;
-  }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
-  }
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 
-  public void setCreatedAt(LocalDateTime createdAt) {
-    this.createdAt = createdAt;
-  }
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }

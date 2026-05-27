@@ -6,22 +6,35 @@ import com.auction.team3hxd.util.SocketService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+
 import java.util.regex.Pattern;
 
 public class RegisterController {
 
-    @FXML private TextField usernameField;
-    @FXML private PasswordField passwordField;
-    @FXML private PasswordField confirmPasswordField;
-    @FXML private TextField emailField;
-    @FXML private Button registerButton;
-    @FXML private Button backButton;
-    @FXML private Label messageLabel;
-    @FXML private ProgressIndicator loadingIndicator;
-    @FXML private ProgressBar passwordStrengthBar;
-    @FXML private Label passwordStrengthLabel;
-    @FXML private Label confirmPasswordError;
-    @FXML private Label emailError;
+    @FXML
+    private TextField usernameField;
+    @FXML
+    private PasswordField passwordField;
+    @FXML
+    private PasswordField confirmPasswordField;
+    @FXML
+    private TextField emailField;
+    @FXML
+    private Button registerButton;
+    @FXML
+    private Button backButton;
+    @FXML
+    private Label messageLabel;
+    @FXML
+    private ProgressIndicator loadingIndicator;
+    @FXML
+    private ProgressBar passwordStrengthBar;
+    @FXML
+    private Label passwordStrengthLabel;
+    @FXML
+    private Label confirmPasswordError;
+    @FXML
+    private Label emailError;
 
     @FXML
     public void initialize() {
@@ -168,7 +181,10 @@ public class RegisterController {
 
         if (AppConfig.isMockEnabled()) {
             new Thread(() -> {
-                try { Thread.sleep(1000); } catch (InterruptedException e) {}
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                }
                 boolean usernameExists = "admin".equalsIgnoreCase(username);
                 boolean emailExists = "admin@example.com".equalsIgnoreCase(email);
                 boolean success = !usernameExists && !emailExists;
@@ -177,7 +193,10 @@ public class RegisterController {
                     if (success) {
                         showMessage("Đăng ký thành công! Chuyển về đăng nhập...", true);
                         new Thread(() -> {
-                            try { Thread.sleep(2000); } catch (InterruptedException e) {}
+                            try {
+                                Thread.sleep(2000);
+                            } catch (InterruptedException e) {
+                            }
                             Platform.runLater(() -> {
                                 SceneSwitcher.getInstance().switchTo("/fxml/login.fxml", registerButton, "Đăng nhập");
                             });
@@ -216,7 +235,10 @@ public class RegisterController {
             showMessage("Đăng ký thành công! Chuyển về đăng nhập...", true);
             // Không cần shutdown hay disconnect gì cả, SocketService vẫn sống
             new Thread(() -> {
-                try { Thread.sleep(2000); } catch (InterruptedException e) {}
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                }
                 Platform.runLater(() -> {
                     SceneSwitcher.getInstance().switchTo("/fxml/login.fxml", registerButton, "Đăng nhập");
                 });
@@ -266,7 +288,10 @@ public class RegisterController {
         messageLabel.setManaged(true);
         if (!isSuccess) {
             new Thread(() -> {
-                try { Thread.sleep(3000); } catch (InterruptedException e) {}
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                }
                 Platform.runLater(() -> {
                     messageLabel.setVisible(false);
                     messageLabel.setManaged(false);

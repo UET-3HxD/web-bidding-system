@@ -20,8 +20,8 @@ public class SocketManager {
     private boolean connected = false;
     private Consumer<String> onMessageReceived;
     // Cấu hình server
-    private final String SERVER_HOST = AppConfig.getServerHost();
-    private final int SERVER_PORT = AppConfig.getServerPort();
+    private final String serverHost = AppConfig.getServerHost();
+    private final int serverPort = AppConfig.getServerPort();
 
 
     private SocketManager() {}  // private constructor -> Singleton
@@ -39,11 +39,11 @@ public class SocketManager {
      */
     public void connect() throws IOException {
         if (!connected) {
-            socket = new Socket(SERVER_HOST, SERVER_PORT);
+            socket = new Socket(serverHost, serverPort);
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             connected = true;
-            System.out.println("Đã kết nối đến server tại " + SERVER_HOST + ":" + SERVER_PORT);
+            System.out.println("Đã kết nối đến server tại " + serverHost + ":" + serverPort);
         }
     }
 

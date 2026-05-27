@@ -78,8 +78,8 @@ public class AuctionServer {
         scheduler.scheduleAtFixedRate(() -> {
             System.out.println(">>> Đang quét và đóng các phiên đấu giá hết hạn...");
             try (Connection conn = DBConnection.getConnection();
-                 PreparedStatement ps = conn.prepareStatement(
-                         "UPDATE auction_sessions SET status = 'FINISHED' " +
+                    PreparedStatement ps = conn.prepareStatement(
+                            "UPDATE auction_sessions SET status = 'FINISHED' " +
                                  "WHERE status = 'ACTIVE' AND end_time <= NOW()")) {
 
                 int rows = ps.executeUpdate();
