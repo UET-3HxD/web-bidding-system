@@ -46,9 +46,9 @@
 
     <!-- ================= NỘI DUNG CHÍNH ================= -->
     <center>
-        <VBox styleClass="main-content" spacing="20">
+        <VBox styleClass="main-content" spacing="10" VBox.vgrow="ALWAYS">
             <padding>
-                <Insets top="20" right="30" bottom="20" left="30"/>
+                <Insets top="15" right="20" bottom="15" left="20"/>
             </padding>
 
             <HBox spacing="10" alignment="CENTER_LEFT">
@@ -57,46 +57,51 @@
                 <Label fx:id="lblBreadcrumbName" text="Tên sản phẩm..." styleClass="breadcrumb-text"/>
             </HBox>
 
-            <HBox spacing="30" VBox.vgrow="ALWAYS">
-
+            <!-- Hàng chính: 2 cột linh hoạt -->
+            <HBox spacing="15" VBox.vgrow="ALWAYS">
                 <!-- Cột trái: Ảnh + thông tin sản phẩm -->
-                <VBox spacing="15" HBox.hgrow="ALWAYS" prefWidth="550">
-                    <Label fx:id="lblProductName" text="Đang tải tên sản phẩm..." styleClass="page-title"/>
+                <VBox spacing="12" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+                    <Label fx:id="lblProductName" text="Đang tải tên sản phẩm..." styleClass="page-title" wrapText="true"/>
 
-                    <StackPane styleClass="card" minHeight="350" VBox.vgrow="ALWAYS">
-                        <ImageView fx:id="imgProductLarge" fitWidth="500" fitHeight="350" preserveRatio="true" visible="false"/>
+                    <StackPane styleClass="card" VBox.vgrow="ALWAYS" minHeight="200">
+                        <ImageView fx:id="imgProductLarge" fitWidth="400" fitHeight="300" preserveRatio="true" visible="false"/>
                         <VBox fx:id="vboxNoImage" alignment="CENTER" spacing="10">
                             <Label text="📷" style="-fx-font-size: 60px; -fx-text-fill: #6B7280;"/>
                             <Label text="Đang tải ảnh sản phẩm..." styleClass="card-subtitle"/>
                         </VBox>
                     </StackPane>
 
-                    <VBox spacing="12" styleClass="card">
-                        <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                    <VBox spacing="10" styleClass="card">
+                        <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
                         <HBox spacing="10">
-                            <Label text="Người bán:" styleClass="input-label" minWidth="120"/>
+                            <Label text="Người bán:" styleClass="input-label" minWidth="100"/>
                             <Label fx:id="lblSeller" text="---" styleClass="card-subtitle"/>
                         </HBox>
                         <HBox spacing="10">
-                            <Label text="Loại sản phẩm:" styleClass="input-label" minWidth="120"/>
+                            <Label text="Loại sản phẩm:" styleClass="input-label" minWidth="100"/>
                             <Label fx:id="lblCategory" text="---" styleClass="card-subtitle"/>
                         </HBox>
-                        <VBox spacing="8">
+                        <VBox spacing="5">
                             <Label text="Mô tả sản phẩm:" styleClass="input-label"/>
-                            <Label fx:id="lblDescription" text="Đang tải mô tả..." wrapText="true" styleClass="card-subtitle" minHeight="100" alignment="TOP_LEFT"/>
+                            <Label fx:id="lblDescription" text="Đang tải mô tả..." wrapText="true" styleClass="card-subtitle" minHeight="60" alignment="TOP_LEFT"/>
                         </VBox>
                     </VBox>
                 </VBox>
 
                 <!-- Cột phải: Đấu giá -->
-                <VBox spacing="20" prefWidth="380" minWidth="380">
-
+                <VBox spacing="12" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
                     <HBox alignment="CENTER_RIGHT">
                         <Button text="✖ Đóng phòng" styleClass="action-btn-secondary" onAction="#handleExitRoom"/>
                     </HBox>
 
-                    <VBox spacing="10" styleClass="card" minHeight="220" VBox.vgrow="ALWAYS">
-                        <Label text="BIỂU ĐỒ GIÁ" styleClass="section-title"/>
+                    <!-- Biểu đồ giá -->
+                    <VBox spacing="5" styleClass="card" VBox.vgrow="ALWAYS" minHeight="200"
+                          style="-fx-padding: 10 15 10 15;">
+                        <HBox alignment="CENTER_LEFT">
+                            <Label text="BIỂU ĐỒ GIÁ" style="-fx-text-fill: #9CA3AF; -fx-font-size: 12px; -fx-font-weight: bold; -fx-padding: 0;"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="btnDetailChart" text="📊" styleClass="action-btn-secondary" style="-fx-padding: 4 8; -fx-font-size: 14px;" />
+                        </HBox>
                         <LineChart fx:id="lineChartPrice" createSymbols="true" animated="false" VBox.vgrow="ALWAYS"
                                    style="-fx-background-color: #1a1a1a; -fx-legend-visible: false;">
                             <xAxis>
@@ -110,8 +115,9 @@
                         </LineChart>
                     </VBox>
 
-                    <VBox spacing="15" styleClass="card">
-                        <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                    <!-- Thông tin đấu giá -->
+                    <VBox spacing="10" styleClass="card">
+                        <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
                         <HBox spacing="20">
                             <VBox HBox.hgrow="ALWAYS">
                                 <Label text="Thời gian còn lại" styleClass="input-label"/>
@@ -123,7 +129,7 @@
                             </VBox>
                         </HBox>
                         <Separator styleClass="divider"/>
-                        <VBox spacing="10">
+                        <VBox spacing="8">
                             <HBox alignment="CENTER_LEFT">
                                 <Label text="Giá cao nhất hiện tại" styleClass="input-label"/>
                                 <Region HBox.hgrow="ALWAYS"/>
@@ -137,9 +143,10 @@
                         </VBox>
                     </VBox>
 
-                    <VBox spacing="12" styleClass="card">
+                    <!-- Đặt giá -->
+                    <VBox spacing="10" styleClass="card">
                         <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
-                        <Label text="ĐẶT GIÁ CỦA BẠN" styleClass="section-title"/>
+                        <Label text="ĐẶT GIÁ CỦA BẠN" style="-fx-text-fill: #9CA3AF; -fx-font-size: 12px; -fx-font-weight: bold; -fx-padding: 0 0 3 0;"/>
                         <TextField fx:id="txtBidInput" promptText="Nhập số tiền (VNĐ)..." styleClass="input-field"/>
                         <HBox spacing="12">
                             <Button text="Tự động" styleClass="action-btn-secondary" prefWidth="120"/>

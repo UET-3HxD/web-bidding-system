@@ -18,6 +18,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 import java.io.File;
+import java.text.DecimalFormat;
 
 public class MyBidsController {
 
@@ -48,6 +49,8 @@ public class MyBidsController {
 
     private String selectedAuctionId = null;
     private String selectedStatus = null;
+    private HBox currentlySelectedCard = null;
+    private final DecimalFormat priceFormatter = new DecimalFormat("#,###");
 
     @FXML
     public void initialize() {
@@ -61,6 +64,8 @@ public class MyBidsController {
         cbStatusFilter.getItems().addAll("Tất cả", "Đang diễn ra", "Đã thắng", "Đã thua");
         cbStatusFilter.getSelectionModel().selectFirst();
         cbStatusFilter.setOnAction(e -> filterBidList());
+
+        vboxBidList.getStyleClass().add("bid-list-container");
 
         SocketService.getInstance().setMessageHandler(this::handleServerResponse);
         SocketService.getInstance().send("GET_BID_HISTORY");
@@ -81,6 +86,7 @@ public class MyBidsController {
 
     private void loadBidList(String message) {
         vboxBidList.getChildren().clear();
+        currentlySelectedCard = null;
         String[] parts = message.split("\\|");
         for (int i = 1; i < parts.length; i++) {
             String record = parts[i];
@@ -88,12 +94,11 @@ public class MyBidsController {
                 continue;
             }
             String[] data = record.split("#");
-            // data: id, name, type, image, startPrice, currentPrice, userBid, status
             if (data.length >= 8) {
                 HBox card = createBidCard(data);
                 vboxBidList.getChildren().add(card);
                 if (data[0].equals(this.selectedAuctionId)) {
-                    showBidDetail(data);
+                    showBidDetail(data, card);
                 }
             }
         }
@@ -140,12 +145,13 @@ public class MyBidsController {
         VBox info = new VBox(5);
         Label lblName = new Label(productName);
         lblName.getStyleClass().add("bid-product-name");
+        lblName.setMaxWidth(200); // Giới hạn chiều rộng tên sản phẩm
+        lblName.setTextOverrun(OverrunStyle.ELLIPSIS);
 
         Label lblType = new Label(itemType);
         lblType.getStyleClass().add("bid-product-type");
 
         Label lblStatus = new Label();
-
         switch (status) {
             case "ACTIVE":
                 lblStatus.setText("Đang diễn ra");
@@ -168,24 +174,32 @@ public class MyBidsController {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // Cột giá
+        // Cột giá (giới hạn maxWidth để tránh giãn card)
         VBox priceCol = new VBox(3);
         priceCol.setAlignment(Pos.CENTER_RIGHT);
+        priceCol.setMaxWidth(120); // Đủ chỗ cho giá trị lớn
 
-        Label lblCurrent = new Label(currentPrice + " đ");
+        String formattedCurrentPrice = priceFormatter.format(Double.parseDouble(currentPrice));
+        Label lblCurrent = new Label(formattedCurrentPrice + " đ");
         lblCurrent.getStyleClass().add("bid-current-price");
+        lblCurrent.setMaxWidth(110);
+        lblCurrent.setTextOverrun(OverrunStyle.ELLIPSIS);
 
-        Label lblYourBidSmall = new Label("Bạn: " + userBid + " đ");
+        String formattedUserBid = priceFormatter.format(Double.parseDouble(userBid));
+        Label lblYourBidSmall = new Label("Bạn: " + formattedUserBid + " đ");
         lblYourBidSmall.getStyleClass().add("bid-your-price");
+        lblYourBidSmall.setMaxWidth(110);
+        lblYourBidSmall.setTextOverrun(OverrunStyle.ELLIPSIS);
 
         priceCol.getChildren().addAll(lblCurrent, lblYourBidSmall);
 
         card.getChildren().addAll(imageBox, info, spacer, priceCol);
-        card.setOnMouseClicked(e -> showBidDetail(data));
+        card.setOnMouseClicked(e -> showBidDetail(data, card));
+
         return card;
     }
 
-    private void showBidDetail(String[] data) {
+    private void showBidDetail(String[] data, HBox card) {
         String auctionId = data[0];
         String productName = data[1];
         String itemType = data[2];
@@ -200,9 +214,9 @@ public class MyBidsController {
 
         lblDetailName.setText(productName);
         lblDetailCategory.setText(itemType);
-        lblDetailStartPrice.setText(startPrice + " đ");
-        lblDetailCurrentPrice.setText(currentPrice + " đ");
-        lblDetailYourBid.setText(userBid.equals("0") ? "---" : userBid + " đ");
+        lblDetailStartPrice.setText(priceFormatter.format(Double.parseDouble(startPrice)) + " đ");
+        lblDetailCurrentPrice.setText(priceFormatter.format(Double.parseDouble(currentPrice)) + " đ");
+        lblDetailYourBid.setText(userBid.equals("0") ? "---" : priceFormatter.format(Double.parseDouble(userBid)) + " đ");
 
         // Ảnh chi tiết
         imgDetailImage.setVisible(false);
@@ -239,13 +253,18 @@ public class MyBidsController {
                 lblDetailStatus.getStyleClass().setAll("detail-status-default");
                 btnEnterRoom.setVisible(false);
         }
+
+        // Cập nhật highlight (không thay đổi kích thước)
+        if (currentlySelectedCard != null) {
+            currentlySelectedCard.getStyleClass().remove("card-selected");
+        }
+        card.getStyleClass().add("card-selected");
+        currentlySelectedCard = card;
     }
 
     @FXML
     void handleEnterBidRoom(ActionEvent event) {
-        if (selectedAuctionId == null) {
-            return;
-        }
+        if (selectedAuctionId == null) return;
         if ("ACTIVE".equals(selectedStatus)) {
             UserSession.getInstance().setSelectedAuctionId(Integer.parseInt(selectedAuctionId));
             SceneSwitcher.getInstance()
@@ -269,18 +288,10 @@ public class MyBidsController {
                 String status = statusLabel.getText();
                 boolean show = false;
                 switch (filter) {
-                    case "Tất cả":
-                        show = true;
-                        break;
-                    case "Đang diễn ra":
-                        show = "Đang diễn ra".equals(status);
-                        break;
-                    case "Đã thắng":
-                        show = "Đã thắng".equals(status);
-                        break;
-                    case "Đã thua":
-                        show = "Đã thua".equals(status);
-                        break;
+                    case "Tất cả": show = true; break;
+                    case "Đang diễn ra": show = "Đang diễn ra".equals(status); break;
+                    case "Đã thắng": show = "Đã thắng".equals(status); break;
+                    case "Đã thua": show = "Đã thua".equals(status); break;
                 }
                 card.setVisible(show);
                 card.setManaged(show);
@@ -288,26 +299,10 @@ public class MyBidsController {
         });
     }
 
-    // Điều hướng sidebar
-    @FXML
-    void handleGoToAccount(ActionEvent e) {
-        switchTo("/fxml/account.fxml", e);
-    }
-
-    @FXML
-    void handleGoToAuction(ActionEvent e) {
-        switchTo("/fxml/main_auction.fxml", e);
-    }
-
-    @FXML
-    void handleGoToProducts(ActionEvent e) {
-        switchTo("/fxml/product_management.fxml", e);
-    }
-
-    @FXML
-    void handleGoToHelp(ActionEvent e) {
-        switchTo("/fxml/help.fxml", e);
-    }
+    @FXML void handleGoToAccount(ActionEvent e) { switchTo("/fxml/account.fxml", e); }
+    @FXML void handleGoToAuction(ActionEvent e) { switchTo("/fxml/main_auction.fxml", e); }
+    @FXML void handleGoToProducts(ActionEvent e) { switchTo("/fxml/product_management.fxml", e); }
+    @FXML void handleGoToHelp(ActionEvent e) { switchTo("/fxml/help.fxml", e); }
 
     private void switchTo(String fxml, ActionEvent e) {
         SceneSwitcher.getInstance().switchTo(fxml, (Node) e.getSource(), "");
