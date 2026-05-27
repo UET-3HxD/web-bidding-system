@@ -71,7 +71,7 @@ CREATE TABLE `items` (
                          `description` text,
                          `starting_price` decimal(15,2) DEFAULT NULL,
                          `image_path` text,
-                         `item_type` enum('ELECTRONIC','ART','VEHICLE') NOT NULL,
+                         `item_type` enum('ELECTRONIC','ART','VEHICLE','OTHER') NOT NULL,
                          `status` enum('WAITING','APPROVED','LIVE','SOLD','REJECTED') DEFAULT 'WAITING',
                          `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
                          PRIMARY KEY (`id`),
