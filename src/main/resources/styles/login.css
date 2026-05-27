@@ -155,3 +155,13 @@
     -fx-background-color: linear-gradient(to right, #38BDF8, #2563EB);
     -fx-background-radius: 10px;
 }
+/* --- Cấu hình Message Đăng nhập/Đăng ký --- */
+.msg-success {
+    -fx-text-fill: #2ecc71;
+    -fx-font-weight: bold;
+}
+
+.msg-error {
+    -fx-text-fill: #e74c3c;
+    -fx-font-weight: bold;
+}

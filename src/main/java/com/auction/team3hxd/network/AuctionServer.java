@@ -1,0 +1,100 @@
+package com.auction.team3hxd.network;
+
+import com.auction.team3hxd.util.DBConnection;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+public class AuctionServer {
+    private static final int PORT = 5000;
+    private static List<ClientHandler> clients = new CopyOnWriteArrayList<>();
+    private static double currentPrice = 0;
+    private static String topBidder = "None";
+    public static final long START_TIME = System.currentTimeMillis();
+    private static int timeLeft = 300;
+    private static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    public static void startCountdown() {
+        scheduler.scheduleAtFixedRate(() -> {
+            if (timeLeft > 0) {
+                timeLeft--;
+                broadcast("TIME:" + timeLeft);
+            } else {
+                stopAuction();
+            }
+        }, 0, 1, TimeUnit.SECONDS);
+    }
+
+    private static void stopAuction() {
+        scheduler.shutdown();
+        broadcast("END:Winner is " + topBidder + " with " + currentPrice + "$");
+        System.out.println("Auction ended!");
+    }
+
+    public static void main(String[] args) {
+        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+            System.out.println("Auction Server is running on port " + PORT);
+            System.out.flush(); // đảm bảo hiện ngay
+            new com.auction.team3hxd.network.AuctionTimeoutTask().startChecking();
+            while (true) {
+                System.out.println("Waiting for connection..."); // debug
+                System.out.flush();
+                Socket clientSocket = serverSocket.accept();
+                System.out.println("New member joined: " + clientSocket);
+                System.out.flush();
+
+                ClientHandler clientHandler = new ClientHandler(clientSocket);
+                clients.add(clientHandler);
+                new Thread(clientHandler).start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static synchronized void handleBid(String bidderName, double bidAmount) {
+        if (bidAmount > currentPrice && timeLeft > 0) {
+            currentPrice = bidAmount;
+            topBidder = bidderName;
+
+            if (timeLeft < 10) {
+                timeLeft += 30;
+                System.out.println("Time extended due to late bid!");
+            }
+
+            broadcast("NEW_BID:" + bidderName + ":" + currentPrice);
+        }
+        // các trường hợp khác có thể thêm sau
+    }
+    public void startAutoCloseTask() {
+        scheduler.scheduleAtFixedRate(() -> {
+            System.out.println(">>> Đang quét và đóng các phiên đấu giá hết hạn...");
+            try (Connection conn = DBConnection.getConnection();
+                    PreparedStatement ps = conn.prepareStatement(
+                            "UPDATE auction_sessions SET status = 'FINISHED' " +
+                                 "WHERE status = 'ACTIVE' AND end_time <= NOW()")) {
+
+                int rows = ps.executeUpdate();
+                if (rows > 0) {
+                    System.out.println(">>> Đã đóng " + rows + " phiên đấu giá.");
+                    // (Nâng cao) Có thể gửi thông báo cho các Client để cập nhật UI
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, 0, 1, TimeUnit.MINUTES); // Chạy định kỳ mỗi 1 phút
+    }
+    public static void broadcast(String message) {
+        for (ClientHandler client : clients) {
+            client.sendMessage(message);
+        }
+    }
+}

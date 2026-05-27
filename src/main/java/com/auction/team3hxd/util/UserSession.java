@@ -1,0 +1,79 @@
+package com.auction.team3hxd.util;
+
+import com.auction.team3hxd.dao.UserDAO;
+
+/**
+ * Lớp tiện ích Singleton lưu trữ thông tin phiên làm việc của người dùng.
+ * Dùng để biết ai đang đăng nhập, vai trò, trạng thái online trên client.
+ */
+public class UserSession {
+    private static UserSession instance;
+    private String username;
+    private String role;
+    private String email;
+    private boolean loggedIn;
+    private int selectedAuctionId = -1;
+    private int id = 0;
+    private final UserDAO userDAO = new UserDAO();
+    private UserSession() {}
+
+    public static synchronized UserSession getInstance() {
+        if (instance == null) {
+            instance = new UserSession();
+        }
+        return instance;
+    }
+
+    /**
+     * Gọi khi đăng nhập thành công.
+     *
+     * @param username tên đăng nhập
+     * @param role vai trò (BIDDER/SELLER/ADMIN)
+     */
+    public void login(String username, String email, String role) {
+        this.username = username;
+        this.role = role;
+        this.email = email;
+        this.loggedIn = true;
+        this.id = userDAO.getUserByUsername(username).getId();
+    }
+
+    /**
+     * Đăng xuất, xóa thông tin.
+     */
+    public void logout() {
+        this.username = null;
+        this.role = null;
+        this.email = null;
+        this.loggedIn = false;
+        this.selectedAuctionId = -1;
+        this.id = 0;
+    }
+
+    public void setSelectedAuctionId(int id) { this.selectedAuctionId = id; }
+    public int getSelectedAuctionId() { return selectedAuctionId; }
+
+    public boolean isLoggedIn() {
+        return loggedIn;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String newEmail) {
+        this.email = newEmail;
+    }
+
+    public int getId() {
+        return id;
+    }
+}
