@@ -22,6 +22,10 @@ public class ItemService {
             case "VEHICLE":
                 newItem = new Vehicle(sellerId, name, desc, price, path);
                 break;
+            case "OTHER":
+                // Mặc định dùng Electronic cho các loại khác
+                newItem = new Electronic(sellerId, name, desc, price, path);
+                break;
             default:
                 return -1;
         }

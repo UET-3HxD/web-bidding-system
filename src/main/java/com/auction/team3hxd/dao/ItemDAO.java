@@ -15,7 +15,7 @@ public class ItemDAO {
     public Item findById(int id) {
         String sql = "SELECT * FROM items WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -35,7 +35,7 @@ public class ItemDAO {
                         "VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setInt(1, item.getSellerId());
             pstmt.setString(2, item.getName());
@@ -72,7 +72,7 @@ public class ItemDAO {
                 "  ELSE 6 END, id DESC";
 
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, sellerId);
             ResultSet rs = pstmt.executeQuery();
@@ -81,7 +81,6 @@ public class ItemDAO {
                 String type = rs.getString("item_type");
                 Item item = null;
 
-                // Bóc tách dữ liệu gốc của bạn (Giữ nguyên 100%)
                 int id = rs.getInt("id");
                 String name = rs.getString("product_name");
                 String desc = rs.getString("description");
@@ -90,7 +89,6 @@ public class ItemDAO {
                 String status = rs.getString("status");
                 LocalDateTime createdAt = rs.getObject("created_at", LocalDateTime.class);
 
-                // Khởi tạo các Sub-class tương ứng dựa trên item_type
                 switch (type) {
                     case "ELECTRONIC":
                         item = new Electronic(id, sellerId, name, desc, price, path, status, createdAt);
@@ -100,6 +98,9 @@ public class ItemDAO {
                         break;
                     case "VEHICLE":
                         item = new Vehicle(id, sellerId, name, desc, price, path, status, createdAt);
+                        break;
+                    case "OTHER":
+                        item = new Electronic(id, sellerId, name, desc, price, path, status, createdAt);
                         break;
                 }
                 if (item != null) {
@@ -120,7 +121,7 @@ public class ItemDAO {
                         "WHERE id = ? AND status NOT IN ('LIVE', 'SOLD')";
 
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setString(1, name);
             pstmt.setDouble(2, price);
@@ -140,7 +141,7 @@ public class ItemDAO {
     public int getOwnerIdByItemId(int itemId) {
         String sql = "SELECT seller_id FROM items WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, itemId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -157,7 +158,7 @@ public class ItemDAO {
         String sql = "DELETE FROM items WHERE id = ? AND status NOT IN ('LIVE', 'SOLD')";
 
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, itemId);
             return pstmt.executeUpdate() > 0;
@@ -168,17 +169,12 @@ public class ItemDAO {
     }
 
     // ==================== ADMIN: Lấy sản phẩm theo trạng thái ====================
-
-    /**
-     * Lấy danh sách sản phẩm theo trạng thái (WAITING, APPROVED, REJECTED, ACTIVE...). JOIN với bảng
-     * users để lấy tên người bán.
-     */
     public List<Item> getItemsByStatus(String status) {
         List<Item> list = new ArrayList<>();
         String sql = "SELECT * FROM items WHERE status = ?";
 
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
             ResultSet rs = ps.executeQuery();
 
@@ -205,6 +201,9 @@ public class ItemDAO {
                     case "VEHICLE":
                         item = new Vehicle(id, sellerId, name, desc, price, path, itemStatus, createdAt);
                         break;
+                    case "OTHER":
+                        item = new Electronic(id, sellerId, name, desc, price, path, itemStatus, createdAt);
+                        break;
                     default:
                         item = new Electronic(id, sellerId, name, desc, price, path, itemStatus, createdAt);
                 }
@@ -220,14 +219,10 @@ public class ItemDAO {
     }
 
     // ==================== ADMIN: Cập nhật trạng thái sản phẩm ====================
-
-    /**
-     * Cập nhật trạng thái cho sản phẩm (APPROVED, REJECTED...).
-     */
     public boolean updateItemStatus(int itemId, String newStatus) {
         String sql = "UPDATE items SET status = ? WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, newStatus);
             ps.setInt(2, itemId);
             return ps.executeUpdate() > 0;
@@ -252,6 +247,9 @@ public class ItemDAO {
             case "ART":
                 item = new Art();
                 break;
+            case "OTHER":
+                item = new Electronic();
+                break;
             default:
                 item = new Electronic();
                 break;
@@ -272,12 +270,11 @@ public class ItemDAO {
         String sql = "SELECT COUNT(*) FROM items WHERE status = 'WAITING';";
         int count = 0;
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql);
-                ResultSet rs = ps.executeQuery()) {
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 count = rs.getInt(1);
             }
-
         } catch (SQLException e) {
             System.err.println(">>> [LỖI DB] Không thể đếm người dùng trực tuyến: " + e.getMessage());
             e.printStackTrace();
