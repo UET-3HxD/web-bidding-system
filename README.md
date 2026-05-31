@@ -68,7 +68,7 @@ src/test/java/com/auction/team3hxd/
 - Đã cài đặt **Maven**.
 - Đã cài đặt **MySQL Server** và **MySQL Workbench CE** (Phiên bản 8.0)
 
-### Các bước thực hiện:
+### I. Các bước build và chạy file .jar:
 **1. Clone Repository:**
 
     git clone https://github.com/UET-3HxD/web-bidding-system.git
@@ -78,7 +78,7 @@ src/test/java/com/auction/team3hxd/
 
 * Import file `schema.sql` đính kèm vào hệ quản trị MySQL.
 * Mở file `DBConnection.java` nằm tại thư mục gốc của dự án.
-* Cập nhật lại giá trị của `USER` và `PASS` cho khớp với tài khoản MySQL trên máy tính của Thầy/Cô.
+* Cập nhật lại giá trị của `USER` và `PASS` cho khớp với tài khoản MySQL trên máy tính.
 
 **3. Biên dịch và Đóng gói (Build Fat JAR):**
 
@@ -93,7 +93,22 @@ Sau khi quá trình build báo `BUILD SUCCESS`, di chuyển vào thư mục `tar
     cd target
     java -jar <tên-file-fat-jar-của-nhóm>.jar
 ---
+### II. Tải trực tiếp và chạy file .jar (prebuilt):
+**1. Tải về bản release:**
+* Tải về phiên bản chính thức tại đây:
 
+**2. Cấu hình Cơ sở dữ liệu:**
+* Giải nén file .zip vừa tải về
+* Import file `schema.sql` đính kèm vào hệ quản trị MySQL.
+* Mở file `config.properties` nằm tại thư mục gốc của dự án.
+* Cập nhật lại giá trị của `db.user` và `db.password` cho khớp với tài khoản MySQL trên máy tính.
+
+**3. Chạy ứng dụng:**
+
+Mở terminal tại thư mục có chứa file .jar và chạy lệnh: 
+
+    java -jar <tên-file-fat-jar-của-nhóm>.jar
+---
 ## 📅 Lộ trình phát triển (Roadmap)
 - [x] **Tuần 1-2:** Thiết lập Repository, cấu trúc Maven, thiết kế Class Diagram sơ bộ.
 - [x] **Tuần 3-5:** Xây dựng giao diện Login/Register và kết nối Socket cơ bản.
