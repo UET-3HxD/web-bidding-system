@@ -137,16 +137,6 @@ Khi muốn chạy song song nhiều cửa sổ một lúc, mở cửa sổ termi
 ---
 *Dự án này tuân thủ các quy định về học thuật và cam kết đóng góp mã nguồn minh bạch trên GitHub.*
 
-## Danh sách chức năng đã hoàn thành
-- Đăng nhập, đăng ký và quản lý người dùng
-- Đăng ký tài khoảng admin để quản lý người dùng và xét duyệt sản phẩm
-- Tạo phiên đấu giá
-- Tham giá đấu giá và kéo dài phiên đấu giá
-- Cập nhật trạng thái đấu giá theo thời gian thực cho client
-- Hỗ trợ tạo sản phẩm theo danh muc : "ART" , "VEHICLE" , "ELECTRONIC"
-- Hiển thị biểu đồ đường giá
-- Cung cấp giao diện JavaFX cho client và admin
-- Lưu trữ thông tin bằng MySQL, thêm/sửa/xóa thông tin qua các lớp DAO
 
 ## Link báo cáo PDF
 https://drive.google.com/file/d/1tTjDG4PeOCwbE2qCR5myq7rCZjWzXKph/view?usp=sharing
