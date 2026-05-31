@@ -17,8 +17,8 @@ Dưới đây là danh sách các thành viên và phân công nhiệm vụ cụ
 | Họ và Tên              | MSSV     | Vai trò chính | GitHub                                     |
 |:-----------------------|:---------| :--- |:-------------------------------------------|
 | **Nguyễn Minh Đức**    | 25021734 | **Team Leader**, Socket, Concurrency | [@ducnm-cs](https://github.com/ducnm-cs)   |
-| **Trần Lê Việt Hoàng**      | 25021778 | UI/UX Designer (JavaFX, CSS) | [@vhoang0502](https://github.com/vhoang0502) |
-| **ĐInh Quốc Huy** | 25021794 | OOP Modeling, Logic Nghiệp vụ | [@DqHuY07](https://github.com/DqHuY07) |
+| **Trần Lê Việt Hoàng** | 25021778 | UI/UX Designer (JavaFX, CSS) | [@vhoang0502](https://github.com/vhoang0502) |
+| **Đinh Quốc Huy**      | 25021794 | OOP Modeling, Logic Nghiệp vụ | [@DqHuY07](https://github.com/DqHuY07) |
 | **Phạm Huy Hiệu**      | 25021771 | Unit Testing, Auto-bidding Logic | [@h-hieu-code](https://github.com/h-hieu-coder) |
 
 ---
