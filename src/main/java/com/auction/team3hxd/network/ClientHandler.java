@@ -35,7 +35,7 @@ public class ClientHandler implements Runnable, ClientObserver {
     private AuctionDAO auctionDAO = new AuctionDAO();
     private AuctionService auctionService = new AuctionService();
     private int currentUserId = -1;
-    public static final Map<Integer, ClientHandler> activeClients = new ConcurrentHashMap<>();
+    public static final Map<Integer, ClientHandler> ACTIVE_CLIENTS = new ConcurrentHashMap<>();
 
     public ClientHandler(Socket socket) {
         this.socket = socket;
@@ -361,7 +361,7 @@ public class ClientHandler implements Runnable, ClientObserver {
                                 boolean success = userDAO.updateRole(targetUserId, "BANNED");
                                 if (success) {
                                     out.println("ADMIN_BAN_SUCCESS|Đã khóa tài khoản thành công.");
-                                    ClientHandler targetClient = activeClients.get(targetUserId);
+                                    ClientHandler targetClient = ACTIVE_CLIENTS.get(targetUserId);
                                     if (targetClient != null) {
                                         targetClient.sendKickMessage();
                                     }
@@ -441,11 +441,11 @@ public class ClientHandler implements Runnable, ClientObserver {
     }
 
     public static void addActiveClient(int userId, ClientHandler handler) {
-        activeClients.put(userId, handler);
+        ACTIVE_CLIENTS.put(userId, handler);
     }
 
     public static void removeActiveClient(int userId) {
-        activeClients.remove(userId);
+        ACTIVE_CLIENTS.remove(userId);
     }
 
     public void sendKickMessage() {

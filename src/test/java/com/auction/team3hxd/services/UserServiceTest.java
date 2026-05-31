@@ -27,10 +27,10 @@ class UserServiceTest {
         fieldDAO.setAccessible(true);
         fieldDAO.set(userService, mockUserDAO);
 
-        Field fieldOnline = UserService.class.getDeclaredField("onlineUsers");
+        Field fieldOnline = UserService.class.getDeclaredField("ONLINE_USERS");
         fieldOnline.setAccessible(true);
-        Set<String> onlineUsers = (Set<String>) fieldOnline.get(null);
-        onlineUsers.clear();
+        Set<String> ONLINE_USERS = (Set<String>) fieldOnline.get(null);
+        ONLINE_USERS.clear();
     }
 
     @Test
