@@ -1,7 +1,7 @@
 markdown
 # 🚀 Web Bidding System - Online Auction Platform
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/UET-3HxD/web-bidding-system/maven.yml?branch=main)](https://github.com/UET-3HxD/web-bidding-system/actions)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/UET-3hxd/web-bidding-system/maven.yml?branch=main)](https://github.com/UET-3hxd/web-bidding-system/actions)
 [![Java Version](https://img.shields.io/badge/Java-25-orange.svg)](https://www.oracle.com/java/technologies/javase/jdk25-archive-downloads.html)
 [![Framework](https://img.shields.io/badge/UI-JavaFX%2021-blue.svg)](https://openjfx.io/)
 [![Build Tool](https://img.shields.io/badge/Build-Maven-critical.svg)](https://maven.apache.org/)
@@ -17,9 +17,9 @@ Dưới đây là danh sách các thành viên và phân công nhiệm vụ cụ
 | Họ và Tên              | MSSV     | Vai trò chính | GitHub                                     |
 |:-----------------------|:---------| :--- |:-------------------------------------------|
 | **Nguyễn Minh Đức**    | 25021734 | **Team Leader**, Socket, Concurrency | [@ducnm-cs](https://github.com/ducnm-cs)   |
-| **Trần Lê Việt Hoàng**      | 25021771 | UI/UX Designer (JavaFX, CSS) | [@vhoang0502](https://github.com/vhoang0502) |
-| **ĐInh Quốc Huy** | 25021778 | OOP Modeling, Logic Nghiệp vụ | [@DqHuY07](https://github.com/DqHuY07) |
-| **Phạm Huy Hiệu**      | 25021794 | Unit Testing, Auto-bidding Logic | [@h-hieu-code](https://github.com/h-hieu-coder) |
+| **Trần Lê Việt Hoàng**      | 25021778 | UI/UX Designer (JavaFX, CSS) | [@vhoang0502](https://github.com/vhoang0502) |
+| **ĐInh Quốc Huy** | 25021794 | OOP Modeling, Logic Nghiệp vụ | [@DqHuY07](https://github.com/DqHuY07) |
+| **Phạm Huy Hiệu**      | 25021771 | Unit Testing, Auto-bidding Logic | [@h-hieu-code](https://github.com/h-hieu-coder) |
 
 ---
 
@@ -37,16 +37,23 @@ Dưới đây là danh sách các thành viên và phân công nhiệm vụ cụ
 ## 📂 Cấu trúc thư mục (MVC Architecture)
 Dự án được tổ chức theo mô hình **Model-View-Controller** để đảm bảo tính dễ bảo trì và mở rộng:
 ```text
-src/main/java/com/auction/team3HxD/
+src/main/java/com/auction/team3hxd/
  ├── model/          # Thực thể: User, Item, Bid, Auction...
  ├── controller/     # Điều phối logic giữa UI và Model
+ ├── util/           # Tiện tích (DBConnection, Config,...)
  ├── network/        # Xử lý Socket (Server/Client Handlers)
  ├── services/       # Logic nghiệp vụ: Auto-bid, Validator...
  └── App.java        # Điểm khởi chạy ứng dụng (Main)
 
 src/main/resources/
  ├── fxml/           # Các file giao diện thiết kế từ Scene Builder
+ ├── sql/               
+ ├── config/
  └── styles/         # CSS tùy chỉnh cho JavaFX
+ 
+src/test/java/com/auction/team3hxd/
+ ├── services/       # Kiểm thử chức năng của services và util
+ ├── util/
 ```
 
 ---
@@ -59,7 +66,7 @@ src/main/resources/
 ### Các bước thực hiện:
 1. **Clone Repository:**
    ```bash
-   git clone [https://github.com/UET-3HxD/web-bidding-system.git](https://github.com/UET-3HxD/web-bidding-system.git)
+   git clone [https://github.com/UET-3hxd/web-bidding-system.git](https://github.com/UET-3hxd/web-bidding-system.git)
    cd web-bidding-system
    ```
 
@@ -88,3 +95,18 @@ src/main/resources/
 
 ---
 *Dự án này tuân thủ các quy định về học thuật và cam kết đóng góp mã nguồn minh bạch trên GitHub.*
+
+## Danh sách chức năng đã hoàn thành
+- Đăng nhập, đăng ký và quản lý người dùng
+- Đăng ký tài khoảng admin để quản lý người dùng và xét duyệt sản phẩm
+- Tạo phiên đấu giá
+- Tham giá đấu giá và kéo dài phiên đấu giá
+- Cập nhật trạng thái đấu giá theo thời gian thực cho client
+- Hỗ trợ tạo sản phẩm theo danh muc : "ART" , "VEHICLE" , "ELECTRONIC"
+- Hiển thị biểu đồ đường giá
+- Cung cấp giao diện JavaFX cho client và admin
+- Lưu trữ thông tin bằng MySQL, thêm/sửa/xóa thông tin qua các lớp DAO
+
+## Link báo cáo PDF
+https://drive.google.com/file/d/1tTjDG4PeOCwbE2qCR5myq7rCZjWzXKph/view?usp=sharing
+## Video demo chức năng hệ thống 
