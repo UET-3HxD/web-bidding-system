@@ -102,11 +102,11 @@ Dự án sử dụng plugin `maven-shade-plugin` để dọn dẹp và đóng g�
 
 Sau khi quá trình build báo `BUILD SUCCESS`, di chuyển vào thư mục `target` và chạy file `.jar` (file có dung lượng lớn nhất) và mở cửa sổ terminal tại đó: 
 
-    java -jar web-bidding-system-1.0.jar
+    java -jar web-bidding-system-1.0-SNAPSHOT.jar
     
 Khi muốn chạy song song nhiều cửa sổ một lúc, mở cửa sổ terminal khác và chạy lệnh:
 
-    java -jar web-bidding-system-1.0.jar --client-only
+    java -jar web-bidding-system-1.0-SNAPSHOT.jar --client-only
 ---
 ### II. Tải trực tiếp và chạy file .jar (prebuilt):
 **1. Tải về bản release:**
@@ -122,7 +122,7 @@ Khi muốn chạy song song nhiều cửa sổ một lúc, mở cửa sổ termi
 
 Nháy đúp vào file .jar hoặc mở terminal tại thư mục có chứa file .jar và chạy lệnh: 
 
-    java -jar <tên-file-fat-jar-của-nhóm>.jar
+    java -jar web-bidding-system-1.0.jar
 
 Khi muốn chạy song song nhiều cửa sổ một lúc, mở cửa sổ terminal khác và chạy lệnh:
 
