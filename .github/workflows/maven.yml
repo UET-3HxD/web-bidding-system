@@ -25,6 +25,8 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
           cache: maven
+      - name : Run checkstyle
+        run: mvn checkstyle:check
 
       - name: Build dự án bằng Maven (Windows & macOS)
         if: matrix.os != 'ubuntu-latest'

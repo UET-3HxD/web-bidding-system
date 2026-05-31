@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class UserService {
     private final UserDAO userDAO = new UserDAO();
-    private static final Set<String> onlineUsers = ConcurrentHashMap.newKeySet();
+    private static final Set<String> ONLINE_USERS = ConcurrentHashMap.newKeySet();
     private AuctionDAO auctionDAO = new AuctionDAO();
 
     public synchronized String register(String username, String password, String email) {
@@ -47,11 +47,11 @@ public class UserService {
             return "LOGIN_ERR_INVALID";
 
         }
-        if (onlineUsers.contains(username)) {
+        if (ONLINE_USERS.contains(username)) {
             return "LOGIN_ERR_ALREADY_ONLINE";
         }
 
-        onlineUsers.add(username);
+        ONLINE_USERS.add(username);
         // trả về thành công kèm role
         return "LOGIN_OK|" + user.getRole().name() + "|" + user.getEmail();
     }
@@ -84,7 +84,7 @@ public class UserService {
     }
     public void logout(String username) {
         if (username != null) {
-            onlineUsers.remove(username);
+            ONLINE_USERS.remove(username);
         }
     }
 
