@@ -43,7 +43,11 @@ src/main/java/com/auction/team3hxd/
  ├── util/           # Tiện tích (DBConnection, Config,...)
  ├── network/        # Xử lý Socket (Server/Client Handlers)
  ├── services/       # Logic nghiệp vụ: Auto-bid, Validator...
- └── App.java        # Điểm khởi chạy ứng dụng (Main)
+ ├── dao/            # truy vấn database
+ ├── dto/            # class wrapper các dữ liệu được truy vấn
+ ├── Main.java       # Điểm khởi chạy ứng dụng (Main)
+ ├── exception/      # Các lỗi trả về tùy chỉnh
+ └── Launcher.java   # 1-click file (chạy cả server và app) 
 
 src/main/resources/
  ├── fxml/           # Các file giao diện thiết kế từ Scene Builder
@@ -62,36 +66,39 @@ src/test/java/com/auction/team3hxd/
 ### Yêu cầu hệ thống:
 - Đã cài đặt **JDK 25**.
 - Đã cài đặt **Maven**.
+- Đã cài đặt **MySQL Server** và **MySQL Workbench CE** (Phiên bản 8.0)
 
 ### Các bước thực hiện:
-1. **Clone Repository:**
-   ```bash
-   git clone [https://github.com/UET-3hxd/web-bidding-system.git](https://github.com/UET-3hxd/web-bidding-system.git)
-   cd web-bidding-system
-   ```
+**1. Clone Repository:**
 
-2. **Biên dịch dự án:**
-   ```bash
-   mvn clean install
-   ```
+    git clone https://github.com/UET-3HxD/web-bidding-system.git
+    cd web-bidding-system
 
-3. **Chạy ứng dụng:**
-    - **Khởi động Server:**
-      ```bash
-      mvn exec:java -Dexec.mainClass="com.auction.ServerApp"
-      ```
-    - **Khởi động Client:**
-      ```bash
-      mvn javafx:run
-      ```
+**2. Cấu hình Cơ sở dữ liệu:**
 
+* Import file `schema.sql` đính kèm vào hệ quản trị MySQL.
+* Mở file `DBConnection.java` nằm tại thư mục gốc của dự án.
+* Cập nhật lại giá trị của `USER` và `PASS` cho khớp với tài khoản MySQL trên máy tính của Thầy/Cô.
+
+**3. Biên dịch và Đóng gói (Build Fat JAR):**
+
+Dự án sử dụng plugin `maven-shade-plugin` để dọn dẹp và đóng gói toàn bộ mã nguồn cùng các thư viện phụ thuộc vào một file thực thi duy nhất. Vui lòng chạy lệnh sau:
+
+    mvn clean package
+
+**4. Chạy ứng dụng:**
+
+Sau khi quá trình build báo `BUILD SUCCESS`, di chuyển vào thư mục `target` và chạy file `.jar` (file có dung lượng lớn nhất). 
+
+    cd target
+    java -jar <tên-file-fat-jar-của-nhóm>.jar
 ---
 
 ## 📅 Lộ trình phát triển (Roadmap)
 - [x] **Tuần 1-2:** Thiết lập Repository, cấu trúc Maven, thiết kế Class Diagram sơ bộ.
-- [ ] **Tuần 3-5:** Xây dựng giao diện Login/Register và kết nối Socket cơ bản.
-- [ ] **Tuần 6-8:** Hiện thực hóa logic đấu giá, Auto-bid và xử lý tranh chấp giá (Concurrency).
-- [ ] **Tuần 9-10:** Hoàn thiện Unit Test, tối ưu hiệu năng và viết báo cáo cuối kỳ.
+- [x] **Tuần 3-5:** Xây dựng giao diện Login/Register và kết nối Socket cơ bản.
+- [x] **Tuần 6-8:** Hiện thực hóa logic đấu giá, Auto-bid và xử lý tranh chấp giá (Concurrency).
+- [x] **Tuần 9-10:** Hoàn thiện Unit Test, tối ưu hiệu năng và viết báo cáo cuối kỳ.
 
 ---
 *Dự án này tuân thủ các quy định về học thuật và cam kết đóng góp mã nguồn minh bạch trên GitHub.*
