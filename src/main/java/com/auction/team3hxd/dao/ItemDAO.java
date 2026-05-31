@@ -15,7 +15,7 @@ public class ItemDAO {
     public Item findById(int id) {
         String sql = "SELECT * FROM items WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -35,7 +35,7 @@ public class ItemDAO {
                         "VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setInt(1, item.getSellerId());
             pstmt.setString(2, item.getName());
@@ -72,7 +72,7 @@ public class ItemDAO {
                 "  ELSE 6 END, id DESC";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, sellerId);
             ResultSet rs = pstmt.executeQuery();
@@ -121,7 +121,7 @@ public class ItemDAO {
                         "WHERE id = ? AND status NOT IN ('LIVE', 'SOLD')";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setString(1, name);
             pstmt.setDouble(2, price);
@@ -141,7 +141,7 @@ public class ItemDAO {
     public int getOwnerIdByItemId(int itemId) {
         String sql = "SELECT seller_id FROM items WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, itemId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -158,7 +158,7 @@ public class ItemDAO {
         String sql = "DELETE FROM items WHERE id = ? AND status NOT IN ('LIVE', 'SOLD')";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, itemId);
             return pstmt.executeUpdate() > 0;
@@ -174,7 +174,7 @@ public class ItemDAO {
         String sql = "SELECT * FROM items WHERE status = ?";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
             ResultSet rs = ps.executeQuery();
 
@@ -222,7 +222,7 @@ public class ItemDAO {
     public boolean updateItemStatus(int itemId, String newStatus) {
         String sql = "UPDATE items SET status = ? WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, newStatus);
             ps.setInt(2, itemId);
             return ps.executeUpdate() > 0;
@@ -270,8 +270,8 @@ public class ItemDAO {
         String sql = "SELECT COUNT(*) FROM items WHERE status = 'WAITING';";
         int count = 0;
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 count = rs.getInt(1);
             }
