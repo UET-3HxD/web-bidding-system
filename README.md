@@ -105,7 +105,7 @@ Sau khi quá trình build báo `BUILD SUCCESS`, di chuyển vào thư mục `tar
 
 **3. Chạy ứng dụng:**
 
-Mở terminal tại thư mục có chứa file .jar và chạy lệnh: 
+Nháy đúp vào file .jar hoặc mở terminal tại thư mục có chứa file .jar và chạy lệnh: 
 
     java -jar <tên-file-fat-jar-của-nhóm>.jar
 ---
