@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: Cross-Platform Build & Test
 
 on:
   push:
@@ -8,20 +8,38 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: Build & Test trên ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
 
     steps:
-      - uses: actions/checkout@v4
 
-      - name: Set up JDK 25
+      - name: Checkout mã nguồn
+        uses: actions/checkout@v4
+
+      - name: Cài đặt JDK 25
         uses: actions/setup-java@v4
         with:
           java-version: '25'
           distribution: 'temurin'
           cache: maven
 
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml
+      - name: Build dự án bằng Maven (Windows & macOS)
+        if: matrix.os != 'ubuntu-latest'
+        run: mvn clean package -B
 
-      - name: Run Tests
-        run: mvn test
+      - name: Build dự án bằng Maven (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+          xvfb-run mvn clean package -B
+
+      - name: Đóng gói Artifact (Lấy Fat JAR)
+        uses: actions/upload-artifact@v4
+        with:
+          name: AuctionSystem-FatJAR-${{ matrix.os }}
+          path: target/*.jar
+          retention-days: 7
