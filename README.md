@@ -33,7 +33,19 @@ Dưới đây là danh sách các thành viên và phân công nhiệm vụ cụ
 - **Định dạng truyền tải:** Custom plain text
 
 ---
-
+## ✅ Các tính năng bắt buộc
+* Đăng ký/đăng nhập với vai trò user, sửa đổi thông tin user (mật khẩu, email)
+* Quản lý sản phẩm: đăng kí, chỉnh sửa sản phẩm
+* Quản lý đấu giá: tạo phòng đấu giá cho sản phẩm, lên thời gian đấu giá, tự đóng và chuyển sản phẩm về người thắng
+* Tính năng của admin: Duyệt sản phẩm, thống kê số lượng sản phẩm, người dùng, quản lý server
+* Xử lý đấu giá đồng thời: Sử dụng pessimistic lock, khóa update ở tầng database tránh ghi đè dữ liệu bid cùng 1 lúc
+* Observer cho cập nhật thời gian thực, thông báo để cập nhật lại khi có sự kiện (phiên kết thúc, có người đặt giá mới, phiên mới lên sàn...)
+## 🛠️ Các tính năng nâng cao
+* Anti sniping: Tự động gia hạn đấu giá thêm 5 phút nếu như có bid mới trong 30 giây cuối
+* Biểu đồ line chart động được update theo thời gian thực
+* Xem lịch sử đấu giá: xem lại các sản phẩm đã thắng/đã thua, truy cập các cuộc đấu giá đang tham gia nhanh chóng
+* Quản lý người dùng (dành cho admin): ban/unban người dùng, đăng xuất ngay lập tức khi bị quản trị viên ban
+---
 ## 📂 Cấu trúc thư mục (MVC Architecture)
 Dự án được tổ chức theo mô hình **Model-View-Controller** để đảm bảo tính dễ bảo trì và mở rộng:
 ```text
@@ -88,10 +100,13 @@ Dự án sử dụng plugin `maven-shade-plugin` để dọn dẹp và đóng g�
 
 **4. Chạy ứng dụng:**
 
-Sau khi quá trình build báo `BUILD SUCCESS`, di chuyển vào thư mục `target` và chạy file `.jar` (file có dung lượng lớn nhất). 
+Sau khi quá trình build báo `BUILD SUCCESS`, di chuyển vào thư mục `target` và chạy file `.jar` (file có dung lượng lớn nhất) và mở cửa sổ terminal tại đó: 
 
-    cd target
-    java -jar <tên-file-fat-jar-của-nhóm>.jar
+    java -jar web-bidding-system-1.0.jar
+    
+Khi muốn chạy song song nhiều cửa sổ một lúc, mở cửa sổ terminal khác và chạy lệnh:
+
+    java -jar web-bidding-system-1.0.jar --client-only
 ---
 ### II. Tải trực tiếp và chạy file .jar (prebuilt):
 **1. Tải về bản release:**
@@ -108,6 +123,10 @@ Sau khi quá trình build báo `BUILD SUCCESS`, di chuyển vào thư mục `tar
 Nháy đúp vào file .jar hoặc mở terminal tại thư mục có chứa file .jar và chạy lệnh: 
 
     java -jar <tên-file-fat-jar-của-nhóm>.jar
+
+Khi muốn chạy song song nhiều cửa sổ một lúc, mở cửa sổ terminal khác và chạy lệnh:
+
+    java -jar web-bidding-system-1.0.jar --client-only
 ---
 ## 📅 Lộ trình phát triển (Roadmap)
 - [x] **Tuần 1-2:** Thiết lập Repository, cấu trúc Maven, thiết kế Class Diagram sơ bộ.
