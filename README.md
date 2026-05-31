@@ -132,3 +132,4 @@ Nháy đúp vào file .jar hoặc mở terminal tại thư mục có chứa file
 ## Link báo cáo PDF
 https://drive.google.com/file/d/1tTjDG4PeOCwbE2qCR5myq7rCZjWzXKph/view?usp=sharing
 ## Video demo chức năng hệ thống 
+https://drive.google.com/file/d/1of4wtHRnXdVqsoFN0XauUbNUVrfouovg/view?usp=sharing
