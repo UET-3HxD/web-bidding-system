@@ -138,14 +138,14 @@ public class BidRoomController {
                                 if (this.currentAuctionId.equals(String.valueOf(extendedAuctionId))) {
                                     txtBidInput.setDisable(false);
                                     btnPlaceBid.setDisable(false);
-                                    lblTimeLeft.setStyle("-fx-text-fill: #000000;");
+                                    lblTimeLeft.setStyle("-fx-text-fill: #fd9000;");
 
                                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                                     alert.setTitle("Thông báo gia hạn");
                                     alert.setHeaderText(null);
                                     alert.setContentText("sản phẩm " + productName + " đã được gia hạn thời gian đấu giá!");
                                     alert.show();
-                                    com.auction.team3hxd.util.SocketService.getInstance().send("GET_AUCTION_DETAIL|" + this.currentAuctionId);
+                                    com.auction.team3hxd.util.SocketService.getInstance().send("GET_AUCTION_DETAIL|" + currentAuctionId + "|" + UserSession.getInstance().getId());
                                 }
                             }
                         } catch (Exception e) { e.printStackTrace(); }
@@ -374,7 +374,6 @@ public class BidRoomController {
             txtBidInput.setDisable(true);
             btnPlaceBid.setDisable(true);
 
-            lblTimeLeft.setText("Đang tính kết quả...");
             lblTimeLeft.setStyle("-fx-text-fill: #ff9800;");
 
             com.auction.team3hxd.util.SocketService.getInstance().send("CHECK_AUCTION_STATUS|" + this.currentAuctionId);
