@@ -95,7 +95,7 @@ Sau khi quá trình build báo `BUILD SUCCESS`, di chuyển vào thư mục `tar
 ---
 ### II. Tải trực tiếp và chạy file .jar (prebuilt):
 **1. Tải về bản release:**
-* Tải về phiên bản chính thức tại đây:
+* Tải về phiên bản chính thức [tại đây](https://github.com/UET-3HxD/web-bidding-system/releases/tag/v1.0)
 
 **2. Cấu hình Cơ sở dữ liệu:**
 * Giải nén file .zip vừa tải về
